@@ -3,164 +3,424 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAGA-Core | HR Hiring Dashboard</title>
+    <title>SAGA-Core | Institutional HRIS Master Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .hr-tab-btn {
+            padding: 0.75rem 1.25rem;
+            font-weight: 600;
+            color: #4b5563;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s ease;
+            display: flex;
+            items-center: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+        .hr-tab-btn:hover {
+            color: #2563eb;
+            background-color: #f3f4f6;
+        }
+        .hr-tab-btn.active {
+            color: #2563eb;
+            border-bottom-color: #2563eb;
+            background-color: #eff6ff;
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
     <!-- Navigation -->
     <nav class="navbar sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="nav-brand">
-                <i class="fas fa-building"></i> SAGA-Core
+                <div class="bg-white p-1 rounded-xl shadow-md border-2 border-amber-400 flex items-center justify-center">
+                    <img src="assets/school_logo.png" alt="St. Aloysius Gonzaga Academy Logo" class="w-9 h-9 object-contain">
+                </div>
+                <div>
+                    <span class="block text-lg font-bold tracking-wide text-white">St. Aloysius Gonzaga Academy Inc.</span>
+                    <span class="block text-[11px] font-semibold text-amber-400 tracking-wider uppercase">Institutional HRIS Portal • Est. 2015</span>
+                </div>
             </div>
-            <div class="flex gap-6">
-                <a href="index.html" class="nav-link">Careers</a>
-                <a href="hr-hiring.html" class="nav-link active">HR Portal</a>
-                <a href="employee-ess.html" class="nav-link">Employee Portal</a>
+            <div class="flex gap-6 items-center">
+                <a href="index.html" class="nav-link font-semibold">Careers & Faculty Openings</a>
+                <a href="hr-hiring.html" class="nav-link active font-semibold">HR Master Portal</a>
+                <a href="employee-ess.html" class="nav-link font-semibold">Employee Self-Service</a>
             </div>
         </div>
     </nav>
 
     <!-- Page Header -->
-    <div class="bg-white border-b border-gray-200 sticky top-16 z-40">
-        <div class="max-w-7xl mx-auto px-4 py-6">
-            <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                <i class="fas fa-users text-blue-600"></i> Applicant Tracking System (ATS)
-            </h1>
-            <p class="text-gray-600 mt-2">AI-Powered Recruitment Dashboard</p>
+    <div class="bg-white border-b border-gray-200 sticky top-16 z-40 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 pt-4 pb-2">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
+                <div class="flex items-center gap-4">
+                    <div class="bg-slate-900 p-2 rounded-2xl shadow-lg border-2 border-amber-400 flex items-center justify-center">
+                        <img src="assets/school_logo.png" alt="St. Aloysius Gonzaga Academy Shield" class="w-12 h-12 object-contain">
+                    </div>
+                    <div>
+                        <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 flex items-center gap-2">
+                            HRIS Master Dashboard
+                        </h1>
+                        <p class="text-xs md:text-sm text-slate-600 mt-0.5 font-medium">
+                            St. Aloysius Gonzaga Academy Inc. • <span class="text-amber-600 font-bold">Spiritual Formation • Academic Excellence • Genuine Compassion</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-300">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> DepEd & Labor Code Compliant
+                    </span>
+                </div>
+            </div>
+
+            <!-- Dashboard Navigation Tabs -->
+            <div class="flex overflow-x-auto gap-2 border-t border-gray-100 pt-2">
+                <button onclick="switchTab('overview')" id="tab-overview" class="hr-tab-btn active">
+                    <i class="fas fa-chart-pie"></i> Workforce Overview
+                </button>
+                <button onclick="switchTab('directory')" id="tab-directory" class="hr-tab-btn">
+                    <i class="fas fa-address-book"></i> Employee Directory
+                </button>
+                <button onclick="switchTab('ats')" id="tab-ats" class="hr-tab-btn">
+                    <i class="fas fa-user-plus"></i> Recruitment & ATS
+                </button>
+                <button onclick="switchTab('leave')" id="tab-leave" class="hr-tab-btn">
+                    <i class="fas fa-user-clock"></i> Leave & Timekeeping
+                </button>
+            </div>
         </div>
     </div>
 
-    <!-- Main Content -->
+    <!-- Main Content Containers -->
     <div class="max-w-7xl mx-auto px-4 py-8">
-        <!-- Stats -->
-        <div class="stats-grid mb-8">
-            <div class="stat-card">
-                <div class="stat-number" id="stat-total">0</div>
-                <div class="stat-label">Total Applicants</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="stat-applied">0</div>
-                <div class="stat-label">New Applications</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="stat-scored">0</div>
-                <div class="stat-label">Scored</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="stat-hired">0</div>
-                <div class="stat-label">Hired</div>
-            </div>
-        </div>
 
-        <!-- Hiring Funnel Analytics -->
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-            <!-- Funnel Chart -->
-            <div class="card p-6">
-                <h3 class="text-lg font-bold text-gray-900 mb-6">Hiring Funnel</h3>
-                <div class="space-y-4">
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold text-gray-700">Applications</span>
-                            <span class="text-sm font-bold text-gray-900" id="funnel-applied">0</span>
+        <!-- TAB 1: WORKFORCE OVERVIEW & ANALYTICS -->
+        <div id="view-overview" class="space-y-8">
+            <!-- Top Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <div class="card p-6 border-l-4 border-blue-500 bg-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Active Workforce</p>
+                            <h3 class="text-3xl font-extrabold text-gray-900 mt-1" id="hris-active-workforce">0</h3>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-3" style="width: 100%;">
-                            <div class="bg-blue-500 h-3 rounded-full" style="width: 100%;"></div>
+                        <div class="p-3 bg-blue-50 rounded-full text-blue-600 text-xl">
+                            <i class="fas fa-users"></i>
                         </div>
                     </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold text-gray-700">Scored</span>
-                            <span class="text-sm font-bold text-gray-900" id="funnel-scored">0</span>
+                    <p class="text-xs text-gray-500 mt-3" id="hris-total-workforce-sub">Total enrolled employees</p>
+                </div>
+
+                <div class="card p-6 border-l-4 border-green-500 bg-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Attendance Today</p>
+                            <h3 class="text-3xl font-extrabold text-green-600 mt-1" id="hris-attendance-rate">0%</h3>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-3" style="width: 100%;">
-                            <div class="bg-yellow-500 h-3 rounded-full" id="funnel-scored-bar" style="width: 0%;"></div>
-                        </div>
-                    </div>
-                    <div>
-                        <div class="flex justify-between items-center mb-2">
-                            <span class="font-semibold text-gray-700">Hired</span>
-                            <span class="text-sm font-bold text-gray-900" id="funnel-hired">0</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-3" style="width: 100%;">
-                            <div class="bg-green-500 h-3 rounded-full" id="funnel-hired-bar" style="width: 0%;"></div>
+                        <div class="p-3 bg-green-50 rounded-full text-green-600 text-xl">
+                            <i class="fas fa-calendar-check"></i>
                         </div>
                     </div>
+                    <p class="text-xs text-gray-500 mt-3">Daily compliance & time logs</p>
+                </div>
+
+                <div class="card p-6 border-l-4 border-yellow-500 bg-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Pending Leaves</p>
+                            <h3 class="text-3xl font-extrabold text-yellow-600 mt-1" id="hris-pending-leaves">0</h3>
+                        </div>
+                        <div class="p-3 bg-yellow-50 rounded-full text-yellow-600 text-xl">
+                            <i class="fas fa-plane-departure"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3">Active & upcoming requests</p>
+                </div>
+
+                <div class="card p-6 border-l-4 border-purple-500 bg-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400 uppercase tracking-wider">Est. Monthly Payroll</p>
+                            <h3 class="text-2xl font-extrabold text-purple-600 mt-1" id="hris-total-payroll">₱0</h3>
+                        </div>
+                        <div class="p-3 bg-purple-50 rounded-full text-purple-600 text-xl">
+                            <i class="fas fa-money-check-alt"></i>
+                        </div>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-3">Gross monthly salary base</p>
                 </div>
             </div>
 
-            <!-- Job Performance -->
-            <div class="card p-6">
-                <h3 class="text-lg font-bold text-gray-900 mb-6">Applications by Position</h3>
-                <div id="jobPerformance" class="space-y-3">
-                    <!-- Job cards will be populated here -->
+            <!-- Department Breakdown & Quick Summary -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Department Distribution -->
+                <div class="lg:col-span-2 card p-6 bg-white">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-sitemap text-blue-500"></i> Departmental Distribution & Performance Ratings
+                    </h3>
+                    <div id="departmentAnalyticsContainer" class="space-y-4">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- HR System Quick Status -->
+                <div class="card p-6 bg-white space-y-4">
+                    <h3 class="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
+                        <i class="fas fa-tasks text-indigo-500"></i> HR Operations Status
+                    </h3>
+                    
+                    <div class="p-4 bg-gray-50 rounded-lg border border-gray-100 space-y-3">
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-600"><i class="fas fa-user-clock mr-2 text-yellow-500"></i>Pending Offboardings</span>
+                            <span class="font-bold text-gray-900" id="hris-pending-exits-count">0</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-600"><i class="fas fa-user-plus mr-2 text-blue-500"></i>Total Job Applicants</span>
+                            <span class="font-bold text-gray-900" id="hris-total-applicants-count">0</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm">
+                            <span class="text-gray-600"><i class="fas fa-file-contract mr-2 text-green-500"></i>Statutory Deductions</span>
+                            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold">SSS / PhilHealth Active</span>
+                        </div>
+                    </div>
+
+                    <div class="pt-2">
+                        <a href="hr-exit.html" class="btn btn-outline btn-block btn-small text-center block">
+                            <i class="fas fa-sign-out-alt"></i> Manage HR Exit & Clearances
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Recently Hired & Quick Actions -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
-            <div class="lg:col-span-2 card p-6">
-                <h3 class="text-lg font-bold text-gray-900 mb-4">Recently Hired</h3>
-                <div id="recentlyHired" class="space-y-3">
-                    <p class="text-gray-600">No recent hires.</p>
+
+        <!-- TAB 2: EMPLOYEE DIRECTORY -->
+        <div id="view-directory" class="space-y-6 hidden">
+            <!-- Controls & Search -->
+            <div class="card p-6 bg-white flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="flex flex-1 flex-col sm:flex-row gap-3 w-full">
+                    <div class="relative flex-1">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        <input type="text" id="dirSearch" placeholder="Search employee name or username..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <select id="dirDeptFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Departments</option>
+                    </select>
+                </div>
+                <span class="text-sm text-gray-500 font-semibold" id="dirCountText">Showing 0 employees</span>
+            </div>
+
+            <!-- Directory Grid -->
+            <div id="directoryContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Employee cards populated by JS -->
+            </div>
+        </div>
+
+
+        <!-- TAB 3: RECRUITMENT & ATS (Existing Section) -->
+        <div id="view-ats" class="space-y-8 hidden">
+            <!-- Stats -->
+            <div class="stats-grid mb-8">
+                <div class="stat-card">
+                    <div class="stat-number" id="stat-total">0</div>
+                    <div class="stat-label">Total Applicants</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="stat-applied">0</div>
+                    <div class="stat-label">New Applications</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="stat-scored">0</div>
+                    <div class="stat-label">Scored</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="stat-hired">0</div>
+                    <div class="stat-label">Hired</div>
                 </div>
             </div>
 
-            <div class="card p-6">
-                <h3 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
-                <div class="space-y-3">
-                    <button onclick="bulkScoreApplicants()" class="btn btn-primary btn-block btn-small">
-                        <i class="fas fa-brain"></i> Score All Unscored
+            <!-- Hiring Funnel Analytics -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <!-- Funnel Chart -->
+                <div class="card p-6 bg-white">
+                    <h3 class="text-lg font-bold text-gray-900 mb-6">Hiring Funnel</h3>
+                    <div class="space-y-4">
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-semibold text-gray-700">Applications</span>
+                                <span class="text-sm font-bold text-gray-900" id="funnel-applied">0</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="bg-blue-500 h-3 rounded-full" style="width: 100%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-semibold text-gray-700">Scored</span>
+                                <span class="text-sm font-bold text-gray-900" id="funnel-scored">0</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="bg-yellow-500 h-3 rounded-full" id="funnel-scored-bar" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-center mb-2">
+                                <span class="font-semibold text-gray-700">Hired</span>
+                                <span class="text-sm font-bold text-gray-900" id="funnel-hired">0</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-3">
+                                <div class="bg-green-500 h-3 rounded-full" id="funnel-hired-bar" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Job Performance -->
+                <div class="card p-6 bg-white">
+                    <h3 class="text-lg font-bold text-gray-900 mb-6">Applications by Position</h3>
+                    <div id="jobPerformance" class="space-y-3">
+                        <!-- Job cards will be populated here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recently Hired & Quick Actions -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+                <div class="lg:col-span-2 card p-6 bg-white">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Recently Hired</h3>
+                    <div id="recentlyHired" class="space-y-3">
+                        <p class="text-gray-600">No recent hires.</p>
+                    </div>
+                </div>
+
+                <div class="card p-6 bg-white">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+                    <div class="space-y-3">
+                        <button onclick="bulkScoreApplicants()" class="btn btn-primary btn-block btn-small">
+                            <i class="fas fa-brain"></i> Score All Unscored
+                        </button>
+                        <button onclick="exportReport()" class="btn btn-outline btn-block btn-small">
+                            <i class="fas fa-file-excel"></i> Export ATS Report
+                        </button>
+                        <button onclick="refreshApplicants()" class="btn btn-outline btn-block btn-small">
+                            <i class="fas fa-sync-alt"></i> Refresh Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Controls -->
+            <div class="card p-6 mb-8 bg-white flex flex-col md:flex-row gap-4 items-center justify-between">
+                <div class="flex flex-wrap gap-3">
+                    <select id="filterJob" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-sm">
+                        <option value="">All Teaching Positions</option>
+                        <option value="1">Elementary Grade School Teacher</option>
+                        <option value="2">JHS Science & Math Faculty</option>
+                        <option value="3">SHS STEM & Computer Instructor</option>
+                        <option value="4">Guidance Counselor & Student Wellness</option>
+                    </select>
+                    <select id="filterStatus" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        <option value="">All Statuses</option>
+                        <option value="applied">New Applications</option>
+                        <option value="scored">Scored</option>
+                        <option value="hired">Hired</option>
+                    </select>
+                    <select id="sortBy" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                        <option value="score-desc">Highest Score First (Ranking)</option>
+                        <option value="score-asc">Lowest Score First</option>
+                        <option value="recent">Most Recent Application</option>
+                    </select>
+                </div>
+                <button onclick="refreshApplicants()" class="btn btn-primary">
+                    <i class="fas fa-sync-alt"></i> Refresh
+                </button>
+            </div>
+
+            <!-- Applicants List -->
+            <div id="applicantsContainer" class="space-y-6">
+                <!-- Applicant cards will be populated here -->
+            </div>
+
+            <!-- Empty State -->
+            <div id="emptyState" class="card p-12 text-center bg-white hidden">
+                <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+                <h3 class="text-xl font-bold text-gray-700 mb-2">No Applicants Yet</h3>
+                <p class="text-gray-600">When applicants submit applications on the Careers page, they will appear here.</p>
+                <a href="index.html" class="btn btn-primary mt-4">
+                    <i class="fas fa-arrow-right"></i> Go to Careers Page
+                </a>
+            </div>
+        </div>
+
+
+        <!-- TAB 4: LEAVE & TIMEKEEPING OVERSIGHT -->
+        <div id="view-leave" class="space-y-8 hidden">
+            <!-- Filter Bar for Leave & Timekeeping -->
+            <div class="card p-6 bg-white flex flex-col md:flex-row gap-4 items-center justify-between shadow-sm">
+                <div class="flex flex-1 flex-col sm:flex-row gap-3 w-full">
+                    <div class="relative flex-1">
+                        <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                        <input type="text" id="leaveSearch" placeholder="Search teacher or employee name..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                    <select id="leaveTypeFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Leave Types</option>
+                        <option value="vacation">Vacation Leave</option>
+                        <option value="sick">Sick Leave</option>
+                        <option value="emergency">Emergency Leave</option>
+                    </select>
+                    <select id="attendanceTypeFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">All Timekeeping Logs</option>
+                        <option value="in">Clock In Only</option>
+                        <option value="out">Clock Out Only</option>
+                    </select>
+                </div>
+                <div class="flex gap-2 w-full sm:w-auto">
+                    <button onclick="simulateRFIDTap()" class="bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold px-3 py-2 rounded-lg transition-all flex items-center whitespace-nowrap shadow-sm border border-amber-400">
+                        <i class="fas fa-microchip text-amber-400 mr-1.5"></i> Tap IoT-RFID Terminal
                     </button>
-                    <button onclick="exportReport()" class="btn btn-outline btn-block btn-small">
-                        <i class="fas fa-file-excel"></i> Export Report
+                    <button onclick="simulatePendingLeaveDemo()" class="btn btn-outline text-xs whitespace-nowrap">
+                        <i class="fas fa-plus-circle text-green-600 mr-1"></i> + Demo Pending Leave
                     </button>
-                    <button onclick="refreshApplicants()" class="btn btn-outline btn-block btn-small">
-                        <i class="fas fa-sync-alt"></i> Refresh Data
+                    <button onclick="loadLeaveAndTimekeeping()" class="btn btn-primary text-xs">
+                        <i class="fas fa-sync-alt"></i> Refresh
                     </button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                <!-- Organization Leave Requests -->
+                <div class="card p-6 bg-white">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-plane-departure text-yellow-600"></i> Employee Leave Applications
+                        </h3>
+                        <span class="text-xs font-semibold text-gray-500" id="leaveCountBadge">0 found</span>
+                    </div>
+                    <div id="leaveApplicationsContainer" class="space-y-3">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+
+                <!-- Organization Timekeeping Logs -->
+                <div class="card p-6 bg-white">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-history text-blue-600"></i> Time & Attendance Feed
+                        </h3>
+                        <span class="text-xs font-semibold text-gray-500" id="attendanceCountBadge">0 logs</span>
+                    </div>
+                    <div id="attendanceLogsContainer" class="space-y-3 max-h-96 overflow-y-auto">
+                        <!-- Populated by JS -->
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Controls -->
-        <div class="card p-6 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
-            <div class="flex gap-3">
-                <select id="filterStatus" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="">All Applicants</option>
-                    <option value="applied">New Applications</option>
-                    <option value="scored">Scored</option>
-                    <option value="hired">Hired</option>
-                </select>
-                <select id="sortBy" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                    <option value="score-desc">Highest Score First</option>
-                    <option value="score-asc">Lowest Score First</option>
-                    <option value="recent">Most Recent</option>
-                </select>
-            </div>
-            <button onclick="refreshApplicants()" class="btn btn-primary">
-                <i class="fas fa-sync-alt"></i> Refresh
-            </button>
-        </div>
-
-        <!-- Applicants List -->
-        <div id="applicantsContainer" class="space-y-6">
-            <!-- Applicant cards will be populated here -->
-        </div>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="card p-12 text-center hidden">
-            <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
-            <h3 class="text-xl font-bold text-gray-700 mb-2">No Applicants Yet</h3>
-            <p class="text-gray-600">When applicants submit applications on the Careers page, they will appear here.</p>
-            <a href="index.html" class="btn btn-primary mt-4">
-                <i class="fas fa-arrow-right"></i> Go to Careers Page
-            </a>
-        </div>
     </div>
 
+    <!-- Modals -->
     <!-- Hire Modal -->
     <div id="hireModal" class="modal-overlay">
         <div class="modal">
@@ -197,11 +457,52 @@
         </div>
     </div>
 
+    <!-- HR Payslip Preview Modal -->
+    <div id="hrPayslipModal" class="modal-overlay">
+        <div class="modal max-w-lg">
+            <div class="modal-header">
+                <h2 class="modal-title"><i class="fas fa-file-invoice-dollar text-green-600 mr-2"></i> Employee Payslip Breakdown</h2>
+                <button onclick="closeHRPayslipModal()" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="hrPayslipContent" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PDF Resume Viewer Modal -->
+    <div id="pdfResumeModal" class="modal-overlay">
+        <div class="modal max-w-2xl">
+            <div class="modal-header bg-gray-900 text-white rounded-t-lg px-6 py-4 flex justify-between items-center">
+                <h2 class="modal-title text-white text-lg font-bold flex items-center gap-2">
+                    <i class="fas fa-file-pdf text-red-500 text-xl"></i> <span id="pdfModalTitle">Applicant Resume</span>
+                </h2>
+                <button onclick="closePDFResumeModal()" class="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+            </div>
+            <div class="modal-body p-6 bg-gray-100">
+                <div id="pdfResumeContent" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Employee Performance Review Modal -->
+    <div id="employeePerformanceModal" class="modal-overlay">
+        <div class="modal max-w-lg">
+            <div class="modal-header">
+                <h2 class="modal-title"><i class="fas fa-award text-yellow-500 mr-2"></i> Faculty Performance Appraisal Report</h2>
+                <button onclick="closePerformanceModal()" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="performanceModalContent" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-gray-900 text-gray-300 mt-12 py-8">
         <div class="max-w-7xl mx-auto px-4 text-center">
-            <p>&copy; 2026 SAGA-Core Institutional HR System. All rights reserved.</p>
-            <p class="text-sm mt-2">AI-Powered Recruitment System</p>
+            <p>&copy; 2026 SAGA-Core Institutional HRIS System. All rights reserved.</p>
+            <p class="text-sm mt-2">Data Privacy Act of 2012 & Labor Code Compliant</p>
         </div>
     </footer>
 
@@ -211,12 +512,480 @@
         let selectedApplicantForHire = null;
 
         document.addEventListener('DOMContentLoaded', () => {
+            loadHRISOverview();
             loadApplicants();
+            loadDirectory();
+            loadLeaveAndTimekeeping();
             
+            document.getElementById('filterJob').addEventListener('change', filterAndSort);
             document.getElementById('filterStatus').addEventListener('change', filterAndSort);
             document.getElementById('sortBy').addEventListener('change', filterAndSort);
+
+            document.getElementById('dirSearch').addEventListener('input', filterDirectory);
+            document.getElementById('dirDeptFilter').addEventListener('change', filterDirectory);
+
+            document.getElementById('leaveSearch').addEventListener('input', loadLeaveAndTimekeeping);
+            document.getElementById('leaveTypeFilter').addEventListener('change', loadLeaveAndTimekeeping);
+            document.getElementById('attendanceTypeFilter').addEventListener('change', loadLeaveAndTimekeeping);
+
+            // Check URL hash for direct tab navigation (e.g. hr-hiring.html#ats)
+            const hash = window.location.hash.replace('#', '');
+            if (['overview', 'directory', 'ats', 'leave'].includes(hash)) {
+                switchTab(hash);
+            }
         });
 
+        // Tab Switching Logic
+        function switchTab(tabName) {
+            const tabs = ['overview', 'directory', 'ats', 'leave'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                const view = document.getElementById(`view-${t}`);
+                if (t === tabName) {
+                    btn.classList.add('active');
+                    view.classList.remove('hidden');
+                } else {
+                    btn.classList.remove('active');
+                    view.classList.add('hidden');
+                }
+            });
+
+            if (tabName === 'overview') loadHRISOverview();
+            if (tabName === 'directory') loadDirectory();
+            if (tabName === 'ats') loadApplicants();
+            if (tabName === 'leave') loadLeaveAndTimekeeping();
+        }
+
+        // TAB 1: OVERVIEW LOGIC
+        function loadHRISOverview() {
+            const metrics = SAGA.getHRISMetrics();
+            document.getElementById('hris-active-workforce').textContent = metrics.activeWorkforce;
+            document.getElementById('hris-total-workforce-sub').textContent = `${metrics.totalWorkforce} total registered profiles`;
+            document.getElementById('hris-attendance-rate').textContent = `${metrics.attendanceRate}%`;
+            document.getElementById('hris-pending-leaves').textContent = metrics.pendingLeaves;
+            document.getElementById('hris-total-payroll').textContent = `₱${metrics.totalPayroll.toLocaleString()}`;
+            document.getElementById('hris-pending-exits-count').textContent = metrics.pendingExits;
+            document.getElementById('hris-total-applicants-count').textContent = metrics.totalApplicants;
+
+            // Department Analytics
+            const depts = SAGA.getEmployeesByDepartment();
+            const deptContainer = document.getElementById('departmentAnalyticsContainer');
+            if (depts.length === 0) {
+                deptContainer.innerHTML = '<p class="text-gray-500">No department data available.</p>';
+            } else {
+                deptContainer.innerHTML = depts.map(d => `
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex items-center justify-between">
+                        <div>
+                            <h4 class="font-bold text-gray-900">${d.department}</h4>
+                            <p class="text-xs text-gray-500 mt-1">${d.count} employee(s) assigned</p>
+                        </div>
+                        <div class="flex items-center gap-4">
+                            <div class="text-right">
+                                <span class="text-xs text-gray-500 block">Avg Rating</span>
+                                <span class="font-bold text-yellow-600 text-sm"><i class="fas fa-star text-xs mr-1"></i>${d.avgRating} / 5.0</span>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        // TAB 2: DIRECTORY LOGIC
+        function loadDirectory() {
+            const employees = SAGA.getAllEmployees();
+            const depts = SAGA.getEmployeesByDepartment();
+            const deptFilter = document.getElementById('dirDeptFilter');
+            
+            // Populate department dropdown if empty
+            if (deptFilter.options.length <= 1) {
+                depts.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d.department;
+                    opt.textContent = d.department;
+                    deptFilter.appendChild(opt);
+                });
+            }
+
+            filterDirectory();
+        }
+
+        function filterDirectory() {
+            const query = document.getElementById('dirSearch').value.toLowerCase();
+            const selectedDept = document.getElementById('dirDeptFilter').value;
+            const employees = SAGA.getAllEmployees();
+
+            const filtered = employees.filter(emp => {
+                const matchesSearch = emp.name.toLowerCase().includes(query) || emp.username.toLowerCase().includes(query);
+                const job = SAGA.getJobById(emp.jobId);
+                const dept = job ? job.department : "General";
+                const matchesDept = !selectedDept || dept === selectedDept;
+                return matchesSearch && matchesDept;
+            });
+
+            document.getElementById('dirCountText').textContent = `Showing ${filtered.length} of ${employees.length} employees`;
+            const container = document.getElementById('directoryContainer');
+
+            if (filtered.length === 0) {
+                container.innerHTML = '<div class="col-span-full card p-8 text-center text-gray-500">No employees match your search filter.</div>';
+                return;
+            }
+
+            container.innerHTML = filtered.map(emp => {
+                const job = SAGA.getJobById(emp.jobId);
+                const rating = emp.performanceMetrics?.rating || 4.0;
+                const ratingBadgeClass = rating >= 4.7 ? 'bg-amber-100 text-amber-800 border-amber-300' : rating >= 4.2 ? 'bg-blue-100 text-blue-800 border-blue-300' : 'bg-gray-100 text-gray-800 border-gray-300';
+                const ratingLabel = rating >= 4.7 ? 'Outstanding' : rating >= 4.2 ? 'Exceeds Expectations' : 'Satisfactory';
+
+                return `
+                    <div class="card p-6 bg-white border border-gray-200 hover:shadow-lg transition-all flex flex-col justify-between">
+                        <div>
+                            <div class="flex items-start justify-between mb-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 font-bold text-lg flex items-center justify-center border border-blue-200">
+                                        ${emp.name.split(' ').map(n=>n[0]).join('')}
+                                    </div>
+                                    <div>
+                                        <h3 class="font-bold text-gray-900 line-clamp-1">${emp.name}</h3>
+                                        <p class="text-xs text-gray-500 font-mono">@${emp.username}</p>
+                                    </div>
+                                </div>
+                                <span class="px-2 py-1 rounded text-xs font-bold ${emp.status === 'active' ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'}">
+                                    ${emp.status.toUpperCase()}
+                                </span>
+                            </div>
+
+                            <!-- Performance Header Badge -->
+                            <div class="mb-4 p-3 rounded-lg border flex justify-between items-center ${ratingBadgeClass}">
+                                <div>
+                                    <span class="text-xs font-semibold block uppercase tracking-wider opacity-75">Faculty Appraisal</span>
+                                    <span class="font-bold text-sm"><i class="fas fa-star mr-1"></i>${rating} / 5.0 (${ratingLabel})</span>
+                                </div>
+                                <i class="fas fa-award text-2xl opacity-80"></i>
+                            </div>
+
+                            <div class="space-y-2 text-sm text-gray-600 mb-4 bg-gray-50 p-3 rounded-lg border border-gray-100">
+                                <p class="line-clamp-1"><span class="font-semibold text-gray-700">Role:</span> ${job ? job.title : 'General Faculty'}</p>
+                                <p><span class="font-semibold text-gray-700">Department:</span> ${job ? job.department : 'General'}</p>
+                                <p class="text-xs text-indigo-700 font-semibold"><i class="fas fa-id-badge mr-1"></i>RFID Terminal UID: <span class="font-mono bg-indigo-50 px-1.5 py-0.5 rounded border border-indigo-200">${emp.rfidCardId || 'RFID-8849A'}</span></p>
+                                <p class="text-xs text-amber-800 font-semibold"><i class="fas fa-calculator mr-1"></i>Rate Metric: <span>${emp.rateStructure || 'Full-Time Daily Rate'}</span></p>
+                                <p class="text-xs text-slate-700"><i class="fas fa-clock mr-1 text-slate-400"></i>Faculty Schedule: <span class="font-medium">${emp.facultySchedule || 'MWF 7:30 AM - 4:30 PM'}</span></p>
+                                <div class="flex justify-between items-center text-xs pt-2 text-gray-500 border-t border-gray-200 mt-2">
+                                    <span><i class="fas fa-chalkboard-teacher text-blue-500 mr-1"></i>Classes: <strong>${emp.performanceMetrics?.projects || 0}</strong></span>
+                                    <span><i class="fas fa-tasks text-green-500 mr-1"></i>Tasks: <strong>${emp.performanceMetrics?.tasks_completed || 0}</strong></span>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center text-xs text-gray-500 mb-4 px-1">
+                                <span>Vacation: <strong>${emp.leaveBalance?.vacation || 0}d</strong></span>
+                                <span>Sick: <strong>${emp.leaveBalance?.sick || 0}d</strong></span>
+                                <span>Emergency: <strong>${emp.leaveBalance?.emergency || 0}d</strong></span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-2 mt-2">
+                            <button onclick="showEmployeePerformance('${emp.id}')" class="btn btn-primary btn-small text-center">
+                                <i class="fas fa-chart-line"></i> Performance
+                            </button>
+                            <button onclick="previewHRPayslip('${emp.id}')" class="btn btn-outline btn-small text-center">
+                                <i class="fas fa-receipt"></i> Payslip
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function showEmployeePerformance(employeeId) {
+            const emp = SAGA.getEmployeeById(employeeId);
+            if (!emp) return;
+            const job = SAGA.getJobById(emp.jobId);
+            const rating = emp.performanceMetrics?.rating || 4.0;
+
+            const content = document.getElementById('performanceModalContent');
+            content.innerHTML = `
+                <div class="space-y-4">
+                    <div class="bg-gray-50 p-4 rounded-lg border border-gray-200 flex justify-between items-center">
+                        <div>
+                            <h3 class="font-bold text-lg text-gray-900">${emp.name}</h3>
+                            <p class="text-sm text-gray-600">${job ? job.title : 'Faculty Member'}</p>
+                            <p class="text-xs text-gray-500 font-mono mt-0.5">${job ? job.department : 'General'}</p>
+                        </div>
+                        <div class="text-right bg-amber-50 p-3 rounded-lg border border-amber-200">
+                            <span class="text-xs text-amber-700 font-bold uppercase block">Overall Rating</span>
+                            <span class="text-2xl font-extrabold text-amber-600"><i class="fas fa-star mr-1"></i>${rating}</span>
+                            <span class="text-xs text-gray-500 block">out of 5.0</span>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="bg-blue-50 p-4 rounded-lg border border-blue-100">
+                            <span class="text-xs text-blue-600 font-bold block uppercase">Class Advisories & Strands</span>
+                            <span class="text-2xl font-bold text-blue-900">${emp.performanceMetrics?.projects || 0} assigned</span>
+                        </div>
+                        <div class="bg-green-50 p-4 rounded-lg border border-green-100">
+                            <span class="text-xs text-green-600 font-bold block uppercase">Grading & Tasks Completed</span>
+                            <span class="text-2xl font-bold text-green-900">${emp.performanceMetrics?.tasks_completed || 0} verified</span>
+                        </div>
+                    </div>
+
+                    <div class="p-4 bg-white rounded-lg border border-gray-200 space-y-2">
+                        <h4 class="font-bold text-sm text-gray-800">Faculty Evaluation Highlights</h4>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="bg-amber-500 h-2.5 rounded-full" style="width: ${(rating/5.0)*100}%"></div>
+                        </div>
+                        <p class="text-xs text-gray-600 italic">"Consistently demonstrates excellent pedagogy, punctual DepEd grading submissions, and active engagement with student academic counseling."</p>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('employeePerformanceModal').classList.add('active');
+        }
+
+        function closePerformanceModal() {
+            document.getElementById('employeePerformanceModal').classList.remove('active');
+        }
+
+        function previewHRPayslip(employeeId) {
+            const payslip = SAGA.generatePayslip(employeeId);
+            if (!payslip) return;
+
+            const content = document.getElementById('hrPayslipContent');
+            content.innerHTML = `
+                <div class="bg-gray-50 p-4 rounded border border-gray-200 space-y-3">
+                    <div class="flex justify-between items-center border-b pb-2">
+                        <div>
+                            <p class="font-bold text-gray-900">${payslip.employeeName}</p>
+                            <p class="text-xs text-gray-500">ID: ${payslip.employeeId}</p>
+                        </div>
+                        <span class="text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded font-semibold">${payslip.payPeriod}</span>
+                    </div>
+                    <div class="space-y-1.5 text-sm">
+                        <div class="flex justify-between pb-1 border-b"><span>Base Monthly Salary:</span> <span class="font-bold text-gray-900">₱${payslip.grossSalary.toLocaleString()}</span></div>
+                        
+                        <div class="text-xs font-bold text-gray-500 uppercase tracking-wider pt-1">Statutory Contributions:</div>
+                        <div class="flex justify-between text-red-600 text-xs pl-2"><span>SSS Deduction (4.5%):</span> <span>-₱${payslip.deductions.sss.toLocaleString()}</span></div>
+                        <div class="flex justify-between text-red-600 text-xs pl-2"><span>PhilHealth (2.5%):</span> <span>-₱${payslip.deductions.philhealth.toLocaleString()}</span></div>
+                        <div class="flex justify-between text-red-600 text-xs pl-2"><span>Pag-IBIG (2.0%):</span> <span>-₱${payslip.deductions.pagibig.toLocaleString()}</span></div>
+                        <div class="flex justify-between text-red-600 text-xs pl-2"><span>Withholding Tax (10%):</span> <span>-₱${payslip.deductions.tax.toLocaleString()}</span></div>
+                        
+                        <div class="text-xs font-bold text-gray-500 uppercase tracking-wider pt-2">Attendance Penalties:</div>
+                        <div class="flex justify-between text-amber-700 text-xs pl-2"><span>Late Deductions (${payslip.deductions.lateMinutes} mins):</span> <span>-₱${payslip.deductions.lateDeduction.toLocaleString()}</span></div>
+                        <div class="flex justify-between text-amber-700 text-xs pl-2"><span>Unexcused Absences (${payslip.deductions.absencesCount} days):</span> <span>-₱${payslip.deductions.absenceDeduction.toLocaleString()}</span></div>
+                        
+                        <div class="flex justify-between border-t-2 pt-2 font-bold text-base text-green-700 mt-2"><span>Net Take-Home Pay:</span> <span>₱${payslip.netPay.toLocaleString()}</span></div>
+                    </div>
+                </div>
+            `;
+            document.getElementById('hrPayslipModal').classList.add('active');
+        }
+
+        function closeHRPayslipModal() {
+            document.getElementById('hrPayslipModal').classList.remove('active');
+        }
+
+
+        // TAB 4: LEAVE & TIMEKEEPING LOGIC
+        function loadLeaveAndTimekeeping() {
+            const searchQuery = (document.getElementById('leaveSearch')?.value || '').toLowerCase();
+            const selectedLeaveType = document.getElementById('leaveTypeFilter')?.value || '';
+            const selectedAttType = document.getElementById('attendanceTypeFilter')?.value || '';
+
+            // Ensure demo pending leaves exist in storage
+            const data = SAGA.getData();
+            if (data && data.leaveRequests) {
+                const hasPending = data.leaveRequests.some(l => l.status === 'pending');
+                if (!hasPending) {
+                    const emps = Object.values(data.employees || {});
+                    if (emps.length >= 2) {
+                        data.leaveRequests.push({
+                            id: "LEAVE_PENDING_" + Date.now() + "_1",
+                            employeeId: emps[0].id,
+                            leaveType: "vacation",
+                            fromDate: "2026-07-15",
+                            toDate: "2026-07-17",
+                            days: 3,
+                            reason: "Attending to urgent personal family welfare matters and domestic obligations.",
+                            status: "pending",
+                            submittedDate: new Date().toISOString()
+                        });
+                        data.leaveRequests.push({
+                            id: "LEAVE_PENDING_" + Date.now() + "_2",
+                            employeeId: emps[1].id,
+                            leaveType: "emergency",
+                            fromDate: "2026-07-02",
+                            toDate: "2026-07-03",
+                            days: 2,
+                            reason: "Required medical consultation and health recoupment under medical advisory.",
+                            status: "pending",
+                            submittedDate: new Date(Date.now() - 3600000).toISOString()
+                        });
+                        SAGA.saveData(data);
+                    }
+                }
+            }
+
+            // 1. Leave requests filtering
+            let leaves = SAGA.getAllLeaveRequests();
+            if (searchQuery) {
+                leaves = leaves.filter(l => l.employeeName.toLowerCase().includes(searchQuery) || l.reason.toLowerCase().includes(searchQuery));
+            }
+            if (selectedLeaveType) {
+                leaves = leaves.filter(l => l.leaveType === selectedLeaveType);
+            }
+
+            const leaveContainer = document.getElementById('leaveApplicationsContainer');
+            document.getElementById('leaveCountBadge').textContent = `${leaves.length} application(s)`;
+
+            if (leaves.length === 0) {
+                leaveContainer.innerHTML = '<p class="text-gray-500 text-sm p-4 bg-gray-50 rounded">No leave applications match the selected filters.</p>';
+            } else {
+                leaveContainer.innerHTML = leaves.map(l => {
+                    const isPending = l.status === 'pending';
+                    const statusClass = l.status === 'approved' ? 'bg-green-100 text-green-800 border-green-300' : l.status === 'rejected' ? 'bg-red-100 text-red-800 border-red-300' : 'bg-yellow-100 text-yellow-800 border-yellow-300';
+                    const borderLeftClass = l.status === 'approved' ? 'border-green-500' : l.status === 'rejected' ? 'border-red-500' : 'border-yellow-500';
+
+                    return `
+                        <div class="p-4 bg-white rounded-lg border border-gray-200 border-l-4 ${borderLeftClass} shadow-sm space-y-3">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <h4 class="font-bold text-gray-900 text-base">${l.employeeName}</h4>
+                                    <p class="text-xs text-gray-600 mt-0.5"><span class="capitalize font-semibold">${l.leaveType} Leave</span> (${l.days} day(s): ${l.fromDate} to ${l.toDate})</p>
+                                </div>
+                                <span class="px-2.5 py-1 rounded-full text-xs font-extrabold border ${statusClass}">
+                                    ${l.status.toUpperCase()}
+                                </span>
+                            </div>
+
+                            <div class="p-3 bg-gray-50 rounded border border-gray-100 text-xs text-gray-700 italic">
+                                "${l.reason}"
+                            </div>
+
+                            <!-- Multi-Tiered Routing Hierarchy -->
+                            <div class="bg-blue-50/70 p-2.5 rounded border border-blue-100 space-y-1 text-[11px]">
+                                <span class="font-bold text-blue-900 block uppercase tracking-wider text-[10px]">Institutional Approval Hierarchy Workflow:</span>
+                                <div class="grid grid-cols-3 gap-1 text-center font-semibold">
+                                    <span class="bg-green-100 text-green-800 px-1.5 py-0.5 rounded border border-green-200"><i class="fas fa-check-circle mr-1"></i>Dept Chair</span>
+                                    <span class="bg-green-100 text-green-800 px-1.5 py-0.5 rounded border border-green-200"><i class="fas fa-check-circle mr-1"></i>Principal</span>
+                                    <span class="${isPending ? 'bg-amber-100 text-amber-800 border-amber-200' : l.status === 'approved' ? 'bg-green-100 text-green-800 border-green-200' : 'bg-red-100 text-red-800 border-red-200'} px-1.5 py-0.5 rounded border"><i class="fas ${isPending ? 'fa-clock' : l.status === 'approved' ? 'fa-check-circle' : 'fa-times-circle'} mr-1"></i>HR Director</span>
+                                </div>
+                            </div>
+
+                            <div class="flex justify-between items-center pt-2 border-t border-gray-100">
+                                <span class="text-[11px] text-gray-400">Filed: ${new Date(l.submittedDate).toLocaleDateString()}</span>
+                                <div class="flex gap-2">
+                                    ${isPending ? `
+                                        <button onclick="hrApproveLeave('${l.id}')" class="px-3 py-1 bg-green-600 text-white text-xs font-bold rounded hover:bg-green-700 transition-colors">
+                                            <i class="fas fa-check mr-1"></i> Approve
+                                        </button>
+                                        <button onclick="hrRejectLeave('${l.id}')" class="px-3 py-1 bg-red-600 text-white text-xs font-bold rounded hover:bg-red-700 transition-colors">
+                                            <i class="fas fa-times mr-1"></i> Reject
+                                        </button>
+                                    ` : `
+                                        <button onclick="hrToggleLeaveStatus('${l.id}', '${l.status === 'approved' ? 'rejected' : 'approved'}')" class="px-2.5 py-1 bg-gray-100 text-gray-600 text-xs font-semibold rounded hover:bg-gray-200 transition-colors">
+                                            <i class="fas fa-sync-alt mr-1"></i> Change Status
+                                        </button>
+                                    `}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // 2. Attendance Logs filtering
+            let logs = SAGA.getAllAttendanceLogs();
+            if (searchQuery) {
+                logs = logs.filter(log => log.employeeName.toLowerCase().includes(searchQuery));
+            }
+            if (selectedAttType) {
+                logs = logs.filter(log => log.type === selectedAttType);
+            }
+
+            const logContainer = document.getElementById('attendanceLogsContainer');
+            document.getElementById('attendanceCountBadge').textContent = `${logs.length} log(s)`;
+
+            if (logs.length === 0) {
+                logContainer.innerHTML = '<p class="text-gray-500 text-sm p-4 bg-gray-50 rounded">No timekeeping logs match the selected filters.</p>';
+            } else {
+                logContainer.innerHTML = logs.map(log => `
+                    <div class="p-3 bg-gray-50 rounded border border-gray-100 flex justify-between items-center text-sm">
+                        <div class="flex items-center gap-3">
+                            <span class="w-8 h-8 rounded-full ${log.type === 'in' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'} font-bold flex items-center justify-center text-xs uppercase">
+                                ${log.type}
+                            </span>
+                            <div>
+                                <p class="font-bold text-gray-900">${log.employeeName}</p>
+                                <p class="text-xs text-gray-500">${log.date}</p>
+                            </div>
+                        </div>
+                        <span class="font-mono text-xs text-gray-600">${SAGA.formatTime(log.timestamp)}</span>
+                    </div>
+                `).join('');
+            }
+        }
+
+        function hrApproveLeave(leaveId) {
+            const res = SAGA.approveLeaveRequest(leaveId);
+            if (res && res.error) {
+                alert('❌ ' + res.error);
+                return;
+            }
+            alert('✅ Leave Application Approved!\n\nLeave credits have been updated and status sent to employee portal.');
+            loadLeaveAndTimekeeping();
+            loadHRISOverview();
+        }
+
+        function hrRejectLeave(leaveId) {
+            if (!confirm('Are you sure you want to reject this leave request?')) return;
+            SAGA.rejectLeaveRequest(leaveId);
+            alert('❌ Leave Application Rejected.');
+            loadLeaveAndTimekeeping();
+            loadHRISOverview();
+        }
+
+        function hrToggleLeaveStatus(leaveId, newStatus) {
+            if (newStatus === 'approved') {
+                hrApproveLeave(leaveId);
+            } else {
+                hrRejectLeave(leaveId);
+            }
+        }
+
+        function simulateRFIDTap() {
+            const emps = SAGA.getAllEmployees();
+            if (emps.length === 0) return;
+            const emp = emps[Math.floor(Math.random() * emps.length)];
+            const cardId = emp.rfidCardId || 'RFID-8849A';
+            const type = Math.random() > 0.5 ? 'in' : 'out';
+
+            SAGA.recordTimeEntry(emp.id, type);
+            SAGA.showCustomAlert(
+                `IoT-RFID Hardware Terminal Signal Received!\n\nTap Sensor Location: Main Gate Transit Hardware\nScanned RFID UID: ${cardId}\nEmployee Name: ${emp.name}\nTimestamp Logged: ${new Date().toLocaleTimeString()}\nEvent: CLOCK ${type.toUpperCase()}\n\nData processed live and aggregated into attendance analytics.`,
+                "IoT-RFID Hardware Terminal Logged"
+            );
+            loadLeaveAndTimekeeping();
+            loadHRISOverview();
+        }
+
+        function simulatePendingLeaveDemo() {
+            const emps = SAGA.getAllEmployees();
+            if (emps.length === 0) return;
+            const emp = emps[Math.floor(Math.random() * emps.length)];
+            
+            SAGA.submitLeaveRequest(
+                emp.id,
+                'vacation',
+                '2026-07-20',
+                '2026-07-22',
+                'Official academic leaves and family personal welfare matters.'
+            );
+            alert(`✨ Sample Pending Leave generated for ${emp.name}!`);
+            loadLeaveAndTimekeeping();
+            loadHRISOverview();
+        }
+
+
+        // TAB 3: ATS ATS LOGIC (Existing functionality preserved)
         function loadApplicants() {
             currentApplicants = SAGA.getApplicants();
             updateStats();
@@ -233,13 +1002,8 @@
             document.getElementById('stat-scored').textContent = scored;
             document.getElementById('stat-hired').textContent = hired;
 
-            // Update funnel chart
             updateFunnelChart(applied, scored, hired);
-
-            // Update job performance
             updateJobPerformance();
-
-            // Update recently hired
             updateRecentlyHired();
         }
 
@@ -258,14 +1022,12 @@
 
         function updateJobPerformance() {
             const jobStats = {};
-            
             currentApplicants.forEach(app => {
-                if (!jobStats[app.jobId]) {
-                    jobStats[app.jobId] = { total: 0, hired: 0 };
-                }
+                if (!jobStats[app.jobId]) jobStats[app.jobId] = { total: 0, hired: 0, topScore: 0 };
                 jobStats[app.jobId].total++;
-                if (app.status === 'hired') {
-                    jobStats[app.jobId].hired++;
+                if (app.status === 'hired') jobStats[app.jobId].hired++;
+                if (app.compatibility_score > (jobStats[app.jobId].topScore || 0)) {
+                    jobStats[app.jobId].topScore = app.compatibility_score;
                 }
             });
 
@@ -273,22 +1035,35 @@
             const jobs = SAGA.getJobs();
 
             container.innerHTML = jobs.map(job => {
-                const stats = jobStats[job.id] || { total: 0, hired: 0 };
+                const stats = jobStats[job.id] || { total: 0, hired: 0, topScore: 0 };
                 return `
-                    <div class="bg-gray-50 p-4 rounded border-l-4 border-blue-500">
+                    <div onclick="filterJobByCard(${job.id})" class="p-4 rounded-xl bg-white border-l-4 border-amber-500 border border-gray-200 hover:border-amber-400 hover:shadow-lg transition-all cursor-pointer group space-y-2">
                         <div class="flex justify-between items-start">
                             <div>
-                                <p class="font-semibold text-gray-900">${job.title}</p>
-                                <p class="text-sm text-gray-600">${stats.total} applications</p>
+                                <p class="font-bold text-gray-900 text-base group-hover:text-amber-700 transition-colors">${job.title}</p>
+                                <p class="text-xs text-gray-500 font-medium mt-0.5"><i class="fas fa-layer-group text-amber-500 mr-1"></i>${job.department}</p>
                             </div>
-                            <div class="text-right">
-                                <p class="text-2xl font-bold text-blue-600">${stats.hired}</p>
-                                <p class="text-xs text-gray-600">hired</p>
-                            </div>
+                            <span class="px-2.5 py-1 rounded-full text-xs font-extrabold bg-amber-100 text-amber-900 border border-amber-300 whitespace-nowrap">
+                                ${stats.total} Candidate(s)
+                            </span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs pt-2 border-t border-gray-100">
+                            <span class="text-gray-600">Top Match: <strong class="text-green-700 font-extrabold">${stats.topScore || 85}/100</strong></span>
+                            <span class="text-amber-800 font-bold flex items-center group-hover:underline">
+                                View Ranked Pipeline <i class="fas fa-arrow-right ml-1 text-xs"></i>
+                            </span>
                         </div>
                     </div>
                 `;
             }).join('');
+        }
+
+        function filterJobByCard(jobId) {
+            document.getElementById('filterJob').value = String(jobId);
+            document.getElementById('sortBy').value = 'score-desc';
+            filterAndSort();
+            const container = document.getElementById('applicantsContainer');
+            if (container) container.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
         function updateRecentlyHired() {
@@ -319,7 +1094,6 @@
 
         function bulkScoreApplicants() {
             const unscored = currentApplicants.filter(a => a.status === 'applied');
-            
             if (unscored.length === 0) {
                 alert('All applicants have already been scored!');
                 return;
@@ -334,7 +1108,6 @@
                 setTimeout(() => {
                     SAGA.parseAndScoreApplicant(app.id);
                     processed++;
-                    
                     if (processed === unscored.length) {
                         loadApplicants();
                         btn.disabled = false;
@@ -348,7 +1121,6 @@
         function exportReport() {
             const data = currentApplicants;
             let csv = 'Name,Email,Position,Status,Score,Applied Date\n';
-            
             data.forEach(app => {
                 const job = SAGA.getJobById(app.jobId);
                 csv += `"${app.name}","${app.email}","${job ? job.title : 'N/A'}","${app.status}","${app.compatibility_score || 'N/A'}","${new Date(app.appliedDate).toLocaleDateString()}"\n`;
@@ -358,21 +1130,19 @@
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `applicants-report-${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = `ats-applicants-report-${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
-            alert('✅ Report exported!');
+            alert('✅ ATS Report exported!');
         }
 
         function filterAndSort() {
             let filtered = currentApplicants;
+            const jobFilter = document.getElementById('filterJob').value;
+            if (jobFilter) filtered = filtered.filter(a => String(a.jobId) === String(jobFilter));
 
-            // Filter
             const statusFilter = document.getElementById('filterStatus').value;
-            if (statusFilter) {
-                filtered = filtered.filter(a => a.status === statusFilter);
-            }
+            if (statusFilter) filtered = filtered.filter(a => a.status === statusFilter);
 
-            // Sort
             const sortBy = document.getElementById('sortBy').value;
             if (sortBy === 'score-desc') {
                 filtered.sort((a, b) => (b.compatibility_score || 0) - (a.compatibility_score || 0));
@@ -396,70 +1166,49 @@
             }
 
             emptyState.classList.add('hidden');
-            container.innerHTML = applicants.map(app => {
+            container.innerHTML = applicants.map((app, index) => {
                 const job = SAGA.getJobById(app.jobId);
                 const scoreClass = app.compatibility_score ? 
                     (app.compatibility_score >= 70 ? 'score-high' : app.compatibility_score >= 50 ? 'score-medium' : 'score-low')
                     : '';
 
+                const rankBadge = (app.compatibility_score) ? 
+                    `<span class="px-2.5 py-1 rounded-full text-xs font-extrabold ${index === 0 ? 'bg-amber-400 text-slate-950 border border-amber-500 shadow-md' : index === 1 ? 'bg-slate-200 text-slate-800 border border-slate-300' : index === 2 ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-slate-100 text-slate-700 border border-slate-200'}"><i class="fas ${index === 0 ? 'fa-crown' : index === 1 ? 'fa-medal' : 'fa-award'} mr-1"></i>Rank #${index + 1} ${index === 0 ? 'Top Match' : 'Candidate'}</span>` : '';
+
                 return `
-                    <div class="card applicant-card p-6 fade-in">
+                    <div class="card applicant-card p-6 fade-in bg-white border-l-4 border-amber-500 shadow-sm hover:shadow-md transition-all">
                         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
-                            <!-- Applicant Info -->
-                            <div class="md:col-span-2">
-                                <h3 class="text-lg font-bold text-gray-900">${app.name}</h3>
-                                <p class="text-sm text-gray-600 mt-1">
-                                    <i class="fas fa-envelope mr-2"></i>${app.email}
-                                </p>
-                                <p class="text-sm text-gray-600">
-                                    <i class="fas fa-phone mr-2"></i>${app.phone}
-                                </p>
-                                <p class="text-sm text-gray-600 mt-2">
-                                    <span class="font-semibold">Position:</span> ${job ? job.title : 'Unknown'}
-                                </p>
-                                <p class="text-xs text-gray-500 mt-2">
-                                    Applied: ${SAGA.formatDate(app.appliedDate)}
-                                </p>
+                            <div class="md:col-span-2 space-y-1.5">
+                                <div class="flex items-center gap-2 flex-wrap mb-1">
+                                    <h3 class="text-lg font-bold text-slate-900">${app.name}</h3>
+                                    ${rankBadge}
+                                </div>
+                                <p class="text-sm text-slate-600"><i class="fas fa-envelope mr-2 text-slate-400"></i>${app.email}</p>
+                                <p class="text-sm text-slate-600"><i class="fas fa-phone mr-2 text-slate-400"></i>${app.phone}</p>
+                                <p class="text-sm text-slate-700 mt-2"><span class="font-semibold text-slate-900">Position Applied:</span> ${job ? job.title : 'Unknown Position'}</p>
+                                <p class="text-xs text-slate-400 mt-0.5">Application Date: ${SAGA.formatDate(app.appliedDate)}</p>
+                                ${app.lastNoticeSent ? `<div class="mt-2 p-1.5 bg-amber-50 rounded-lg border border-amber-200 text-[11px] text-amber-900 font-bold flex items-center gap-1.5"><i class="fas fa-check-circle text-amber-600"></i><span>Dispatch Status: ${app.lastNoticeSent}</span></div>` : ''}
                             </div>
-
-                            <!-- Score & Status -->
-                            <div class="text-center">
+                            <div class="text-center flex flex-col justify-center items-center">
                                 ${app.compatibility_score ? `
-                                    <div class="score-badge ${scoreClass} mx-auto mb-2">
-                                        ${app.compatibility_score}
-                                    </div>
-                                    <p class="text-sm font-semibold text-gray-700">Compatibility</p>
+                                    <div class="score-badge ${scoreClass} mx-auto mb-1.5 shadow-md">${app.compatibility_score}</div>
+                                    <p class="text-xs font-bold text-slate-700 uppercase tracking-wider">AI Compatibility</p>
                                 ` : `
-                                    <div class="bg-gray-100 p-4 rounded text-center">
-                                        <p class="text-xs text-gray-600">Not yet scored</p>
-                                    </div>
+                                    <div class="bg-slate-100 p-3 rounded-xl text-center border border-slate-200"><p class="text-xs font-semibold text-slate-500">Not yet scored</p></div>
                                 `}
-                                <span class="badge badge-${app.status} mt-3 block">
-                                    ${app.status.toUpperCase()}
-                                </span>
+                                <span class="badge badge-${app.status} mt-2 block">${app.status.toUpperCase()}</span>
                             </div>
-
-                            <!-- Actions -->
                             <div class="flex flex-col gap-2 justify-center">
                                 ${app.status === 'applied' ? `
-                                    <button onclick="parseAndScore('${app.id}')" class="btn btn-primary btn-small">
-                                        <i class="fas fa-brain"></i> AI Parse & Score
-                                    </button>
+                                    <button onclick="parseAndScore('${app.id}')" class="btn btn-primary btn-small"><i class="fas fa-brain"></i> AI Parse & Score</button>
                                 ` : app.status === 'scored' ? `
-                                    <button onclick="openHireModal('${app.id}')" class="btn btn-success btn-small">
-                                        <i class="fas fa-check-circle"></i> Hire
-                                    </button>
-                                    <button onclick="showSkills('${app.id}')" class="btn btn-outline btn-small">
-                                        <i class="fas fa-chart-pie"></i> View Skills
-                                    </button>
+                                    <button onclick="openHireModal('${app.id}')" class="btn btn-success btn-small"><i class="fas fa-check-circle"></i> Hire Candidate</button>
+                                    <button onclick="showSkills('${app.id}')" class="btn btn-outline btn-small"><i class="fas fa-chart-pie"></i> View AI Competencies</button>
                                 ` : app.status === 'hired' ? `
-                                    <a href="onboarding.html?applicantId=${app.id}" class="btn btn-primary btn-small text-center">
-                                        <i class="fas fa-forward"></i> Go to Onboarding
-                                    </a>
+                                    <a href="onboarding.html?applicantId=${app.id}" class="btn btn-primary btn-small text-center"><i class="fas fa-forward"></i> Go to Onboarding</a>
                                 ` : ''}
-                                <button onclick="showResume('${app.name}', '${app.resume}')" class="btn btn-outline btn-small">
-                                    <i class="fas fa-file-pdf"></i> Resume
-                                </button>
+                                <button onclick="sendCorrespondence('${app.id}')" class="btn btn-outline btn-small"><i class="fas fa-paper-plane text-amber-700 mr-1"></i> Send Email Notice</button>
+                                <button onclick="showResumePDF('${app.id}')" class="btn btn-outline btn-small"><i class="fas fa-file-pdf text-red-600 mr-1"></i> View Resume PDF</button>
                             </div>
                         </div>
                     </div>
@@ -472,15 +1221,12 @@
             btn.disabled = true;
             btn.innerHTML = '<span class="spinner"></span> Parsing...';
 
-            // Simulate AI processing with a delay
             setTimeout(() => {
                 const applicant = SAGA.parseAndScoreApplicant(applicantId);
-                
                 if (applicant) {
                     alert(`✅ Parsing Complete!\n\nCompatibility Score: ${applicant.compatibility_score}/100\nSkills Found: ${applicant.extracted_skills.length}`);
                     loadApplicants();
                 }
-
                 btn.disabled = false;
                 btn.innerHTML = '<i class="fas fa-brain"></i> AI Parse & Score';
             }, 1500);
@@ -494,21 +1240,17 @@
             skillsContent.innerHTML = `
                 <div>
                     <h3 class="font-bold text-lg text-gray-900 mb-4">${applicant.name}</h3>
-                    
                     <div class="mb-4">
                         <p class="text-sm font-semibold text-gray-700 mb-2">Compatibility Score:</p>
                         <div class="flex items-center gap-3">
                             <div class="score-badge ${applicant.compatibility_score >= 70 ? 'score-high' : applicant.compatibility_score >= 50 ? 'score-medium' : 'score-low'}" style="width: 48px; height: 48px;">
                                 ${applicant.compatibility_score}
                             </div>
-                            <div>
-                                <div class="w-48 h-2 bg-gray-200 rounded-full overflow-hidden">
-                                    <div class="h-full ${applicant.compatibility_score >= 70 ? 'bg-green-500' : applicant.compatibility_score >= 50 ? 'bg-yellow-500' : 'bg-red-500'}" style="width: ${applicant.compatibility_score}%"></div>
-                                </div>
+                            <div class="w-48 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                <div class="h-full ${applicant.compatibility_score >= 70 ? 'bg-green-500' : applicant.compatibility_score >= 50 ? 'bg-yellow-500' : 'bg-red-500'}" style="width: ${applicant.compatibility_score}%"></div>
                             </div>
                         </div>
                     </div>
-
                     <div>
                         <p class="text-sm font-semibold text-gray-700 mb-3">Extracted Skills (${applicant.extracted_skills.length}):</p>
                         <div class="space-y-2">
@@ -525,12 +1267,52 @@
                     </div>
                 </div>
             `;
-
             document.getElementById('skillsModal').classList.add('active');
         }
 
         function closeSkillsModal() {
             document.getElementById('skillsModal').classList.remove('active');
+        }
+
+        function sendCorrespondence(applicantId) {
+            const data = SAGA.getData();
+            const applicant = data.applicants.find(a => a.id === applicantId);
+            if (!applicant) return;
+            const job = SAGA.getJobById(applicant.jobId);
+            const positionTitle = job ? job.title : 'Faculty Role';
+
+            let stageTitle = "";
+            let emailSubject = "";
+            let emailBody = "";
+
+            if (applicant.status === 'applied') {
+                stageTitle = "Stage 1 Notice Sent (Queue Acceptance)";
+                emailSubject = `Application Received & Verified - ${positionTitle} (St. Aloysius Gonzaga Academy Inc.)`;
+                emailBody = `Dear ${applicant.name},\n\nThank you for applying for the position of ${positionTitle} at St. Aloysius Gonzaga Academy Inc.\n\nWe have successfully received your credentials and verified your initial documents. Your application is currently ACCEPTED IN THE SELECTION QUEUE and waiting for AI competency evaluation and committee review.\n\nWe will notify you shortly regarding the next steps.\n\nBest regards,\nHR Recruitment Office\nSt. Aloysius Gonzaga Academy Inc.`;
+            } else if (applicant.status === 'scored') {
+                stageTitle = "Stage 2 Notice Sent (Panel Interview Schedule)";
+                emailSubject = `Shortlisted for Interview - ${positionTitle} (St. Aloysius Gonzaga Academy Inc.)`;
+                emailBody = `Dear ${applicant.name},\n\nCongratulations! Based on our AI Competency Matching (Score: ${applicant.compatibility_score}/100), you have been SHORTLISTED for the position of ${positionTitle}.\n\nYou are invited for a formal panel interview and teaching demonstration on Friday at 9:00 AM at the Principal's Conference Room, St. Aloysius Gonzaga Academy Campus.\n\nPlease confirm your availability by replying to this notice.\n\nBest regards,\nSearch & Screening Committee\nSt. Aloysius Gonzaga Academy Inc.`;
+            } else if (applicant.status === 'hired') {
+                stageTitle = "Stage 3 Notice Sent (Official Appointment Offer)";
+                emailSubject = `Official Appointment & Hiring Confirmation - ${positionTitle}`;
+                emailBody = `Dear ${applicant.name},\n\nWe are delighted to formally offer you the position of ${positionTitle} at St. Aloysius Gonzaga Academy Inc. for the upcoming Academic Year!\n\nYour appointment has been officially approved by the Department Chair, Principal, and HR Director. Please proceed to the Faculty Onboarding Portal to generate your employee credentials and initialize your profile.\n\nWelcome to the Gonzaga family!\n\nWarm regards,\nOffice of the HR Director\nSt. Aloysius Gonzaga Academy Inc.`;
+            } else {
+                stageTitle = "Institutional Notice Sent";
+                emailSubject = `Update regarding your application at St. Aloysius Gonzaga Academy Inc.`;
+                emailBody = `Dear ${applicant.name},\n\nThank you for your interest in joining St. Aloysius Gonzaga Academy Inc. Your application status is currently: ${applicant.status.toUpperCase()}.\n\nBest regards,\nHR Office`;
+            }
+
+            applicant.lastNoticeSent = stageTitle;
+            applicant.lastNoticeDate = new Date().toISOString();
+            SAGA.saveData(data);
+
+            SAGA.showCustomAlert(
+                `Automated Progressive Email Dispatch Sent!\n\nDispatch Status: ${stageTitle}\nRecipient: ${applicant.name} <${applicant.email}>\nSubject: ${emailSubject}\n\n----------------------------------------\n${emailBody}\n----------------------------------------\n\nNotice recorded live in SAGA-Core Automated Correspondence System.`,
+                "Progressive Email Sent"
+            );
+
+            loadApplicants();
         }
 
         function openHireModal(applicantId) {
@@ -553,7 +1335,6 @@
                     <p class="font-bold text-2xl text-yellow-600">${applicant.compatibility_score}%</p>
                 </div>
             `;
-
             document.getElementById('hireModal').classList.add('active');
         }
 
@@ -569,8 +1350,60 @@
             loadApplicants();
         }
 
-        function showResume(name, resume) {
-            alert(`Resume for ${name}:\n\n${resume.substring(0, 500)}${resume.length > 500 ? '...' : ''}`);
+        function showResumePDF(applicantId) {
+            const applicant = SAGA.getApplicantById(applicantId);
+            if (!applicant) return;
+
+            const fileName = applicant.resumeFileName || `${applicant.name.replace(/\s+/g, '_')}_CV.pdf`;
+            document.getElementById('pdfModalTitle').textContent = fileName;
+
+            const content = document.getElementById('pdfResumeContent');
+            content.innerHTML = `
+                <!-- Document Toolbar -->
+                <div class="flex justify-between items-center bg-white p-3 rounded-lg border border-gray-200 mb-4 text-xs">
+                    <div class="flex items-center gap-3">
+                        <span class="px-2 py-1 bg-red-100 text-red-700 font-bold rounded">PDF DOCUMENT</span>
+                        <span class="text-gray-500"><i class="fas fa-paperclip mr-1"></i>${fileName}</span>
+                    </div>
+                    <button onclick="alert('📥 Simulated PDF Download Started for ${fileName}')" class="px-3 py-1 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition-colors">
+                        <i class="fas fa-download mr-1"></i> Download Original PDF
+                    </button>
+                </div>
+
+                <!-- Simulated Paper Document Viewer -->
+                <div class="bg-white p-8 rounded-lg shadow-inner border border-gray-300 space-y-4 font-sans max-h-96 overflow-y-auto">
+                    <div class="border-b pb-4">
+                        <h2 class="text-2xl font-bold text-gray-900">${applicant.name}</h2>
+                        <p class="text-sm text-gray-600 mt-1"><i class="fas fa-envelope mr-1"></i> ${applicant.email} &bull; <i class="fas fa-phone mr-1"></i> ${applicant.phone}</p>
+                    </div>
+
+                    <div>
+                        <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">Attached Document Text Content</h3>
+                        <div class="p-4 bg-gray-50 rounded border text-sm text-gray-800 whitespace-pre-wrap leading-relaxed">
+                            ${applicant.resume}
+                        </div>
+                    </div>
+
+                    ${applicant.extracted_skills && applicant.extracted_skills.length > 0 ? `
+                        <div>
+                            <h3 class="text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">SAGA AI Extracted Competencies</h3>
+                            <div class="flex flex-wrap gap-2">
+                                ${applicant.extracted_skills.map(s => `
+                                    <span class="px-2.5 py-1 bg-blue-50 text-blue-700 font-semibold text-xs rounded-full border border-blue-200">
+                                        ${s.skill}
+                                    </span>
+                                `).join('')}
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+
+            document.getElementById('pdfResumeModal').classList.add('active');
+        }
+
+        function closePDFResumeModal() {
+            document.getElementById('pdfResumeModal').classList.remove('active');
         }
 
         function refreshApplicants() {
@@ -578,16 +1411,16 @@
         }
 
         // Close modals when clicking outside
-        document.getElementById('hireModal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('hireModal')) {
-                closeHireModal();
-            }
-        });
-
-        document.getElementById('skillsModal').addEventListener('click', (e) => {
-            if (e.target === document.getElementById('skillsModal')) {
-                closeSkillsModal();
-            }
+        ['hireModal', 'skillsModal', 'hrPayslipModal', 'pdfResumeModal', 'employeePerformanceModal'].forEach(id => {
+            document.getElementById(id).addEventListener('click', (e) => {
+                if (e.target === document.getElementById(id)) {
+                    if (id === 'hireModal') closeHireModal();
+                    if (id === 'skillsModal') closeSkillsModal();
+                    if (id === 'hrPayslipModal') closeHRPayslipModal();
+                    if (id === 'pdfResumeModal') closePDFResumeModal();
+                    if (id === 'employeePerformanceModal') closePerformanceModal();
+                }
+            });
         });
     </script>
 </body>

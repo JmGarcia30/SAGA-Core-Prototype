@@ -11,20 +11,51 @@
 <body class="bg-gray-50">
     <!-- Navigation -->
     <nav class="navbar sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="nav-brand">
-                <i class="fas fa-building"></i> SAGA-Core
+                <div class="bg-white p-1 rounded-xl shadow-md border-2 border-amber-400 flex items-center justify-center">
+                    <img src="assets/school_logo.png" alt="St. Aloysius Gonzaga Academy Logo" class="w-9 h-9 object-contain">
+                </div>
+                <div>
+                    <span class="block text-lg font-bold tracking-wide text-white">St. Aloysius Gonzaga Academy Inc.</span>
+                    <span class="block text-[11px] font-semibold text-amber-400 tracking-wider uppercase">Employee Self-Service • Est. 2015</span>
+                </div>
             </div>
             <div class="flex gap-6 items-center">
-                <a href="index.html" class="nav-link">Careers</a>
-                <a href="hr-hiring.html" class="nav-link">HR Portal</a>
-                <a href="employee-ess.html" class="nav-link active">Employee Portal</a>
+                <a href="index.html" class="nav-link font-semibold">Careers & Faculty Openings</a>
+                <a href="hr-hiring.html" class="nav-link font-semibold">HR Master Portal</a>
+                <a href="employee-ess.html" class="nav-link active font-semibold">Employee Self-Service</a>
                 <button onclick="logout()" class="btn btn-outline btn-small">
                     <i class="fas fa-sign-out-alt"></i> Logout
                 </button>
             </div>
         </div>
     </nav>
+
+    <!-- Login & Switcher Section (Demo) -->
+    <div id="loginSection" class="min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div class="max-w-md w-full space-y-8 card p-8 bg-white border-t-4 border-amber-500 shadow-xl">
+            <div class="text-center">
+                <div class="bg-slate-900 p-3 rounded-2xl inline-block shadow-lg border-2 border-amber-400 mb-3">
+                    <img src="assets/school_logo.png" alt="School Emblem" class="w-16 h-16 object-contain">
+                </div>
+                <h2 class="text-2xl font-extrabold text-gray-900">Employee Self-Service</h2>
+                <p class="mt-1 text-xs text-amber-700 font-bold uppercase tracking-wider">St. Aloysius Gonzaga Academy Inc.</p>
+                <p class="mt-2 text-sm text-gray-600">Select an employee profile below to test ESS portal access:</p>
+            </div>
+            <form id="loginForm" onsubmit="handleDemoLogin(event)" class="space-y-4">
+                <div>
+                    <label for="employeeSelect" class="block text-xs font-bold text-gray-700 uppercase mb-1">Active Faculty Account</label>
+                    <select id="employeeSelect" class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 text-sm font-medium">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary w-full justify-center text-sm py-3">
+                    <i class="fas fa-sign-in-alt mr-1"></i> Access ESS Dashboard
+                </button>
+            </form>
+        </div>
+    </div>
 
     <!-- Dashboard Section -->
     <div id="dashboardSection" class="min-h-screen">
@@ -34,7 +65,7 @@
                 <div class="flex justify-between items-start">
                     <div>
                         <h1 id="welcomeMessage" class="text-3xl font-bold text-gray-900 flex items-center gap-3">
-                            <i class="fas fa-user-circle text-blue-600"></i> Welcome
+                            <i class="fas fa-user-circle text-amber-600"></i> Welcome
                         </h1>
                         <p id="employeeInfo" class="text-gray-600 mt-2"></p>
                     </div>
@@ -244,7 +275,24 @@
 
                     <!-- New Leave Request -->
                     <div class="bg-gray-50 p-6 rounded-lg mb-8">
-                        <h3 class="font-bold text-lg text-gray-900 mb-4">Submit New Leave Request</h3>
+                        <!-- Routing Banner -->
+                        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg mb-6 text-sm text-blue-900 flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-paper-plane text-blue-600 text-2xl"></i>
+                                <div>
+                                    <p class="font-bold text-base">Automatic Submission Routing</p>
+                                    <p class="text-xs text-blue-700">Requests submitted here are instantly routed to your <strong>Department Head</strong>, <strong>School Principal</strong>, and archived in the <strong>HRIS Master System</strong>.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center mb-4">
+                            <h3 class="font-bold text-lg text-gray-900">Submit New Leave Request</h3>
+                            <button type="button" onclick="generateLeaveDocTemplate()" class="btn btn-outline btn-small">
+                                <i class="fas fa-file-alt text-blue-600 mr-1"></i> Edit Formal Leave Letter Template
+                            </button>
+                        </div>
+
                         <form id="leaveForm" onsubmit="submitLeaveRequest(event)">
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div class="form-group">
@@ -274,13 +322,29 @@
                             </div>
 
                             <div class="form-group mb-4">
-                                <label>Reason for Leave *</label>
-                                <textarea id="leaveReason" rows="3" required placeholder="Please provide the reason for your leave request..."></textarea>
+                                <label class="block font-semibold text-gray-700 mb-1 flex justify-between items-center">
+                                    <span>Reason for Leave *</span>
+                                    <span class="text-xs text-blue-600 font-normal"><i class="fas fa-magic mr-1"></i>Pre-generated formal options available below</span>
+                                </label>
+                                <select id="presetFormalReason" onchange="applyPresetReason()" class="w-full p-2.5 mb-2 border border-blue-200 rounded-lg text-sm bg-blue-50 text-blue-900 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500">
+                                    <option value="">Select a Formal Pre-Generated Reason to auto-fill...</option>
+                                    <option value="Attending to urgent personal family welfare matters and domestic obligations in accordance with institutional leave provisions.">Personal & Family Welfare: Urgent personal family matters & domestic obligations.</option>
+                                    <option value="Required medical consultation, health recoupment, and prescribed rest under medical advisory.">Medical & Health Recoupment: Medical consultation & prescribed rest.</option>
+                                    <option value="Participation in official educational seminars, DepEd K-12 teacher training workshops, and professional development courses.">Professional Development: DepEd seminars & teacher training workshops.</option>
+                                    <option value="Addressing an unexpected critical family emergency requiring immediate physical presence and domestic coordination.">Emergency Family Obligation: Unexpected family emergency & coordination.</option>
+                                    <option value="Fulfilling academic requirements, graduate studies examinations, and research defense commitments.">Academic & Higher Studies: Graduate school exams & research defense.</option>
+                                </select>
+                                <textarea id="leaveReason" rows="3" required placeholder="Select a pre-generated formal reason above or edit/type your custom reason here..." class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
                             </div>
 
-                            <button type="submit" class="btn btn-success">
-                                <i class="fas fa-check-circle"></i> Submit Leave Request
-                            </button>
+                            <div class="flex flex-wrap gap-3">
+                                <button type="submit" class="btn btn-success flex-1">
+                                    <i class="fas fa-check-circle"></i> Submit Request to HR
+                                </button>
+                                <button type="button" onclick="generateLeaveDocTemplate()" class="btn btn-outline flex-1">
+                                    <i class="fas fa-file-signature text-blue-600"></i> Generate & Route Formal Letter
+                                </button>
+                            </div>
                         </form>
                     </div>
 
@@ -414,6 +478,39 @@
         </div>
     </div>
 
+    <!-- Templated Leave Letter Modal -->
+    <div id="leaveDocModal" class="modal-overlay">
+        <div class="modal max-w-2xl">
+            <div class="modal-header bg-gray-900 text-white rounded-t-lg px-6 py-4 flex justify-between items-center">
+                <h2 class="modal-title text-white text-lg font-bold flex items-center gap-2">
+                    <i class="fas fa-file-contract text-blue-400"></i> Formal Leave Letter Generator
+                </h2>
+                <button onclick="closeLeaveDocModal()" class="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+            </div>
+            <div class="modal-body p-6 bg-gray-50">
+                <!-- Routing Destination Header -->
+                <div class="bg-blue-100 border border-blue-200 p-3 rounded-lg text-xs text-blue-900 font-semibold mb-4 flex items-center justify-between">
+                    <span><i class="fas fa-paper-plane text-blue-600 mr-1"></i> <strong>Routed To:</strong> Department Head & School Principal's Office</span>
+                    <span class="bg-blue-600 text-white px-2 py-0.5 rounded text-[10px] uppercase font-bold">Official Document</span>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="block text-xs font-bold text-gray-700 uppercase tracking-wider">Editable Formal Application Document Text:</label>
+                    <textarea id="leaveDocTextArea" rows="14" class="w-full p-4 font-serif text-sm text-gray-800 bg-white border border-gray-300 rounded-lg shadow-inner focus:outline-none focus:ring-2 focus:ring-blue-500 leading-relaxed"></textarea>
+                </div>
+
+                <div class="mt-6 flex flex-wrap gap-3 justify-end border-t pt-4">
+                    <button type="button" onclick="copyOrPrintLeaveDoc()" class="btn btn-outline">
+                        <i class="fas fa-print mr-1"></i> Download / Print
+                    </button>
+                    <button type="button" onclick="submitFormalLeaveFromModal()" class="btn btn-success">
+                        <i class="fas fa-check-circle mr-1"></i> Submit & Route Formally
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-gray-900 text-gray-300 py-8">
         <div class="max-w-7xl mx-auto px-4 text-center">
@@ -427,32 +524,76 @@
         let currentEmployee = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Auto-login with first active employee for prototype demo
+            populateEmployeeSelect();
             const data = SAGA.getData();
             if (data.currentUser) {
                 currentEmployee = SAGA.getEmployeeById(data.currentUser.id);
                 if (currentEmployee && currentEmployee.status === 'active') {
                     loginEmployee(currentEmployee);
+                    return;
                 }
             }
+            showLoginSection();
         });
+
+        function populateEmployeeSelect() {
+            const employees = SAGA.getAllEmployees();
+            const select = document.getElementById('employeeSelect');
+            if (!select) return;
+            select.innerHTML = employees.map(e => `
+                <option value="${e.id}">${e.name} - ${SAGA.getJobById(e.jobId)?.title || 'Faculty'}</option>
+            `).join('');
+        }
+
+        function showLoginSection() {
+            populateEmployeeSelect();
+            document.getElementById('dashboardSection')?.classList.add('hidden');
+            document.getElementById('loginSection')?.classList.remove('hidden');
+        }
+
+        function handleDemoLogin(e) {
+            if (e) e.preventDefault();
+            const empId = document.getElementById('employeeSelect').value;
+            const emp = SAGA.getEmployeeById(empId);
+            if (emp) {
+                const data = SAGA.getData();
+                data.currentUser = { id: emp.id, username: emp.username };
+                SAGA.saveData(data);
+                loginEmployee(emp);
+            }
+        }
 
         function loginEmployee(employee) {
             currentEmployee = employee;
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('dashboardSection').classList.remove('hidden');
+            document.getElementById('loginSection')?.classList.add('hidden');
+            document.getElementById('dashboardSection')?.classList.remove('hidden');
 
-            document.getElementById('welcomeMessage').textContent = `Welcome, ${employee.name}!`;
-            document.getElementById('employeeInfo').innerHTML = `
-                <span class="text-gray-700">${SAGA.getJobById(employee.jobId)?.title || 'Employee'}</span>
-                <span class="mx-2">•</span>
-                <span class="text-gray-700">Since ${SAGA.formatDate(employee.onboardedDate)}</span>
-            `;
-            document.getElementById('empId').textContent = employee.id;
+            const welcomeMsg = document.getElementById('welcomeMessage');
+            if (welcomeMsg) welcomeMsg.innerHTML = `<i class="fas fa-user-circle text-amber-600 mr-2"></i> Welcome, ${employee.name}!`;
+
+            const empInfo = document.getElementById('employeeInfo');
+            if (empInfo) {
+                empInfo.innerHTML = `
+                    <span class="text-gray-700 font-medium">${SAGA.getJobById(employee.jobId)?.title || 'Employee'}</span>
+                    <span class="mx-2 text-gray-400">•</span>
+                    <span class="text-gray-500 text-xs">Faculty Since ${SAGA.formatDate(employee.onboardedDate)}</span>
+                `;
+            }
+            const empIdEl = document.getElementById('empId');
+            if (empIdEl) empIdEl.textContent = employee.id;
 
             updateLeaveBalance();
             loadAttendanceLogs();
             loadLeaveHistory();
+
+            // Attach live template auto-update listeners to form fields
+            ['leaveType', 'leaveDays', 'leaveFromDate', 'leaveToDate', 'leaveReason'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) {
+                    el.addEventListener('input', updateLiveFormalLeaveTemplate);
+                    el.addEventListener('change', updateLiveFormalLeaveTemplate);
+                }
+            });
         }
 
         function logout() {
@@ -461,9 +602,9 @@
             SAGA.saveData(data);
 
             currentEmployee = null;
-            document.getElementById('dashboardSection').classList.add('hidden');
-            document.getElementById('loginSection').classList.remove('hidden');
-            document.getElementById('loginForm').reset();
+            showLoginSection();
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) loginForm.reset();
             switchTab('overview');
         }
 
@@ -553,6 +694,14 @@
             document.getElementById('leaveBal-emergency').textContent = currentEmployee.leaveBalance.emergency;
         }
 
+        function applyPresetReason() {
+            const presetVal = document.getElementById('presetFormalReason').value;
+            if (presetVal) {
+                document.getElementById('leaveReason').value = presetVal;
+                updateLiveFormalLeaveTemplate();
+            }
+        }
+
         function submitLeaveRequest(event) {
             event.preventDefault();
 
@@ -579,13 +728,131 @@
                 return;
             }
 
-            alert(`✅ Leave Request Submitted!\n\nDays: ${result.days}\nStatus: ${result.status}`);
+            alert(`✅ Leave Application Sent directly to HR Master System!\n\nDuration: ${result.days} day(s)\nStatus: Recorded & Pending Review in HR Dashboard\n\nYour application has been received by HR and the Principal's Office.`);
             document.getElementById('leaveForm').reset();
             
             // Refresh employee data
             currentEmployee = SAGA.getEmployeeById(currentEmployee.id);
             updateLeaveBalance();
             loadLeaveHistory();
+        }
+
+        // Templated Leave Letter Generator Functions
+        function updateLiveFormalLeaveTemplate() {
+            if (!currentEmployee) return;
+
+            const leaveTypeVal = (document.getElementById('leaveType')?.value || "vacation").toUpperCase();
+            const fromDate = document.getElementById('leaveFromDate')?.value || new Date().toISOString().split('T')[0];
+            const toDate = document.getElementById('leaveToDate')?.value || new Date().toISOString().split('T')[0];
+            const reason = document.getElementById('leaveReason')?.value || "Official academic and personal leave matters.";
+            const days = document.getElementById('leaveDays')?.value || "1";
+
+            const job = SAGA.getJobById(currentEmployee.jobId);
+            const position = job ? job.title : "Faculty Member";
+            const department = job ? job.department : "Academic Division";
+            const formattedDate = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
+            const docControlNo = "SAGA-LV-" + Math.floor(100000 + Math.random() * 900000);
+
+            const formalText = `OFFICIAL APPLICATION FOR LEAVE OF ABSENCE
+DOCUMENT CONTROL NO: ${docControlNo}
+DATE OF FILING: ${formattedDate}
+
+TO:
+Office of the School Principal & Academic Leadership
+Human Resource Management Office
+SAGA-Core Institutional Academy
+
+FROM:
+Faculty Applicant: ${currentEmployee.name}
+Position Title: ${position}
+Assignment / Dept: ${department}
+Employee Serial No: ${currentEmployee.id}
+
+SUBJECT: FORMAL APPLICATION FOR OFFICIAL ${leaveTypeVal} LEAVE
+
+Sir / Madam:
+
+I have the honor to submit this formal application for an official ${leaveTypeVal} leave of absence covering the period of ${fromDate} through ${toDate}, inclusive, representing a total duration of ${days} working day(s).
+
+1. PURPOSE AND JUSTIFICATION:
+   The undersigned hereby certifies that this application is filed for the following specific reason(s):
+   "${reason}"
+
+2. CLASSROOM ADVISORY & CURRICULUM COVERAGE ARRANGEMENTS:
+   In compliance with institutional academic continuity guidelines, all lesson modules, learning materials, and student assessment tasks for my handling classes during the aforementioned period have been prepared and turned over to the Department Chair. Substitute teaching coverage has been coordinated accordingly.
+
+3. STATUTORY AND INSTITUTIONAL DECLARATION:
+   I understand that this request is subject to formal verification of accumulated leave credits by the HR office and approval by the School Principal. I undertake to resume my official teaching duties promptly on the first working day following the expiration of this approved leave.
+
+Respectfully submitted,
+
+
+____________________________________
+${currentEmployee.name}
+Faculty Applicant (${position})
+
+
+--------------------------------------------------------------------------------
+OFFICIAL ENDORSEMENT AND ROUTING APPROVAL BLOCK
+--------------------------------------------------------------------------------
+[ ] RECOMMENDING APPROVAL:                      [ ] APPROVED:
+
+____________________________________            ____________________________________
+Department Chair / Academic Head                Office of the School Principal
+Date: ________________________                  Date: ________________________
+
+[✓] HR VERIFICATION: Leave credits verified & recorded in SAGA-Core HRIS Database.`;
+
+            const txtArea = document.getElementById('leaveDocTextArea');
+            if (txtArea) {
+                txtArea.value = formalText;
+            }
+        }
+
+        function generateLeaveDocTemplate() {
+            updateLiveFormalLeaveTemplate();
+            document.getElementById('leaveDocModal').classList.add('active');
+        }
+
+        function closeLeaveDocModal() {
+            document.getElementById('leaveDocModal').classList.remove('active');
+        }
+
+        function submitFormalLeaveFromModal() {
+            const leaveType = document.getElementById('leaveType').value || "vacation";
+            const fromDate = document.getElementById('leaveFromDate').value || new Date().toISOString().split('T')[0];
+            const toDate = document.getElementById('leaveToDate').value || new Date().toISOString().split('T')[0];
+            const docContent = document.getElementById('leaveDocTextArea').value;
+
+            const result = SAGA.submitLeaveRequest(
+                currentEmployee.id,
+                leaveType,
+                fromDate,
+                toDate,
+                `Formal Document Attached: ${docContent.substring(0, 150)}...`
+            );
+
+            if (result.error) {
+                alert('❌ ' + result.error);
+                return;
+            }
+
+            alert(`✅ Formal Leave Application Sent directly to HR Master System!\n\nRouted directly to: HR Office & School Principal's Desk.\nLogged live in HR Dashboard.`);
+            closeLeaveDocModal();
+            document.getElementById('leaveForm').reset();
+
+            currentEmployee = SAGA.getEmployeeById(currentEmployee.id);
+            updateLeaveBalance();
+            loadLeaveHistory();
+        }
+
+        function copyOrPrintLeaveDoc() {
+            const text = document.getElementById('leaveDocTextArea').value;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('📋 Formal Leave Letter copied to clipboard! You can paste or print it for your records.');
+            }).catch(() => {
+                alert('📋 Text selected. You can copy or print the document.');
+            });
         }
 
         function loadLeaveHistory() {
@@ -614,25 +881,29 @@
         function downloadPayslip(period) {
             const payslip = SAGA.generatePayslip(currentEmployee.id);
             const content = `
-PAYSLIP - ${period.toUpperCase()}
+INSTITUTIONAL PAYSLIP - ${period.toUpperCase()}
 =====================================
-Employee: ${payslip.employeeName}
-ID: ${payslip.employeeId}
-Period: ${payslip.payPeriod}
+Employee Name: ${payslip.employeeName}
+Employee ID:   ${payslip.employeeId}
+Pay Period:    ${payslip.payPeriod}
 
-EARNINGS
-Gross Salary: ₱${payslip.grossSalary.toLocaleString()}
+GROSS EARNINGS
+Base Monthly Salary: ₱${payslip.grossSalary.toLocaleString()}
 
-DEDUCTIONS
-SSS: ₱${payslip.deductions.sss.toLocaleString()}
-PhilHealth: ₱${payslip.deductions.philhealth.toLocaleString()}
-PAG-IBIG: ₱${payslip.deductions.pagibig.toLocaleString()}
-Income Tax: ₱${payslip.deductions.tax.toLocaleString()}
+STATUTORY DEDUCTIONS
+SSS Contribution (4.5%):    ₱${payslip.deductions.sss.toLocaleString()}
+PhilHealth Contribution (2.5%): ₱${payslip.deductions.philhealth.toLocaleString()}
+PAG-IBIG Contribution (2.0%):   ₱${payslip.deductions.pagibig.toLocaleString()}
+Withholding Income Tax (10%):  ₱${payslip.deductions.tax.toLocaleString()}
+
+ATTENDANCE PENALTY DEDUCTIONS
+Late Deductions (${payslip.deductions.lateMinutes} mins):    ₱${payslip.deductions.lateDeduction.toLocaleString()}
+Unexcused Absences (${payslip.deductions.absencesCount} days): ₱${payslip.deductions.absenceDeduction.toLocaleString()}
 =====================================
-Total Deductions: ₱${payslip.totalDeductions.toLocaleString()}
-NET PAY: ₱${payslip.netPay.toLocaleString()}
+TOTAL DEDUCTIONS: ₱${payslip.totalDeductions.toLocaleString()}
+NET TAKE-HOME PAY: ₱${payslip.netPay.toLocaleString()}
 
-This is an electronically generated payslip. No signature required.
+Electronically generated payslip compliant with labor guidelines.
 Generated: ${new Date().toLocaleString()}
             `;
 
@@ -642,7 +913,7 @@ Generated: ${new Date().toLocaleString()}
             a.href = url;
             a.download = `payslip-${period}.txt`;
             a.click();
-            alert('✅ Payslip downloaded!');
+            alert('Payslip downloaded successfully.');
         }
 
         function initiateExit(event) {
@@ -692,6 +963,13 @@ Generated: ${new Date().toLocaleString()}
                 border-bottom-color: #3B82F6;
             }
         `;
+        // Close leave document modal on outside click
+        document.getElementById('leaveDocModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('leaveDocModal')) {
+                closeLeaveDocModal();
+            }
+        });
+
         document.head.appendChild(style);
     </script>
 </body>

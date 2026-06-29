@@ -11,14 +11,20 @@
 <body class="bg-gray-50">
     <!-- Navigation -->
     <nav class="navbar sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="nav-brand">
-                <i class="fas fa-building"></i> SAGA-Core
+                <div class="bg-white p-1 rounded-xl shadow-md border-2 border-amber-400 flex items-center justify-center">
+                    <img src="assets/school_logo.png" alt="St. Aloysius Gonzaga Academy Logo" class="w-9 h-9 object-contain">
+                </div>
+                <div>
+                    <span class="block text-lg font-bold tracking-wide text-white">St. Aloysius Gonzaga Academy Inc.</span>
+                    <span class="block text-[11px] font-semibold text-amber-400 tracking-wider uppercase">Faculty Onboarding Portal • Est. 2015</span>
+                </div>
             </div>
-            <div class="flex gap-6">
-                <a href="index.html" class="nav-link">Careers</a>
-                <a href="hr-hiring.html" class="nav-link">HR Portal</a>
-                <a href="employee-ess.html" class="nav-link">Employee Portal</a>
+            <div class="flex gap-6 items-center">
+                <a href="index.html" class="nav-link font-semibold">Careers & Faculty Openings</a>
+                <a href="hr-hiring.html" class="nav-link font-semibold">HR Master Portal</a>
+                <a href="employee-ess.html" class="nav-link font-semibold">Employee Self-Service</a>
             </div>
         </div>
     </nav>
@@ -340,9 +346,7 @@
             const employee = SAGA.createEmployee(applicantId, username, password);
 
             if (employee) {
-                alert(`✅ Onboarding Complete!\n\nWelcome, ${employee.name}!\n\nYour employee ID: ${employee.id}\n\nUsername: ${username}\n\nYou can now log into the Employee Portal.`);
-                
-                // Store current user
+                // Auto-login session for presentation demo
                 const data = SAGA.getData();
                 data.currentUser = {
                     id: employee.id,
@@ -350,12 +354,16 @@
                 };
                 SAGA.saveData(data);
 
-                // Redirect to employee portal
+                SAGA.showCustomAlert(
+                    `Onboarding Complete & Account Activated!\n\nWelcome to St. Aloysius Gonzaga Academy, ${employee.name}!\nEmployee ID: ${employee.id}\nUsername: ${username}\n\nAutomating instant session login to Employee Self-Service (ESS) Portal for demo presentation...`,
+                    "Automatic Session Login"
+                );
+
                 setTimeout(() => {
                     window.location.href = 'employee-ess.html';
-                }, 2000);
+                }, 1200);
             } else {
-                alert('Error creating employee. Please try again.');
+                SAGA.showCustomAlert('Error initializing employee profile. Please verify fields and try again.', 'Onboarding Error');
             }
         }
 
