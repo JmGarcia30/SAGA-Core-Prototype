@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAGA-Core | HR Hiring Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="navbar sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="nav-brand">
+                <i class="fas fa-building"></i> SAGA-Core
+            </div>
+            <div class="flex gap-6">
+                <a href="index.html" class="nav-link">Careers</a>
+                <a href="hr-hiring.html" class="nav-link active">HR Portal</a>
+                <a href="employee-ess.html" class="nav-link">Employee Portal</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="bg-white border-b border-gray-200 sticky top-16 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <i class="fas fa-users text-blue-600"></i> Applicant Tracking System (ATS)
+            </h1>
+            <p class="text-gray-600 mt-2">AI-Powered Recruitment Dashboard</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Stats -->
+        <div class="stats-grid mb-8">
+            <div class="stat-card">
+                <div class="stat-number" id="stat-total">0</div>
+                <div class="stat-label">Total Applicants</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-applied">0</div>
+                <div class="stat-label">New Applications</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-scored">0</div>
+                <div class="stat-label">Scored</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-hired">0</div>
+                <div class="stat-label">Hired</div>
+            </div>
+        </div>
+
+        <!-- Hiring Funnel Analytics -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <!-- Funnel Chart -->
+            <div class="card p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-6">Hiring Funnel</h3>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold text-gray-700">Applications</span>
+                            <span class="text-sm font-bold text-gray-900" id="funnel-applied">0</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3" style="width: 100%;">
+                            <div class="bg-blue-500 h-3 rounded-full" style="width: 100%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold text-gray-700">Scored</span>
+                            <span class="text-sm font-bold text-gray-900" id="funnel-scored">0</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3" style="width: 100%;">
+                            <div class="bg-yellow-500 h-3 rounded-full" id="funnel-scored-bar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <span class="font-semibold text-gray-700">Hired</span>
+                            <span class="text-sm font-bold text-gray-900" id="funnel-hired">0</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-3" style="width: 100%;">
+                            <div class="bg-green-500 h-3 rounded-full" id="funnel-hired-bar" style="width: 0%;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Job Performance -->
+            <div class="card p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-6">Applications by Position</h3>
+                <div id="jobPerformance" class="space-y-3">
+                    <!-- Job cards will be populated here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Recently Hired & Quick Actions -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <div class="lg:col-span-2 card p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Recently Hired</h3>
+                <div id="recentlyHired" class="space-y-3">
+                    <p class="text-gray-600">No recent hires.</p>
+                </div>
+            </div>
+
+            <div class="card p-6">
+                <h3 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+                <div class="space-y-3">
+                    <button onclick="bulkScoreApplicants()" class="btn btn-primary btn-block btn-small">
+                        <i class="fas fa-brain"></i> Score All Unscored
+                    </button>
+                    <button onclick="exportReport()" class="btn btn-outline btn-block btn-small">
+                        <i class="fas fa-file-excel"></i> Export Report
+                    </button>
+                    <button onclick="refreshApplicants()" class="btn btn-outline btn-block btn-small">
+                        <i class="fas fa-sync-alt"></i> Refresh Data
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Controls -->
+        <div class="card p-6 mb-8 flex flex-col md:flex-row gap-4 items-center justify-between">
+            <div class="flex gap-3">
+                <select id="filterStatus" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="">All Applicants</option>
+                    <option value="applied">New Applications</option>
+                    <option value="scored">Scored</option>
+                    <option value="hired">Hired</option>
+                </select>
+                <select id="sortBy" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <option value="score-desc">Highest Score First</option>
+                    <option value="score-asc">Lowest Score First</option>
+                    <option value="recent">Most Recent</option>
+                </select>
+            </div>
+            <button onclick="refreshApplicants()" class="btn btn-primary">
+                <i class="fas fa-sync-alt"></i> Refresh
+            </button>
+        </div>
+
+        <!-- Applicants List -->
+        <div id="applicantsContainer" class="space-y-6">
+            <!-- Applicant cards will be populated here -->
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="card p-12 text-center hidden">
+            <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+            <h3 class="text-xl font-bold text-gray-700 mb-2">No Applicants Yet</h3>
+            <p class="text-gray-600">When applicants submit applications on the Careers page, they will appear here.</p>
+            <a href="index.html" class="btn btn-primary mt-4">
+                <i class="fas fa-arrow-right"></i> Go to Careers Page
+            </a>
+        </div>
+    </div>
+
+    <!-- Hire Modal -->
+    <div id="hireModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Hire Applicant</h2>
+                <button onclick="closeHireModal()" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="hireSummary" class="space-y-4 mb-6"></div>
+                <div class="alert alert-info mb-4">
+                    <i class="fas fa-info-circle"></i>
+                    <div>This applicant will be moved to the onboarding stage and can create employee credentials.</div>
+                </div>
+                <div class="modal-footer gap-3">
+                    <button onclick="closeHireModal()" class="btn btn-outline flex-1">Cancel</button>
+                    <button onclick="confirmHire()" class="btn btn-success flex-1">
+                        <i class="fas fa-check"></i> Confirm Hire
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Skills Modal -->
+    <div id="skillsModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Extracted Skills & Compatibility</h2>
+                <button onclick="closeSkillsModal()" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="skillsContent" class="space-y-4"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>&copy; 2026 SAGA-Core Institutional HR System. All rights reserved.</p>
+            <p class="text-sm mt-2">AI-Powered Recruitment System</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        let currentApplicants = [];
+        let selectedApplicantForHire = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadApplicants();
+            
+            document.getElementById('filterStatus').addEventListener('change', filterAndSort);
+            document.getElementById('sortBy').addEventListener('change', filterAndSort);
+        });
+
+        function loadApplicants() {
+            currentApplicants = SAGA.getApplicants();
+            updateStats();
+            filterAndSort();
+        }
+
+        function updateStats() {
+            const applied = currentApplicants.filter(a => a.status === 'applied').length;
+            const scored = currentApplicants.filter(a => a.status === 'scored').length;
+            const hired = currentApplicants.filter(a => a.status === 'hired').length;
+
+            document.getElementById('stat-total').textContent = currentApplicants.length;
+            document.getElementById('stat-applied').textContent = applied;
+            document.getElementById('stat-scored').textContent = scored;
+            document.getElementById('stat-hired').textContent = hired;
+
+            // Update funnel chart
+            updateFunnelChart(applied, scored, hired);
+
+            // Update job performance
+            updateJobPerformance();
+
+            // Update recently hired
+            updateRecentlyHired();
+        }
+
+        function updateFunnelChart(applied, scored, hired) {
+            document.getElementById('funnel-applied').textContent = applied;
+            document.getElementById('funnel-scored').textContent = scored;
+            document.getElementById('funnel-hired').textContent = hired;
+
+            if (applied > 0) {
+                const scoredPercent = (scored / applied) * 100;
+                const hiredPercent = (hired / applied) * 100;
+                document.getElementById('funnel-scored-bar').style.width = scoredPercent + '%';
+                document.getElementById('funnel-hired-bar').style.width = hiredPercent + '%';
+            }
+        }
+
+        function updateJobPerformance() {
+            const jobStats = {};
+            
+            currentApplicants.forEach(app => {
+                if (!jobStats[app.jobId]) {
+                    jobStats[app.jobId] = { total: 0, hired: 0 };
+                }
+                jobStats[app.jobId].total++;
+                if (app.status === 'hired') {
+                    jobStats[app.jobId].hired++;
+                }
+            });
+
+            const container = document.getElementById('jobPerformance');
+            const jobs = SAGA.getJobs();
+
+            container.innerHTML = jobs.map(job => {
+                const stats = jobStats[job.id] || { total: 0, hired: 0 };
+                return `
+                    <div class="bg-gray-50 p-4 rounded border-l-4 border-blue-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-semibold text-gray-900">${job.title}</p>
+                                <p class="text-sm text-gray-600">${stats.total} applications</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-2xl font-bold text-blue-600">${stats.hired}</p>
+                                <p class="text-xs text-gray-600">hired</p>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateRecentlyHired() {
+            const hired = currentApplicants.filter(a => a.status === 'hired').slice(-3).reverse();
+            const container = document.getElementById('recentlyHired');
+
+            if (hired.length === 0) {
+                container.innerHTML = '<p class="text-gray-600">No recent hires.</p>';
+                return;
+            }
+
+            container.innerHTML = hired.map(app => {
+                const job = SAGA.getJobById(app.jobId);
+                return `
+                    <div class="bg-green-50 p-4 rounded border-l-4 border-green-500">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <p class="font-semibold text-gray-900">${app.name}</p>
+                                <p class="text-sm text-gray-600">${job ? job.title : 'Unknown'}</p>
+                                <p class="text-xs text-gray-500 mt-1">Hired: ${SAGA.formatDate(app.hireDateApproved)}</p>
+                            </div>
+                            <span class="badge badge-hired">HIRED</span>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function bulkScoreApplicants() {
+            const unscored = currentApplicants.filter(a => a.status === 'applied');
+            
+            if (unscored.length === 0) {
+                alert('All applicants have already been scored!');
+                return;
+            }
+
+            let processed = 0;
+            const btn = event.target;
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Processing...';
+
+            unscored.forEach((app, index) => {
+                setTimeout(() => {
+                    SAGA.parseAndScoreApplicant(app.id);
+                    processed++;
+                    
+                    if (processed === unscored.length) {
+                        loadApplicants();
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-brain"></i> Score All Unscored';
+                        alert(`✅ Scored ${processed} applicants!`);
+                    }
+                }, index * 300);
+            });
+        }
+
+        function exportReport() {
+            const data = currentApplicants;
+            let csv = 'Name,Email,Position,Status,Score,Applied Date\n';
+            
+            data.forEach(app => {
+                const job = SAGA.getJobById(app.jobId);
+                csv += `"${app.name}","${app.email}","${job ? job.title : 'N/A'}","${app.status}","${app.compatibility_score || 'N/A'}","${new Date(app.appliedDate).toLocaleDateString()}"\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `applicants-report-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            alert('✅ Report exported!');
+        }
+
+        function filterAndSort() {
+            let filtered = currentApplicants;
+
+            // Filter
+            const statusFilter = document.getElementById('filterStatus').value;
+            if (statusFilter) {
+                filtered = filtered.filter(a => a.status === statusFilter);
+            }
+
+            // Sort
+            const sortBy = document.getElementById('sortBy').value;
+            if (sortBy === 'score-desc') {
+                filtered.sort((a, b) => (b.compatibility_score || 0) - (a.compatibility_score || 0));
+            } else if (sortBy === 'score-asc') {
+                filtered.sort((a, b) => (a.compatibility_score || 0) - (b.compatibility_score || 0));
+            } else if (sortBy === 'recent') {
+                filtered.sort((a, b) => new Date(b.appliedDate) - new Date(a.appliedDate));
+            }
+
+            renderApplicants(filtered);
+        }
+
+        function renderApplicants(applicants) {
+            const container = document.getElementById('applicantsContainer');
+            const emptyState = document.getElementById('emptyState');
+
+            if (applicants.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            container.innerHTML = applicants.map(app => {
+                const job = SAGA.getJobById(app.jobId);
+                const scoreClass = app.compatibility_score ? 
+                    (app.compatibility_score >= 70 ? 'score-high' : app.compatibility_score >= 50 ? 'score-medium' : 'score-low')
+                    : '';
+
+                return `
+                    <div class="card applicant-card p-6 fade-in">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                            <!-- Applicant Info -->
+                            <div class="md:col-span-2">
+                                <h3 class="text-lg font-bold text-gray-900">${app.name}</h3>
+                                <p class="text-sm text-gray-600 mt-1">
+                                    <i class="fas fa-envelope mr-2"></i>${app.email}
+                                </p>
+                                <p class="text-sm text-gray-600">
+                                    <i class="fas fa-phone mr-2"></i>${app.phone}
+                                </p>
+                                <p class="text-sm text-gray-600 mt-2">
+                                    <span class="font-semibold">Position:</span> ${job ? job.title : 'Unknown'}
+                                </p>
+                                <p class="text-xs text-gray-500 mt-2">
+                                    Applied: ${SAGA.formatDate(app.appliedDate)}
+                                </p>
+                            </div>
+
+                            <!-- Score & Status -->
+                            <div class="text-center">
+                                ${app.compatibility_score ? `
+                                    <div class="score-badge ${scoreClass} mx-auto mb-2">
+                                        ${app.compatibility_score}
+                                    </div>
+                                    <p class="text-sm font-semibold text-gray-700">Compatibility</p>
+                                ` : `
+                                    <div class="bg-gray-100 p-4 rounded text-center">
+                                        <p class="text-xs text-gray-600">Not yet scored</p>
+                                    </div>
+                                `}
+                                <span class="badge badge-${app.status} mt-3 block">
+                                    ${app.status.toUpperCase()}
+                                </span>
+                            </div>
+
+                            <!-- Actions -->
+                            <div class="flex flex-col gap-2 justify-center">
+                                ${app.status === 'applied' ? `
+                                    <button onclick="parseAndScore('${app.id}')" class="btn btn-primary btn-small">
+                                        <i class="fas fa-brain"></i> AI Parse & Score
+                                    </button>
+                                ` : app.status === 'scored' ? `
+                                    <button onclick="openHireModal('${app.id}')" class="btn btn-success btn-small">
+                                        <i class="fas fa-check-circle"></i> Hire
+                                    </button>
+                                    <button onclick="showSkills('${app.id}')" class="btn btn-outline btn-small">
+                                        <i class="fas fa-chart-pie"></i> View Skills
+                                    </button>
+                                ` : app.status === 'hired' ? `
+                                    <a href="onboarding.html?applicantId=${app.id}" class="btn btn-primary btn-small text-center">
+                                        <i class="fas fa-forward"></i> Go to Onboarding
+                                    </a>
+                                ` : ''}
+                                <button onclick="showResume('${app.name}', '${app.resume}')" class="btn btn-outline btn-small">
+                                    <i class="fas fa-file-pdf"></i> Resume
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function parseAndScore(applicantId) {
+            const btn = event.target.closest('button');
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Parsing...';
+
+            // Simulate AI processing with a delay
+            setTimeout(() => {
+                const applicant = SAGA.parseAndScoreApplicant(applicantId);
+                
+                if (applicant) {
+                    alert(`✅ Parsing Complete!\n\nCompatibility Score: ${applicant.compatibility_score}/100\nSkills Found: ${applicant.extracted_skills.length}`);
+                    loadApplicants();
+                }
+
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-brain"></i> AI Parse & Score';
+            }, 1500);
+        }
+
+        function showSkills(applicantId) {
+            const applicant = SAGA.getApplicantById(applicantId);
+            if (!applicant) return;
+
+            const skillsContent = document.getElementById('skillsContent');
+            skillsContent.innerHTML = `
+                <div>
+                    <h3 class="font-bold text-lg text-gray-900 mb-4">${applicant.name}</h3>
+                    
+                    <div class="mb-4">
+                        <p class="text-sm font-semibold text-gray-700 mb-2">Compatibility Score:</p>
+                        <div class="flex items-center gap-3">
+                            <div class="score-badge ${applicant.compatibility_score >= 70 ? 'score-high' : applicant.compatibility_score >= 50 ? 'score-medium' : 'score-low'}" style="width: 48px; height: 48px;">
+                                ${applicant.compatibility_score}
+                            </div>
+                            <div>
+                                <div class="w-48 h-2 bg-gray-200 rounded-full overflow-hidden">
+                                    <div class="h-full ${applicant.compatibility_score >= 70 ? 'bg-green-500' : applicant.compatibility_score >= 50 ? 'bg-yellow-500' : 'bg-red-500'}" style="width: ${applicant.compatibility_score}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div>
+                        <p class="text-sm font-semibold text-gray-700 mb-3">Extracted Skills (${applicant.extracted_skills.length}):</p>
+                        <div class="space-y-2">
+                            ${applicant.extracted_skills.length > 0 ? 
+                                applicant.extracted_skills.map(s => `
+                                    <div class="flex justify-between items-center bg-blue-50 p-3 rounded">
+                                        <span class="font-medium text-gray-700">${s.skill}</span>
+                                        <span class="text-sm font-bold text-blue-600">+${s.weight} pts</span>
+                                    </div>
+                                `).join('')
+                                : '<p class="text-gray-500 text-sm">No specific skills detected in resume.</p>'
+                            }
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('skillsModal').classList.add('active');
+        }
+
+        function closeSkillsModal() {
+            document.getElementById('skillsModal').classList.remove('active');
+        }
+
+        function openHireModal(applicantId) {
+            selectedApplicantForHire = applicantId;
+            const applicant = SAGA.getApplicantById(applicantId);
+            const job = SAGA.getJobById(applicant.jobId);
+
+            const summary = document.getElementById('hireSummary');
+            summary.innerHTML = `
+                <div class="bg-blue-50 p-4 rounded-lg">
+                    <p class="font-semibold text-gray-900">${applicant.name}</p>
+                    <p class="text-sm text-gray-600 mt-1">${applicant.email}</p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-lg">
+                    <p class="text-sm text-gray-600">Position</p>
+                    <p class="font-semibold text-gray-900">${job ? job.title : 'Unknown'}</p>
+                </div>
+                <div class="bg-yellow-50 p-4 rounded-lg">
+                    <p class="text-sm text-gray-600">Compatibility Score</p>
+                    <p class="font-bold text-2xl text-yellow-600">${applicant.compatibility_score}%</p>
+                </div>
+            `;
+
+            document.getElementById('hireModal').classList.add('active');
+        }
+
+        function closeHireModal() {
+            document.getElementById('hireModal').classList.remove('active');
+            selectedApplicantForHire = null;
+        }
+
+        function confirmHire() {
+            const applicant = SAGA.hireApplicant(selectedApplicantForHire);
+            alert(`✅ Applicant Hired!\n\nApplicant ID: ${applicant.id}\n\nNext Step: Proceed to Onboarding`);
+            closeHireModal();
+            loadApplicants();
+        }
+
+        function showResume(name, resume) {
+            alert(`Resume for ${name}:\n\n${resume.substring(0, 500)}${resume.length > 500 ? '...' : ''}`);
+        }
+
+        function refreshApplicants() {
+            loadApplicants();
+        }
+
+        // Close modals when clicking outside
+        document.getElementById('hireModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('hireModal')) {
+                closeHireModal();
+            }
+        });
+
+        document.getElementById('skillsModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('skillsModal')) {
+                closeSkillsModal();
+            }
+        });
+    </script>
+</body>
+</html>

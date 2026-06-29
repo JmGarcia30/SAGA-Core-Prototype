@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAGA-Core | HR Exit & Offboarding</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-50">
+    <!-- Navigation -->
+    <nav class="navbar sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+            <div class="nav-brand">
+                <i class="fas fa-building"></i> SAGA-Core
+            </div>
+            <div class="flex gap-6">
+                <a href="index.html" class="nav-link">Careers</a>
+                <a href="hr-hiring.html" class="nav-link">HR Portal</a>
+                <a href="employee-ess.html" class="nav-link">Employee Portal</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Header -->
+    <div class="bg-white border-b border-gray-200 sticky top-16 z-40">
+        <div class="max-w-7xl mx-auto px-4 py-6">
+            <h1 class="text-3xl font-bold text-gray-900 flex items-center gap-3">
+                <i class="fas fa-door-open text-red-600"></i> Exit & Offboarding Management
+            </h1>
+            <p class="text-gray-600 mt-2">Process employee separations, clearances, and archiving</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        <!-- Tabs Navigation -->
+        <div class="bg-white border-b border-gray-200 mb-8 sticky top-32 z-30">
+            <div class="flex overflow-x-auto gap-1">
+                <button onclick="switchTab('pending')" class="tab-btn active" data-tab="pending">
+                    <i class="fas fa-hourglass-half"></i> Pending Clearance
+                </button>
+                <button onclick="switchTab('active')" class="tab-btn" data-tab="active">
+                    <i class="fas fa-users"></i> Active Employees
+                </button>
+                <button onclick="switchTab('archived')" class="tab-btn" data-tab="archived">
+                    <i class="fas fa-archive"></i> Archived Records
+                </button>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="stats-grid mb-8">
+            <div class="stat-card">
+                <div class="stat-number" id="stat-active">0</div>
+                <div class="stat-label">Active Employees</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-pending">0</div>
+                <div class="stat-label">Pending Clearance</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="stat-archived">0</div>
+                <div class="stat-label">Archived Records</div>
+            </div>
+        </div>
+
+        <!-- Tab: Pending Clearance -->
+        <div id="tab-pending" class="tab-content active space-y-6">
+            <div class="card p-6">
+                <h2 class="section-title">
+                    <i class="fas fa-exclamation-circle text-orange"></i> Employees Pending Separation Clearance
+                </h2>
+                <p class="text-gray-600 mb-6">Review and approve employee exit requests. Approving will revoke access and archive the profile.</p>
+
+                <div id="pendingContainer" class="space-y-4">
+                    <!-- Pending employees will be listed here -->
+                </div>
+
+                <div id="pendingEmpty" class="card p-12 text-center hidden">
+                    <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
+                    <h3 class="text-xl font-bold text-gray-700 mb-2">No Pending Clearances</h3>
+                    <p class="text-gray-600">All employees have been processed.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Active Employees -->
+        <div id="tab-active" class="tab-content hidden space-y-6">
+            <div class="card p-6">
+                <h2 class="section-title">
+                    <i class="fas fa-users text-blue-600"></i> Active Employee Directory
+                </h2>
+                <p class="text-gray-600 mb-6">Currently employed staff members with active portal access.</p>
+
+                <!-- Filter -->
+                <div class="mb-6">
+                    <input type="text" id="activeSearchBox" placeholder="Search by name or email..." 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Employee Name</th>
+                                <th>Email</th>
+                                <th>Position</th>
+                                <th>Onboarded Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="activeTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center text-gray-500 py-4">No active employees yet.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab: Archived Records -->
+        <div id="tab-archived" class="tab-content hidden space-y-6">
+            <div class="card p-6">
+                <h2 class="section-title">
+                    <i class="fas fa-archive text-gray-600"></i> Archived Employee Records
+                </h2>
+                <p class="text-gray-600 mb-6">Separated employees with deactivated accounts. Records retained for 7 years per Data Privacy Act compliance.</p>
+
+                <!-- Filter -->
+                <div class="mb-6">
+                    <input type="text" id="archivedSearchBox" placeholder="Search by name or email..." 
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Employee Name</th>
+                                <th>Email</th>
+                                <th>Position</th>
+                                <th>Separation Date</th>
+                                <th>Reason</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="archivedTableBody">
+                            <tr>
+                                <td colspan="6" class="text-center text-gray-500 py-4">No archived records.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="alert alert-info mt-6">
+                    <i class="fas fa-lock"></i>
+                    <div>
+                        <p class="font-semibold mb-1">Data Privacy Compliance</p>
+                        <p class="text-sm">All archived records are encrypted and stored securely in compliance with the Republic Act 10173 (Data Privacy Act of 2012). Records are retained for a minimum of 7 years.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Clearance Modal -->
+    <div id="clearanceModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Approve & Archive Employee</h2>
+                <button onclick="closeClearanceModal()" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="clearanceSummary" class="space-y-4 mb-6"></div>
+
+                <div class="alert alert-warning mb-6">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <div>
+                        <p class="font-semibold mb-1">Final Action</p>
+                        <p class="text-sm">This will immediately:</p>
+                        <ul class="text-sm list-disc list-inside mt-2 space-y-1">
+                            <li>Revoke employee's portal access</li>
+                            <li>Mark as "Separated"</li>
+                            <li>Archive employee record</li>
+                            <li>Generate Certificate of Employment</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div id="certificatePreview" class="bg-gray-100 p-4 rounded mb-6 max-h-64 overflow-y-auto"></div>
+
+                <div class="modal-footer gap-3">
+                    <button onclick="closeClearanceModal()" class="btn btn-outline flex-1">Cancel</button>
+                    <button onclick="confirmClearance()" class="btn btn-danger flex-1">
+                        <i class="fas fa-check"></i> Approve & Archive
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- COE View Modal -->
+    <div id="coeModal" class="modal-overlay">
+        <div class="modal">
+            <div class="modal-header">
+                <h2 class="modal-title">Certificate of Employment</h2>
+                <button onclick="closeCOEModal()" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div id="coeContent" class="bg-white p-8 border-2 border-gray-300 min-h-96"></div>
+                <div class="modal-footer gap-3 mt-6">
+                    <button onclick="closeCOEModal()" class="btn btn-outline flex-1">Close</button>
+                    <button onclick="downloadCOE()" class="btn btn-primary flex-1">
+                        <i class="fas fa-download"></i> Download PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-gray-300 mt-12 py-8">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <p>&copy; 2026 SAGA-Core Institutional HR System. All rights reserved.</p>
+            <p class="text-sm mt-2">Exit & Offboarding Management Module</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+    <script>
+        let selectedEmployeeForClearance = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            
+            document.getElementById('activeSearchBox').addEventListener('input', filterActiveTable);
+            document.getElementById('archivedSearchBox').addEventListener('input', filterArchivedTable);
+        });
+
+        function loadData() {
+            updateStats();
+            loadPendingClearances();
+            loadActiveEmployees();
+            loadArchivedEmployees();
+        }
+
+        function updateStats() {
+            const activeEmployees = SAGA.getAllEmployees();
+            const pendingExits = SAGA.getPendingExits();
+            const archivedEmployees = SAGA.getArchivedEmployees();
+
+            document.getElementById('stat-active').textContent = activeEmployees.length;
+            document.getElementById('stat-pending').textContent = pendingExits.length;
+            document.getElementById('stat-archived').textContent = archivedEmployees.length;
+        }
+
+        function loadPendingClearances() {
+            const pendingExits = SAGA.getPendingExits();
+            const container = document.getElementById('pendingContainer');
+            const emptyState = document.getElementById('pendingEmpty');
+
+            if (pendingExits.length === 0) {
+                container.innerHTML = '';
+                emptyState.classList.remove('hidden');
+                return;
+            }
+
+            emptyState.classList.add('hidden');
+            container.innerHTML = pendingExits.map(emp => `
+                <div class="card p-6 employee-card fade-in">
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+                        <!-- Employee Info -->
+                        <div class="md:col-span-2">
+                            <h3 class="text-lg font-bold text-gray-900">${emp.name}</h3>
+                            <p class="text-sm text-gray-600 mt-1">
+                                <i class="fas fa-envelope mr-2"></i>${emp.email}
+                            </p>
+                            <p class="text-sm text-gray-600">
+                                <i class="fas fa-phone mr-2"></i>${emp.phone}
+                            </p>
+                            <div class="mt-3 text-xs text-gray-600 space-y-1">
+                                <p><span class="font-semibold">Exit Reason:</span> ${(emp.exitReason || 'Not specified').replace(/_/g, ' ')}</p>
+                                <p><span class="font-semibold">Requested:</span> ${SAGA.formatDate(emp.exitInitiatedDate)}</p>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="text-center">
+                            <span class="badge badge-pending-exit block mb-4" style="justify-content: center;">PENDING EXIT</span>
+                            <p class="text-sm font-semibold text-gray-700">Employee ID</p>
+                            <p class="text-lg font-bold text-gray-900">${emp.id}</p>
+                        </div>
+
+                        <!-- Actions -->
+                        <div class="flex flex-col gap-2 justify-center">
+                            <button onclick="openClearanceModal('${emp.id}')" class="btn btn-danger btn-small">
+                                <i class="fas fa-check-circle"></i> Approve Clearance
+                            </button>
+                            <button onclick="viewEmployeeDetails('${emp.id}')" class="btn btn-outline btn-small">
+                                <i class="fas fa-file"></i> View Details
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadActiveEmployees() {
+            const employees = SAGA.getAllEmployees();
+            const tbody = document.getElementById('activeTableBody');
+
+            if (employees.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-500 py-4">No active employees.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = employees.map(emp => `
+                <tr>
+                    <td class="font-semibold text-gray-900">${emp.name}</td>
+                    <td class="text-sm">${emp.email}</td>
+                    <td>${SAGA.getJobById(emp.jobId)?.title || 'N/A'}</td>
+                    <td class="text-sm">${new Date(emp.onboardedDate).toLocaleDateString()}</td>
+                    <td><span class="badge badge-active">${emp.status.toUpperCase()}</span></td>
+                    <td>
+                        <button onclick="viewEmployeeDetails('${emp.id}')" class="btn btn-outline btn-small">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadArchivedEmployees() {
+            const archived = SAGA.getArchivedEmployees();
+            const tbody = document.getElementById('archivedTableBody');
+
+            if (archived.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-gray-500 py-4">No archived records.</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = archived.map(emp => `
+                <tr>
+                    <td class="font-semibold text-gray-900">${emp.name}</td>
+                    <td class="text-sm">${emp.email}</td>
+                    <td>${SAGA.getJobById(emp.jobId)?.title || 'N/A'}</td>
+                    <td class="text-sm">${new Date(emp.clearanceApprovedDate).toLocaleDateString()}</td>
+                    <td class="text-sm capitalize">${(emp.exitReason || 'N/A').replace(/_/g, ' ')}</td>
+                    <td>
+                        <button onclick="viewCOE('${emp.id}')" class="btn btn-outline btn-small">
+                            <i class="fas fa-certificate"></i> COE
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openClearanceModal(employeeId) {
+            selectedEmployeeForClearance = employeeId;
+            const employee = SAGA.getEmployeeById(employeeId);
+            if (!employee) return;
+
+            const job = SAGA.getJobById(employee.jobId);
+
+            const summary = document.getElementById('clearanceSummary');
+            summary.innerHTML = `
+                <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                    <p class="text-sm text-gray-600">Employee Name</p>
+                    <p class="font-bold text-gray-900 text-lg">${employee.name}</p>
+                </div>
+                <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                    <p class="text-sm text-gray-600">Position</p>
+                    <p class="font-bold text-gray-900">${job ? job.title : 'Unknown'}</p>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
+                        <p class="text-sm text-gray-600">Onboarded</p>
+                        <p class="font-bold text-gray-900">${new Date(employee.onboardedDate).toLocaleDateString()}</p>
+                    </div>
+                    <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                        <p class="text-sm text-gray-600">Exit Reason</p>
+                        <p class="font-bold text-gray-900 capitalize">${(employee.exitReason || 'N/A').replace(/_/g, ' ')}</p>
+                    </div>
+                </div>
+            `;
+
+            // Generate COE preview
+            generateCOEPreview(employee);
+
+            document.getElementById('clearanceModal').classList.add('active');
+        }
+
+        function generateCOEPreview(employee) {
+            const job = SAGA.getJobById(employee.jobId);
+            const today = new Date();
+            
+            const coeHTML = `
+                <div style="text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #000;">
+                    <h2 style="font-size: 18px; font-weight: bold; margin: 0;">SAGA-CORE INSTITUTIONAL HR SYSTEM</h2>
+                    <p style="margin: 5px 0; font-size: 14px; color: #666;">Human Resources Department</p>
+                </div>
+
+                <h3 style="text-align: center; font-size: 16px; font-weight: bold; margin: 30px 0;">CERTIFICATE OF EMPLOYMENT</h3>
+
+                <div style="margin: 30px 0; line-height: 1.8;">
+                    <p style="margin: 10px 0;">TO WHOM IT MAY CONCERN:</p>
+                    
+                    <p style="margin: 20px 0; text-align: justify;">
+                        This is to certify that <strong>${employee.name}</strong> was employed by SAGA-Core as a 
+                        <strong>${job ? job.title : 'Employee'}</strong> in the <strong>${job ? job.department : 'Department'}</strong> 
+                        from <strong>${new Date(employee.onboardedDate).toLocaleDateString()}</strong> to 
+                        <strong>${today.toLocaleDateString()}</strong>.
+                    </p>
+
+                    <p style="margin: 20px 0; text-align: justify;">
+                        During their tenure, the employee demonstrated professional conduct and fulfilled their assigned responsibilities.
+                    </p>
+
+                    <p style="margin: 20px 0; text-align: justify;">
+                        This certificate is issued upon request and is valid for all purposes it may be required.
+                    </p>
+                </div>
+
+                <div style="margin-top: 50px;">
+                    <div style="margin: 20px 0;">
+                        <p style="margin: 0; font-weight: bold;">HR Manager</p>
+                        <p style="margin: 5px 0; font-size: 12px;">SAGA-Core Institution</p>
+                    </div>
+                    <p style="margin-top: 20px; font-size: 12px; color: #999;">
+                        Issued: ${today.toLocaleDateString()} | Document ID: ${employee.id}
+                    </p>
+                </div>
+            `;
+            
+            document.getElementById('certificatePreview').innerHTML = coeHTML;
+        }
+
+        function confirmClearance() {
+            const result = SAGA.approveAndArchiveEmployee(selectedEmployeeForClearance);
+            
+            if (result) {
+                alert(`✅ Employee Archived!\n\nName: ${result.employeeId}\nAccess Revoked\nCertificate Generated\n\nRecord moved to secure archive.`);
+                closeClearanceModal();
+                loadData();
+                switchTab('pending');
+            }
+        }
+
+        function closeClearanceModal() {
+            document.getElementById('clearanceModal').classList.remove('active');
+            selectedEmployeeForClearance = null;
+        }
+
+        function viewEmployeeDetails(employeeId) {
+            const employee = SAGA.getEmployeeById(employeeId);
+            if (!employee) {
+                alert('Employee not found');
+                return;
+            }
+
+            const job = SAGA.getJobById(employee.jobId);
+            const details = `
+EMPLOYEE DETAILS
+=====================================
+Name: ${employee.name}
+ID: ${employee.id}
+Email: ${employee.email}
+Phone: ${employee.phone}
+Position: ${job ? job.title : 'N/A'}
+Department: ${job ? job.department : 'N/A'}
+Status: ${employee.status.toUpperCase()}
+Onboarded: ${SAGA.formatDate(employee.onboardedDate)}
+
+LEAVE BALANCE
+Vacation: ${employee.leaveBalance.vacation} days
+Sick: ${employee.leaveBalance.sick} days
+Emergency: ${employee.leaveBalance.emergency} days
+
+SALARY INFO
+Base Salary: ₱${employee.salaryInfo.baseSalary.toLocaleString()}
+Last Payment: ${SAGA.formatDate(employee.salaryInfo.lastPaymentDate)}
+
+PERFORMANCE
+Rating: ${employee.performanceMetrics.rating}/5.0
+Tasks Completed: ${employee.performanceMetrics.tasks_completed}
+Projects: ${employee.performanceMetrics.projects}
+            `;
+
+            alert(details);
+        }
+
+        function viewCOE(employeeId) {
+            const archived = SAGA.getArchivedEmployees().find(a => a.id === employeeId);
+            if (!archived) {
+                alert('Record not found');
+                return;
+            }
+
+            const job = SAGA.getJobById(archived.jobId);
+            const coeHTML = `
+                <div style="text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #000;">
+                    <h2 style="font-size: 18px; font-weight: bold; margin: 0;">SAGA-CORE INSTITUTIONAL HR SYSTEM</h2>
+                    <p style="margin: 5px 0; font-size: 14px; color: #666;">Human Resources Department</p>
+                </div>
+
+                <h3 style="text-align: center; font-size: 16px; font-weight: bold; margin: 30px 0;">CERTIFICATE OF EMPLOYMENT</h3>
+
+                <div style="margin: 30px 0; line-height: 1.8;">
+                    <p style="margin: 10px 0;">TO WHOM IT MAY CONCERN:</p>
+                    
+                    <p style="margin: 20px 0; text-align: justify;">
+                        This is to certify that <strong>${archived.name}</strong> was employed by SAGA-Core as a 
+                        <strong>${job ? job.title : 'Employee'}</strong> in the <strong>${job ? job.department : 'Department'}</strong> 
+                        from <strong>${new Date(archived.onboardedDate).toLocaleDateString()}</strong> to 
+                        <strong>${new Date(archived.clearanceApprovedDate).toLocaleDateString()}</strong>.
+                    </p>
+
+                    <p style="margin: 20px 0; text-align: justify;">
+                        During their tenure, the employee demonstrated professional conduct and fulfilled their assigned responsibilities.
+                    </p>
+
+                    <p style="margin: 20px 0; text-align: justify;">
+                        This certificate is issued upon request and is valid for all purposes it may be required.
+                    </p>
+                </div>
+
+                <div style="margin-top: 50px;">
+                    <div style="margin: 20px 0;">
+                        <p style="margin: 0; font-weight: bold;">HR Manager</p>
+                        <p style="margin: 5px 0; font-size: 12px;">SAGA-Core Institution</p>
+                    </div>
+                    <p style="margin-top: 20px; font-size: 12px; color: #999;">
+                        Issued: ${new Date().toLocaleDateString()} | Document ID: ${archived.id}
+                    </p>
+                </div>
+            `;
+
+            document.getElementById('coeContent').innerHTML = coeHTML;
+            document.getElementById('coeModal').classList.add('active');
+        }
+
+        function closeCOEModal() {
+            document.getElementById('coeModal').classList.remove('active');
+        }
+
+        function downloadCOE() {
+            const content = document.getElementById('coeContent').innerText;
+            const blob = new Blob([content], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'certificate-of-employment.txt';
+            a.click();
+            alert('✅ Certificate downloaded!');
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.add('hidden'));
+
+            document.querySelector(`[data-tab="${tabName}"]`)?.classList.add('active');
+            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
+        }
+
+        function filterActiveTable() {
+            const query = document.getElementById('activeSearchBox').value.toLowerCase();
+            const rows = document.querySelectorAll('#activeTableBody tr');
+            
+            rows.forEach(row => {
+                if (row.cells.length === 6) {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(query) ? '' : 'none';
+                }
+            });
+        }
+
+        function filterArchivedTable() {
+            const query = document.getElementById('archivedSearchBox').value.toLowerCase();
+            const rows = document.querySelectorAll('#archivedTableBody tr');
+            
+            rows.forEach(row => {
+                if (row.cells.length === 6) {
+                    const text = row.textContent.toLowerCase();
+                    row.style.display = text.includes(query) ? '' : 'none';
+                }
+            });
+        }
+
+        // Tab styling
+        const style = document.createElement('style');
+        style.textContent = `
+            .tab-btn {
+                padding: 1rem;
+                border: none;
+                background: none;
+                cursor: pointer;
+                color: #6B7280;
+                font-weight: 600;
+                border-bottom: 3px solid transparent;
+                transition: all 0.3s;
+                white-space: nowrap;
+            }
+            .tab-btn:hover {
+                color: #EF4444;
+            }
+            .tab-btn.active {
+                color: #EF4444;
+                border-bottom-color: #EF4444;
+            }
+        `;
+        document.head.appendChild(style);
+
+        // Close modals when clicking outside
+        document.getElementById('clearanceModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('clearanceModal')) {
+                closeClearanceModal();
+            }
+        });
+
+        document.getElementById('coeModal').addEventListener('click', (e) => {
+            if (e.target === document.getElementById('coeModal')) {
+                closeCOEModal();
+            }
+        });
+    </script>
+</body>
+</html>
