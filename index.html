@@ -24,9 +24,8 @@
                 </div>
             </div>
             <div class="flex gap-6 items-center">
-                <a href="index.html" class="nav-link active font-semibold">Careers & Faculty Openings</a>
-                <a href="hr-hiring.html" class="nav-link font-semibold">HR Master Portal</a>
-                <a href="employee-ess.html" class="nav-link font-semibold">Employee Self-Service</a>
+                <a href="index.html" class="nav-link active font-semibold"><i class="fas fa-briefcase mr-1.5"></i>Careers</a>
+                <a href="login.html" class="nav-link font-semibold text-amber-400 hover:text-amber-300"><i class="fas fa-lock mr-1.5"></i>Portal Sign In</a>
             </div>
         </div>
     </nav>
@@ -364,8 +363,8 @@ Head Guidance Counselor | Academy of Saint Mary (2020 - Present)
                 `Application Successfully Submitted & Routed to HR Portal.\n\nPosition: ${job ? job.title : 'Faculty Position'}\nApplicant ID: ${applicant.id}\nUploaded Document: ${fileName}\nAI Compatibility Score: ${applicant.compatibility_score || 85}/100\n\nYour candidate profile and extracted competencies are now active in the St. Aloysius Gonzaga Academy HR Recruitment Database for review!`,
                 "Application Sent to HR Master Portal"
             ).then(() => {
-                // Redirect user directly to HR Recruitment Portal ATS view so they can see their application logged live
-                window.location.href = 'hr-hiring.html#ats';
+                // Redirect user to login page
+                window.location.href = 'login.html';
             });
 
             // Close modal and reset form

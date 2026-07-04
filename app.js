@@ -814,7 +814,7 @@ const SAGA = {
   // LEAVE MANAGEMENT
   // ============================================================================
 
-  submitLeaveRequest(employeeId, leaveType, fromDate, toDate, reason) {
+  submitLeaveRequest(employeeId, leaveType, fromDate, toDate, reason, attachmentName = null) {
     const data = this.getData();
     const employee = data.employees[employeeId];
     if (!employee) return null;
@@ -833,12 +833,13 @@ const SAGA = {
       toDate,
       days,
       reason,
+      attachmentName,
       status: "pending",
       submittedDate: new Date().toISOString(),
       approvalHierarchy: {
-        chair: { role: "Department Chair", status: "Approved" },
-        principal: { role: "School Principal", status: "Approved" },
-        hr: { role: "HR Director", status: "Pending Final Action" }
+        chair: { role: "Department Chair", status: "Pending", date: null },
+        dean: { role: "Dean / Principal", status: "Waiting", date: null },
+        hr: { role: "HR Director", status: "Waiting", date: null }
       }
     };
 
@@ -848,11 +849,53 @@ const SAGA = {
     return leaveRequest;
   },
 
+  advanceLeaveApproval(leaveId, role, decision) {
+    const data = this.getData();
+    const req = (data.leaveRequests || []).find(l => l.id === leaveId);
+    if (!req) return { error: "Leave request not found" };
+    if (req.status !== "pending") return { error: "Request already finalized" };
+
+    const employee = data.employees[req.employeeId];
+
+    if (decision === "Rejected") {
+      req.approvalHierarchy[role].status = "Rejected";
+      req.approvalHierarchy[role].date = new Date().toISOString();
+      req.status = "rejected";
+      req.rejectedDate = new Date().toISOString();
+      this.saveData(data);
+      return req;
+    }
+
+    if (decision === "Approved") {
+      req.approvalHierarchy[role].status = "Approved";
+      req.approvalHierarchy[role].date = new Date().toISOString();
+
+      if (role === "chair") {
+        req.approvalHierarchy.dean.status = "Pending";
+      } else if (role === "dean") {
+        req.approvalHierarchy.hr.status = "Pending";
+      } else if (role === "hr") {
+        if (employee && employee.leaveBalance[req.leaveType] >= req.days) {
+          employee.leaveBalance[req.leaveType] -= req.days;
+        }
+        req.status = "approved";
+        req.approvedDate = new Date().toISOString();
+      }
+    }
+
+    this.saveData(data);
+    return req;
+  },
+
   approveLeaveRequest(leaveId) {
     const data = this.getData();
     const req = (data.leaveRequests || []).find(l => l.id === leaveId);
     if (!req) return { error: "Leave request not found" };
     if (req.status === "approved") return { error: "Leave already approved" };
+
+    req.approvalHierarchy.chair.status = "Approved";
+    req.approvalHierarchy.dean.status = "Approved";
+    req.approvalHierarchy.hr.status = "Approved";
 
     const employee = data.employees[req.employeeId];
     if (employee && employee.leaveBalance[req.leaveType] >= req.days) {
@@ -869,15 +912,10 @@ const SAGA = {
     const data = this.getData();
     const req = (data.leaveRequests || []).find(l => l.id === leaveId);
     if (!req) return { error: "Leave request not found" };
-    
-    // If it was previously approved, refund the balance
-    if (req.status === "approved") {
-      const employee = data.employees[req.employeeId];
-      if (employee) {
-        employee.leaveBalance[req.leaveType] += req.days;
-      }
-    }
 
+    req.approvalHierarchy.chair.status = "Rejected";
+    req.approvalHierarchy.dean.status = "Rejected";
+    req.approvalHierarchy.hr.status = "Rejected";
     req.status = "rejected";
     req.rejectedDate = new Date().toISOString();
 

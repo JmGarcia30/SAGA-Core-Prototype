@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAGA-Core | Secure Institutional Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+            overflow: hidden;
+            position: relative;
+            min-height: 100vh;
+        }
+        .login-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .dark .login-card {
+            background: rgba(15, 23, 42, 0.3);
+            border-color: rgba(255, 255, 255, 0.05);
+        }
+        .input-group:focus-within label {
+            color: #EAB308;
+            transform: translateY(-2px);
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen relative p-4">
+    <!-- Floating Background Bubbles -->
+    <div class="bubble bubble-1"></div>
+    <div class="bubble bubble-2"></div>
+    <div class="bubble bubble-3"></div>
+    <div class="bubble bubble-4"></div>
+
+    <!-- Login Container -->
+    <div class="w-full max-w-lg z-10 fade-in">
+        <!-- Logo Header -->
+        <div class="text-center mb-6">
+            <div class="inline-flex items-center justify-center p-3.5 bg-white/95 rounded-3xl shadow-xl shadow-amber-500/10 border-2 border-amber-400 mb-3 transform hover:scale-105 transition-transform duration-300">
+                <img src="assets/school_logo.png" alt="St. Aloysius Gonzaga Academy Logo" class="w-16 h-16 object-contain">
+            </div>
+            <h1 class="text-3xl font-extrabold text-white tracking-wide">SAGA-Core</h1>
+            <p class="text-amber-400 text-xs font-bold uppercase tracking-widest mt-1">Human Resource Information System</p>
+            <p class="text-slate-400 text-xs mt-1">St. Aloysius Gonzaga Academy, Inc.</p>
+        </div>
+
+        <!-- Card -->
+        <div class="login-card rounded-3xl p-8 sm:p-10 text-white">
+            <div class="mb-6 text-center">
+                <h2 class="text-xl font-bold text-white">Sign In to Portal</h2>
+                <p class="text-slate-300 text-xs mt-1">Enter your credentials below</p>
+            </div>
+
+            <!-- Capstone Reviewer Helper Dropdown -->
+            <div class="mb-6 bg-slate-900/50 rounded-2xl border border-slate-700/60 p-4">
+                <div class="flex items-center gap-2 mb-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
+                    <i class="fas fa-magic"></i>
+                    <span>Capstone Demo Role Auto-Filler</span>
+                </div>
+                <p class="text-slate-300 text-[11px] mb-3 leading-relaxed">
+                    Select a preset organizational role below to automatically fill credentials and explore role-based dashboards:
+                </p>
+                <select id="roleSelector" onchange="autoFillRole()" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 font-semibold focus:outline-none focus:border-amber-400">
+                    <option value="">-- Choose a Demo Role --</option>
+                    <option value="hr-admin">HR Administrator (Full Rights)</option>
+                    <option value="hr-staff">HR Staff (Operations View)</option>
+                    <option value="dean">Dean / Principal (Academic Approver)</option>
+                    <option value="dept-chair">Department Chair (Primary Reviewer)</option>
+                    <option value="faculty-juan">Faculty: Teacher Juan Dela Cruz (ESS Portal)</option>
+                    <option value="faculty-ana">Faculty: Teacher Ana Rodriguez (ESS Portal)</option>
+                </select>
+            </div>
+
+            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
+                <div class="input-group">
+                    <label class="block text-xs font-bold text-slate-300 uppercase tracking-wider mb-2 transition-all">Email Address / Username</label>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                            <i class="fas fa-envelope"></i>
+                        </span>
+                        <input type="text" id="username" required placeholder="name@school.edu.ph" class="w-full bg-slate-900/40 border border-slate-700/70 rounded-xl pl-11 pr-4 py-3 text-sm text-white focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/10 placeholder-slate-500 transition-all">
+                    </div>
+                </div>
+
+                <div class="input-group">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="text-xs font-bold text-slate-300 uppercase tracking-wider transition-all">Password</label>
+                        <a href="#" onclick="alert('Forgot password simulation: Please contact your IT administrator to reset your SAGA-Core active directory password.')" class="text-xs text-amber-400 hover:text-amber-300 font-medium hover:underline">Forgot Password?</a>
+                    </div>
+                    <div class="relative">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3.5 text-slate-400">
+                            <i class="fas fa-lock"></i>
+                        </span>
+                        <input type="password" id="password" required placeholder="••••••••" class="w-full bg-slate-900/40 border border-slate-700/70 rounded-xl pl-11 pr-4 py-3 text-sm text-white focus:outline-none focus:border-amber-400 focus:ring-2 focus:ring-amber-500/10 placeholder-slate-500 transition-all">
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-slate-400 hover:text-slate-200">
+                            <i id="passwordToggleIcon" class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center">
+                    <input type="checkbox" id="remember_me" class="w-4 h-4 rounded bg-slate-900/40 border-slate-700 text-amber-500 focus:ring-amber-500/20 focus:ring-offset-slate-900">
+                    <label for="remember_me" class="ml-2.5 text-xs text-slate-300 select-none">Remember this device for 30 days</label>
+                </div>
+
+                <button type="submit" class="w-full py-3.5 bg-amber-400 hover:bg-amber-500 text-slate-950 hover:text-slate-900 font-bold rounded-xl shadow-lg shadow-amber-500/20 transition-all flex items-center justify-center gap-2 transform active:scale-[0.98]">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Secure Sign In</span>
+                </button>
+            </form>
+        </div>
+
+        <div class="mt-6 text-center">
+            <a href="index.html" class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-amber-400 transition-colors font-medium">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Careers & Faculty Openings Portal</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Script imports -->
+    <script src="app.js"></script>
+    <script>
+        function togglePasswordVisibility() {
+            const passwordField = document.getElementById('password');
+            const icon = document.getElementById('passwordToggleIcon');
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                passwordField.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        const roleCreds = {
+            'hr-admin': { user: 'admin@school.edu.ph', pass: 'AdminSaga2026' },
+            'hr-staff': { user: 'staff@school.edu.ph', pass: 'StaffSaga2026' },
+            'dean': { user: 'dean@school.edu.ph', pass: 'DeanSaga2026' },
+            'dept-chair': { user: 'chair@school.edu.ph', pass: 'ChairSaga2026' },
+            'faculty-juan': { user: 'juan.delacruz', pass: 'Password123' },
+            'faculty-ana': { user: 'ana.rodriguez', pass: 'SecurePass456' }
+        };
+
+        function autoFillRole() {
+            const selectedVal = document.getElementById('roleSelector').value;
+            if (!selectedVal) return;
+            const creds = roleCreds[selectedVal];
+            document.getElementById('username').value = creds.user;
+            document.getElementById('password').value = creds.pass;
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const username = document.getElementById('username').value.trim();
+            const role = document.getElementById('roleSelector').value || 'hr-admin'; // default to hr-admin if custom creds are typed
+            
+            // Save active session in localStorage
+            let sessionRole = 'HR Administrator';
+            let sessionUser = 'HR Director';
+            let employeeId = null;
+
+            if (username === 'admin@school.edu.ph' || role === 'hr-admin') {
+                sessionRole = 'HR Administrator';
+                sessionUser = 'HR Director';
+            } else if (username === 'staff@school.edu.ph' || role === 'hr-staff') {
+                sessionRole = 'HR Staff';
+                sessionUser = 'Staff Assistant';
+            } else if (username === 'dean@school.edu.ph' || role === 'dean') {
+                sessionRole = 'Dean';
+                sessionUser = 'Dr. Albert Tan';
+            } else if (username === 'chair@school.edu.ph' || role === 'dept-chair') {
+                sessionRole = 'Department Chair';
+                sessionUser = 'Prof. Cynthia Cruz';
+            } else if (username === 'juan.delacruz' || role === 'faculty-juan') {
+                sessionRole = 'Faculty';
+                sessionUser = 'Teacher Juan Dela Cruz';
+                employeeId = 'EMP_1624896000000';
+            } else if (username === 'ana.rodriguez' || role === 'faculty-ana') {
+                sessionRole = 'Faculty';
+                sessionUser = 'Teacher Ana Rodriguez';
+                employeeId = 'EMP_1624896000001';
+            } else {
+                // custom sign in
+                sessionRole = 'Employee';
+                sessionUser = username;
+            }
+
+            const session = {
+                username: username,
+                role: sessionRole,
+                fullName: sessionUser,
+                employeeId: employeeId,
+                loginTime: new Date().toISOString()
+            };
+            localStorage.setItem('saga_session', JSON.stringify(session));
+
+            // Log event in audit trail
+            const data = SAGA.getData();
+            if (data) {
+                const activityLog = {
+                    id: 'ACT_' + Date.now(),
+                    user: sessionUser,
+                    action: 'Logged into system portal',
+                    time: new Date().toISOString(),
+                    type: 'system'
+                };
+                if (!data.activities) data.activities = [];
+                data.activities.unshift(activityLog);
+                SAGA.saveData(data);
+            }
+
+            SAGA.showCustomAlert(
+                `Welcome back, ${sessionUser}!\n\nAuthenticated successfully as [${sessionRole}]. Redirecting to the SAGA-Core HRIS Dashboard...`,
+                "Authentication Successful"
+            ).then(() => {
+                window.location.href = 'dashboard.html';
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,1599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAGA-Core | Institutional HRIS Dashboard</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            transition: background-color 0.3s ease, color 0.3s ease;
+        }
+        .sidebar {
+            background: linear-gradient(180deg, #111827 0%, #1f2937 100%);
+            border-right: 3px solid #EAB308;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .sidebar-item {
+            color: #d1d5db;
+            transition: all 0.2s ease;
+        }
+        .sidebar-item:hover, .sidebar-item.active {
+            color: #EAB308;
+            background: rgba(234, 179, 8, 0.1);
+            border-left: 4px solid #EAB308;
+            padding-left: 1.25rem;
+        }
+        .dashboard-card {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .dashboard-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.08);
+        }
+        .modal-card {
+            backdrop-filter: blur(16px);
+            background: rgba(255, 255, 255, 0.95);
+        }
+        .dark .modal-card {
+            background: rgba(17, 24, 39, 0.95);
+        }
+        .tab-content {
+            animation: fadeIn 0.4s ease-out;
+        }
+        /* Confetti elements */
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #f00;
+            opacity: 0.8;
+            border-radius: 50%;
+            animation: confetti-fall 3s infinite linear;
+        }
+        @keyframes confetti-fall {
+            0% { transform: translateY(-10px) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-900 min-h-screen flex">
+
+    <!-- MOBILE MENU TOGGLE -->
+    <button onclick="toggleMobileSidebar()" class="lg:hidden fixed bottom-5 right-5 z-50 bg-amber-500 hover:bg-amber-600 text-slate-950 p-4 rounded-full shadow-2xl flex items-center justify-center">
+        <i id="mobileMenuIcon" class="fas fa-bars text-xl"></i>
+    </button>
+
+    <!-- LEFT SIDEBAR -->
+    <aside id="sidebar" class="sidebar w-64 fixed inset-y-0 left-0 z-40 transform -translate-x-full lg:translate-x-0 flex flex-col">
+        <!-- Brand Logo Header -->
+        <div class="p-5 border-b border-slate-800 flex items-center gap-3">
+            <div class="bg-white p-1 rounded-xl shadow-md border border-amber-400 flex items-center justify-center">
+                <img src="assets/school_logo.png" alt="St. Aloysius Logo" class="w-8 h-8 object-contain">
+            </div>
+            <div>
+                <span class="block text-sm font-extrabold tracking-wide text-white">SAGA-Core</span>
+                <span class="block text-[9px] font-bold text-amber-400 tracking-widest uppercase">HRIS Portal</span>
+            </div>
+        </div>
+
+        <!-- Role Badge Panel -->
+        <div class="px-5 py-3.5 bg-slate-900/40 border-b border-slate-800 flex items-center gap-3">
+            <div class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></div>
+            <div>
+                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Active Role</p>
+                <p id="sidebarRoleText" class="text-xs font-semibold text-white">HR Administrator</p>
+            </div>
+        </div>
+
+        <!-- Scrollable Navigation Items -->
+        <nav class="flex-1 overflow-y-auto py-4 space-y-1.5 px-3">
+            <!-- Admin / Staff Navigation Section -->
+            <div id="adminSidebarNav" class="space-y-1">
+                <p class="px-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">Management</p>
+                <a href="#overview" onclick="switchNavTab('overview')" id="nav-overview" class="sidebar-item active flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-chart-pie w-5 text-center text-amber-400"></i> Workforce Overview
+                </a>
+                <a href="#recruitment" onclick="switchNavTab('recruitment')" id="nav-recruitment" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-bullhorn w-5 text-center text-amber-400"></i> Recruitment & ATS
+                </a>
+                <a href="#applicants" onclick="switchNavTab('applicants')" id="nav-applicants" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-user-tie w-5 text-center text-amber-400"></i> Job Applicants
+                </a>
+                <a href="#employees" onclick="switchNavTab('employees')" id="nav-employees" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-address-card w-5 text-center text-amber-400"></i> Employee Directory
+                </a>
+                <a href="#onboarding" onclick="switchNavTab('onboarding')" id="nav-onboarding" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-plane-arrival w-5 text-center text-amber-400"></i> Onboarding Checklist
+                </a>
+                <a href="#attendance" onclick="switchNavTab('attendance')" id="nav-attendance" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-user-clock w-5 text-center text-amber-400"></i> RFID Attendance
+                </a>
+                <a href="#payroll" onclick="switchNavTab('payroll')" id="nav-payroll" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-money-check-alt w-5 text-center text-amber-400"></i> Payroll Hub
+                </a>
+                <a href="#leave" onclick="switchNavTab('leave')" id="nav-leave" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-plane-departure w-5 text-center text-amber-400"></i> Leaves Queue
+                </a>
+                <a href="#exit" onclick="switchNavTab('exit')" id="nav-exit" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-door-open w-5 text-center text-amber-400"></i> Exit & Clearance
+                </a>
+
+                <p class="px-3 pt-4 text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">Systems</p>
+                <a href="#documents" onclick="switchNavTab('documents')" id="nav-documents" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-folder-open w-5 text-center text-amber-400"></i> Digital 201 Manager
+                </a>
+                <a href="#analytics" onclick="switchNavTab('analytics')" id="nav-analytics" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-chart-line w-5 text-center text-amber-400"></i> Advanced Analytics
+                </a>
+                <a href="#reports" onclick="switchNavTab('reports')" id="nav-reports" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-file-invoice w-5 text-center text-amber-400"></i> Report Generator
+                </a>
+                <a href="#settings" onclick="switchNavTab('settings')" id="nav-settings" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-cog w-5 text-center text-amber-400"></i> System Settings
+                </a>
+                <a href="#archive" onclick="switchNavTab('archive')" id="nav-archive" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-archive w-5 text-center text-amber-400"></i> Archived Files
+                </a>
+            </div>
+
+            <!-- Employee ESS Navigation Section (Toggled dynamically) -->
+            <div id="essSidebarNav" class="space-y-1 hidden">
+                <p class="px-3 text-[10px] text-slate-500 font-bold uppercase tracking-widest mb-2">Self Service</p>
+                <a href="#ess-dashboard" onclick="switchNavTab('ess-dashboard')" id="nav-ess-dashboard" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-user-circle w-5 text-center text-amber-400"></i> ESS Overview
+                </a>
+                <a href="#ess-attendance" onclick="switchNavTab('ess-attendance')" id="nav-ess-attendance" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-history w-5 text-center text-amber-400"></i> My Time Logs
+                </a>
+                <a href="#ess-payroll" onclick="switchNavTab('ess-payroll')" id="nav-ess-payroll" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-receipt w-5 text-center text-amber-400"></i> My Payslips
+                </a>
+                <a href="#ess-leave" onclick="switchNavTab('ess-leave')" id="nav-ess-leave" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-plane w-5 text-center text-amber-400"></i> Request Leave
+                </a>
+                <a href="#ess-documents" onclick="switchNavTab('ess-documents')" id="nav-ess-documents" class="sidebar-item flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold">
+                    <i class="fas fa-briefcase w-5 text-center text-amber-400"></i> My 201 Files
+                </a>
+            </div>
+        </nav>
+
+        <!-- Logout Trigger Footer -->
+        <div class="p-4 border-t border-slate-800">
+            <button onclick="handleLogout()" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-rose-400 hover:bg-rose-500/10 transition-colors">
+                <i class="fas fa-sign-out-alt w-5 text-center"></i> Sign Out Portal
+            </button>
+        </div>
+    </aside>
+
+    <!-- MAIN BODY SECTION -->
+    <div class="flex-1 lg:pl-64 flex flex-col min-h-screen">
+        
+        <!-- TOP HEADER BAR -->
+        <header class="h-16 bg-white border-b border-slate-200/80 sticky top-0 z-30 flex items-center justify-between px-6 shadow-sm">
+            
+            <!-- Breadcrumbs / Section Title -->
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex items-center gap-1.5 text-xs font-semibold text-slate-500">
+                    <span>SAGA-Core</span>
+                    <i class="fas fa-chevron-right text-[10px] text-slate-400"></i>
+                    <span id="breadcrumbSection" class="text-slate-800">Overview</span>
+                </div>
+            </div>
+
+            <!-- Global Search & Actions -->
+            <div class="flex items-center gap-4">
+                
+                <!-- Global Search Bar -->
+                <div class="relative hidden md:block w-64">
+                    <i class="fas fa-search absolute left-3.5 top-3 text-slate-400 text-sm"></i>
+                    <input type="text" id="globalSearchInput" onkeyup="handleGlobalSearch()" placeholder="Search employees, files..." class="w-full pl-9 pr-4 py-1.5 bg-slate-50 border border-slate-200 rounded-full text-xs font-medium focus:outline-none focus:ring-2 focus:ring-amber-500/30 focus:border-amber-500 transition-all">
+                    <!-- Search Results Floating Panel -->
+                    <div id="searchFloatingResults" class="hidden absolute left-0 right-0 mt-2 bg-white rounded-2xl border border-slate-200 shadow-xl max-h-64 overflow-y-auto p-2 z-50 text-xs"></div>
+                </div>
+
+                <!-- Dark Mode Toggle -->
+                <button onclick="toggleTheme()" class="w-8 h-8 rounded-full border border-slate-200/60 bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors" title="Toggle Theme">
+                    <i id="themeToggleIcon" class="fas fa-moon"></i>
+                </button>
+
+                <!-- Notifications Bell Dropdown -->
+                <div class="relative">
+                    <button onclick="toggleNotificationPanel()" class="w-8 h-8 rounded-full border border-slate-200/60 bg-slate-50 hover:bg-slate-100 flex items-center justify-center text-slate-600 transition-colors relative" title="Notifications">
+                        <i class="fas fa-bell"></i>
+                        <span id="notifBadge" class="absolute -top-1 -right-1 w-4 h-4 bg-amber-500 text-[9px] font-bold text-slate-950 rounded-full flex items-center justify-center">0</span>
+                    </button>
+                    <!-- Floating Notifications Menu -->
+                    <div id="notifMenuPanel" class="hidden absolute right-0 mt-3.5 w-80 bg-white rounded-2xl border border-slate-200/80 shadow-2xl p-4 z-50">
+                        <div class="flex justify-between items-center pb-2 border-b border-slate-100 mb-3">
+                            <h4 class="font-bold text-xs uppercase tracking-wider text-slate-800">Operational Alerts</h4>
+                            <button onclick="clearAllNotifications()" class="text-[10px] text-amber-600 hover:underline font-bold">Clear All</button>
+                        </div>
+                        <div id="notifPanelList" class="space-y-3.5 max-h-64 overflow-y-auto pr-1">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Dropdown Menu -->
+                <div class="relative">
+                    <button onclick="toggleProfileDropdown()" class="flex items-center gap-2.5 pl-2 pr-3 py-1.5 rounded-full border border-slate-200 hover:bg-slate-50 transition-colors">
+                        <div class="w-7 h-7 rounded-full bg-slate-900 text-amber-400 font-extrabold text-[11px] flex items-center justify-center border border-amber-400 shadow-sm" id="userAvatarText">
+                            AD
+                        </div>
+                        <div class="text-left hidden sm:block">
+                            <p id="userProfileName" class="text-xs font-bold text-slate-800 leading-tight">HR Director</p>
+                            <p id="userProfileRole" class="text-[9px] text-slate-400 leading-none">HR Admin</p>
+                        </div>
+                        <i class="fas fa-chevron-down text-[10px] text-slate-400"></i>
+                    </button>
+                    <!-- Floating Profile Settings Dropdown -->
+                    <div id="profileDropdownPanel" class="hidden absolute right-0 mt-3 w-64 bg-white rounded-2xl border border-slate-200/80 shadow-2xl p-4 z-50 space-y-4">
+                        <div class="text-center pb-3 border-b border-slate-100">
+                            <p id="dropdownFullName" class="font-bold text-sm text-slate-900">Dr. Albert Tan</p>
+                            <p id="dropdownRoleLabel" class="text-[10px] bg-amber-100 text-amber-900 border border-amber-300 font-bold px-2 py-0.5 rounded-full inline-block mt-1">HR Administrator</p>
+                        </div>
+                        
+                        <!-- Role switching simulation for presentation evaluation -->
+                        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/60">
+                            <p class="text-[10px] text-slate-500 font-bold uppercase tracking-wider mb-2"><i class="fas fa-sync-alt mr-1"></i> Switch Active Session</p>
+                            <select id="userSessionSwitcher" onchange="switchSessionRole()" class="w-full text-xs bg-white border border-slate-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-amber-400">
+                                <option value="HR Administrator">HR Administrator (Full)</option>
+                                <option value="HR Staff">HR Staff (Assistant)</option>
+                                <option value="Dean">Dean / Principal</option>
+                                <option value="Department Chair">Department Chair</option>
+                                <option value="Faculty">Teacher Juan Dela Cruz</option>
+                                <option value="Faculty-Ana">Teacher Ana Rodriguez</option>
+                            </select>
+                        </div>
+
+                        <div class="space-y-1 text-xs">
+                            <a href="#settings" onclick="switchNavTab('settings'); toggleProfileDropdown();" class="flex items-center gap-2.5 px-2 py-2 rounded-lg text-slate-700 hover:bg-slate-100"><i class="fas fa-user-cog w-4 text-center"></i> Profile Settings</a>
+                            <a href="#settings" onclick="switchNavTab('settings'); toggleProfileDropdown();" class="flex items-center gap-2.5 px-2 py-2 rounded-lg text-slate-700 hover:bg-slate-100"><i class="fas fa-shield-alt w-4 text-center"></i> Security Settings</a>
+                            <button onclick="handleLogout()" class="w-full flex items-center gap-2.5 px-2 py-2 rounded-lg text-rose-500 hover:bg-rose-50"><i class="fas fa-sign-out-alt w-4 text-center"></i> Sign Out Portal</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </header>
+
+        <!-- MAIN MAIN CONTENT CONTAINER -->
+        <main class="flex-grow p-6 relative">
+
+            <!-- ======================================================================= -->
+            <!-- 1. VIEW: WORKFORCE OVERVIEW (DASHBOARD) -->
+            <!-- ======================================================================= -->
+            <div id="view-overview" class="tab-content space-y-6">
+                <!-- Header block -->
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Institutional workforce Overview</h2>
+                        <p class="text-xs text-slate-500">St. Aloysius Gonzaga Academy HR Operational Status</p>
+                    </div>
+                    <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">DepEd K-12 Compliant</span>
+                </div>
+
+                <!-- High-Fidelity Stats Grid -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="dashboard-card card p-4 border-l-4 border-blue-500 bg-white">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Total Active Staff</p>
+                                <h3 class="text-2xl font-extrabold mt-1 text-slate-900" id="card-active-staff">0</h3>
+                            </div>
+                            <span class="p-2 bg-blue-50 text-blue-500 rounded-full text-base"><i class="fas fa-users"></i></span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-2.5"><span class="text-emerald-500 font-bold"><i class="fas fa-arrow-up mr-0.5"></i>8.5%</span> Since last SY term</p>
+                    </div>
+                    <div class="dashboard-card card p-4 border-l-4 border-green-500 bg-white">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Today's Attendance</p>
+                                <h3 class="text-2xl font-extrabold mt-1 text-green-600" id="card-attendance-rate">0%</h3>
+                            </div>
+                            <span class="p-2 bg-green-50 text-green-500 rounded-full text-base"><i class="fas fa-check-double"></i></span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-2.5"><span class="text-emerald-500 font-bold" id="card-present-count">0</span> Active clocks recorded today</p>
+                    </div>
+                    <div class="dashboard-card card p-4 border-l-4 border-yellow-500 bg-white">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Leaves In Process</p>
+                                <h3 class="text-2xl font-extrabold mt-1 text-yellow-600" id="card-pending-leaves">0</h3>
+                            </div>
+                            <span class="p-2 bg-yellow-50 text-yellow-500 rounded-full text-base"><i class="fas fa-clock"></i></span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-2.5"><span class="text-amber-500 font-bold">1 Urgent</span> Awaiting Director sign-off</p>
+                    </div>
+                    <div class="dashboard-card card p-4 border-l-4 border-purple-500 bg-white">
+                        <div class="flex justify-between items-center">
+                            <div>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Pending Applicants</p>
+                                <h3 class="text-2xl font-extrabold mt-1 text-purple-600" id="card-total-applicants">0</h3>
+                            </div>
+                            <span class="p-2 bg-purple-50 text-purple-500 rounded-full text-base"><i class="fas fa-user-plus"></i></span>
+                        </div>
+                        <p class="text-[10px] text-slate-400 mt-2.5"><span class="text-purple-500 font-bold" id="card-scored-count">0</span> Applicants scored by AI</p>
+                    </div>
+                </div>
+
+                <!-- Charts layout -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left: Analytics charts -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="card p-5 bg-white">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2"><i class="fas fa-chart-line text-blue-500"></i> Daily Attendance Flow vs Hiring Trends</h3>
+                                <div class="flex gap-2">
+                                    <button class="px-2 py-0.5 bg-slate-100 text-[10px] font-bold rounded">Weekly</button>
+                                    <button class="px-2 py-0.5 text-[10px] font-bold text-slate-400">Monthly</button>
+                                </div>
+                            </div>
+                            <div class="h-64">
+                                <canvas id="chartAttendanceFlow"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div class="card p-5 bg-white">
+                                <h3 class="font-bold text-sm text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-sitemap text-amber-500"></i> Departments Distribution</h3>
+                                <div class="h-48">
+                                    <canvas id="chartDeptDistribution"></canvas>
+                                </div>
+                            </div>
+                            <div class="card p-5 bg-white">
+                                <h3 class="font-bold text-sm text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-wallet text-emerald-500"></i> Payroll Breakdown</h3>
+                                <div class="h-48">
+                                    <canvas id="chartPayrollSummary"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Quick actions, birthday alerts, recent logs -->
+                    <div class="space-y-6">
+                        <!-- Quick actions panel -->
+                        <div class="card p-5 bg-white space-y-4">
+                            <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-tasks text-indigo-500"></i> Executive Quick Actions</h3>
+                            <div class="grid grid-cols-2 gap-2 text-xs font-semibold">
+                                <button onclick="switchNavTab('recruitment')" class="p-3 bg-blue-50 hover:bg-blue-100 border border-blue-200/50 rounded-xl text-blue-800 flex flex-col items-center gap-1.5"><i class="fas fa-bullhorn text-lg"></i> Post a Job</button>
+                                <button onclick="switchNavTab('attendance')" class="p-3 bg-emerald-50 hover:bg-emerald-100 border border-emerald-200/50 rounded-xl text-emerald-800 flex flex-col items-center gap-1.5"><i class="fas fa-clock text-lg"></i> Scanner Simulator</button>
+                                <button onclick="switchNavTab('payroll')" class="p-3 bg-purple-50 hover:bg-purple-100 border border-purple-200/50 rounded-xl text-purple-800 flex flex-col items-center gap-1.5"><i class="fas fa-money-check-alt text-lg"></i> Run Payroll</button>
+                                <button onclick="switchNavTab('leave')" class="p-3 bg-yellow-50 hover:bg-yellow-100 border border-yellow-200/50 rounded-xl text-yellow-800 flex flex-col items-center gap-1.5"><i class="fas fa-plane-departure text-lg"></i> Approve Leaves</button>
+                            </div>
+                        </div>
+
+                        <!-- Today's Birthdays & Upcoming Events -->
+                        <div class="card p-5 bg-white space-y-4">
+                            <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-gift text-rose-500"></i> Birthdays & Seminars</h3>
+                            <div class="space-y-3.5">
+                                <div class="flex items-center gap-3 p-2.5 bg-rose-50 rounded-xl border border-rose-100 text-xs">
+                                    <div class="w-8 h-8 rounded-full bg-rose-200 flex items-center justify-center text-rose-600 text-sm font-bold"><i class="fas fa-birthday-cake"></i></div>
+                                    <div>
+                                        <p class="font-bold text-slate-800">Teacher Ana Rodriguez</p>
+                                        <p class="text-[10px] text-rose-600 font-medium">Celebrating 28th Birthday Today! 🎂</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3 p-2.5 bg-slate-50 rounded-xl border border-slate-200/40 text-xs">
+                                    <div class="w-8 h-8 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold text-xs">15 JUL</div>
+                                    <div>
+                                        <p class="font-bold text-slate-800">Annual DepEd Pedagogy Seminar</p>
+                                        <p class="text-[10px] text-slate-400">Main Hall • 08:30 AM</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Audit Activity Trail -->
+                        <div class="card p-5 bg-white space-y-4">
+                            <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-history text-slate-500"></i> Recent Activities Timeline</h3>
+                            <div class="space-y-4 max-h-56 overflow-y-auto pr-1 text-xs" id="dashboard-activity-trail">
+                                <!-- Populated dynamically -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 2. VIEW: RECRUITMENT & ATS -->
+            <!-- ======================================================================= -->
+            <div id="view-recruitment" class="tab-content space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Career Postings & Job Openings</h2>
+                        <p class="text-xs text-slate-500">Manage recruitment campaigns and job descriptions</p>
+                    </div>
+                    <button onclick="openCreateJobModal()" class="btn btn-primary btn-small"><i class="fas fa-plus"></i> Create Job Posting</button>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left: Job Openings Directory -->
+                    <div class="lg:col-span-2 space-y-4" id="recruitmentJobsContainer">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Right: Quick Stats & Creation widget -->
+                    <div class="space-y-6">
+                        <div class="card p-5 bg-white space-y-4">
+                            <h3 class="font-bold text-sm text-slate-800">Recruitment Metrics</h3>
+                            <div class="space-y-3.5 text-xs">
+                                <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-lg">
+                                    <span class="text-slate-500 font-semibold">Active Campaigns</span>
+                                    <span class="font-bold text-slate-900" id="rec-active-campaigns">4</span>
+                                </div>
+                                <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-lg">
+                                    <span class="text-slate-500 font-semibold">Total Applications</span>
+                                    <span class="font-bold text-slate-900" id="rec-total-apps">0</span>
+                                </div>
+                                <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-lg">
+                                    <span class="text-slate-500 font-semibold">Average AI Score</span>
+                                    <span class="font-bold text-amber-600">86.4%</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Organization Structure Link -->
+                        <div class="card p-5 bg-amber-500 text-slate-950 space-y-3 rounded-2xl border border-amber-400 relative overflow-hidden">
+                            <i class="fas fa-sitemap absolute right-3 bottom-3 text-7xl text-amber-400/20"></i>
+                            <h3 class="font-extrabold text-sm uppercase tracking-wider">Organization Chart</h3>
+                            <p class="text-xs leading-relaxed font-medium">Verify structural loading capacities and class division vacancies before initiating recruitment campaigns.</p>
+                            <button onclick="openOrgChartModal()" class="px-3.5 py-1.5 bg-slate-950 text-white hover:bg-slate-900 text-xs font-bold rounded-xl mt-2 flex items-center gap-1.5"><i class="fas fa-search-plus"></i> View Organization Chart</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 3. VIEW: JOB APPLICANTS (ATS Leaderboard & AI Parsing) -->
+            <!-- ======================================================================= -->
+            <div id="view-applicants" class="tab-content space-y-6 hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">ATS Competency & Applicant Ranking</h2>
+                        <p class="text-xs text-slate-500">Live recruitment pipeline with AI-driven resume scoring</p>
+                    </div>
+                    <div class="flex flex-wrap gap-2 text-xs font-semibold">
+                        <select id="filterAppJob" onchange="renderApplicantsList()" class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400">
+                            <option value="">All Job Listings</option>
+                        </select>
+                        <select id="filterAppStatus" onchange="renderApplicantsList()" class="px-3 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400">
+                            <option value="">All Statuses</option>
+                            <option value="applied">Applied (New)</option>
+                            <option value="scored">Scored (Reviewed)</option>
+                            <option value="hired">Hired (Onboarding)</option>
+                        </select>
+                        <button onclick="bulkScoreApplicants()" class="px-3 py-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-xl flex items-center gap-1.5 shadow"><i class="fas fa-brain"></i> AI Recalculate</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left: Leaderboard of Applicants -->
+                    <div class="lg:col-span-2 card p-5 bg-white">
+                        <h3 class="font-bold text-sm text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-trophy text-amber-500"></i> Candidate Competency Leaderboard</h3>
+                        <div class="table-responsive">
+                            <table class="text-xs">
+                                <thead>
+                                    <tr>
+                                        <th class="w-12 text-center">Rank</th>
+                                        <th>Applicant Name</th>
+                                        <th>Target Position</th>
+                                        <th class="text-center">AI Score</th>
+                                        <th class="text-center">Status</th>
+                                        <th class="w-24 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="applicantsLeaderboardBody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right: AI Evaluation Panel -->
+                    <div class="space-y-6">
+                        <div id="aiEvaluationCard" class="card p-5 bg-white border-t-4 border-indigo-600 shadow-md">
+                            <!-- Populated by JS based on selection -->
+                            <div class="text-center py-12 text-slate-400 text-xs">
+                                <i class="fas fa-user-astronaut text-4xl mb-3 text-slate-300"></i>
+                                <p>Select an applicant from the leaderboard to view the comprehensive AI Resume Evaluation details</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 4. VIEW: EMPLOYEE DIRECTORY -->
+            <!-- ======================================================================= -->
+            <div id="view-employees" class="tab-content space-y-6 hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Institutional Faculty & Staff Directory</h2>
+                        <p class="text-xs text-slate-500">Complete listing of employees, contracts, schedules, and loading</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-semibold">
+                        <input type="text" id="directorySearch" onkeyup="renderEmployeeDirectory()" placeholder="Search staff name..." class="px-3.5 py-1.5 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400">
+                        <select id="directoryDeptFilter" onchange="renderEmployeeDirectory()" class="px-3.5 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400">
+                            <option value="">All Departments</option>
+                        </select>
+                        <div class="border border-slate-200 rounded-xl p-1 bg-white flex gap-1">
+                            <button id="btnDirGrid" onclick="toggleDirLayout('grid')" class="px-2 py-1 bg-amber-100 text-amber-900 rounded font-bold transition-all"><i class="fas fa-th-large"></i></button>
+                            <button id="btnDirTable" onclick="toggleDirLayout('table')" class="px-2 py-1 text-slate-400 rounded transition-all"><i class="fas fa-list"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Directory Grid view (Default) -->
+                <div id="directoryGridContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Populated dynamically -->
+                </div>
+
+                <!-- Directory Table view (Hidden by default) -->
+                <div id="directoryTableContainer" class="card p-5 bg-white hidden">
+                    <div class="table-responsive">
+                        <table class="text-xs">
+                            <thead>
+                                <tr>
+                                    <th>Employee ID</th>
+                                    <th>Staff Name</th>
+                                    <th>Email / Phone</th>
+                                    <th>Department Role</th>
+                                    <th>Rate Structure</th>
+                                    <th class="text-center">RFID UID</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="w-16 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="directoryTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 5. VIEW: EMPLOYEE ONBOARDING -->
+            <!-- ======================================================================= -->
+            <div id="view-onboarding" class="tab-content space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">New Hire Onboarding Pipeline</h2>
+                        <p class="text-xs text-slate-500">Monitor newly hired staff documentation and RFID registration</p>
+                    </div>
+                    <span class="text-xs font-bold text-slate-400" id="onboardingProgressHeader">Active onboarding files</span>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left: Onboarding list -->
+                    <div class="lg:col-span-2 card p-5 bg-white space-y-4">
+                        <h3 class="font-bold text-sm text-slate-800 mb-2">Staff Currently in Orientation</h3>
+                        <div id="onboardingListContainer" class="space-y-4">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Right: RFID registration scanner simulation -->
+                    <div class="space-y-6">
+                        <!-- Scanner Card -->
+                        <div class="card p-5 bg-white border border-slate-200 rounded-2xl relative overflow-hidden" id="rfidEnrollmentPanel">
+                            <h3 class="font-bold text-sm text-slate-800 mb-4 flex items-center gap-2"><i class="fas fa-id-card text-blue-500"></i> RFID Enrollment Scanner</h3>
+                            <div class="p-4 bg-slate-950 text-white rounded-xl text-center space-y-4 relative">
+                                <div class="w-16 h-16 rounded-full border-4 border-amber-400 flex items-center justify-center text-amber-400 mx-auto rfid-pulse mb-3">
+                                    <i class="fas fa-broadcast-tower text-2xl"></i>
+                                </div>
+                                <div class="space-y-1">
+                                    <p class="text-xs font-bold uppercase tracking-wider text-amber-400" id="rfidScanState">Terminal Ready</p>
+                                    <p class="text-[10px] text-slate-400" id="rfidScanTarget">Awaiting employee linking...</p>
+                                </div>
+
+                                <!-- Scanner laser visual -->
+                                <div class="absolute left-0 right-0 h-0.5 bg-amber-400 shadow shadow-amber-400/80 scanner-laser top-0 hidden" id="scannerLaserEffect"></div>
+                            </div>
+
+                            <div class="mt-4 space-y-3.5 text-xs" id="rfidScanForm" style="display:none">
+                                <div>
+                                    <label class="block font-bold text-slate-600 mb-1">Assigned Staff Name</label>
+                                    <input type="text" id="rfidStaffName" readonly class="w-full bg-slate-100 p-2 border rounded-lg font-semibold">
+                                    <input type="hidden" id="rfidStaffId">
+                                </div>
+                                <button onclick="simulateRFIDCardTap()" class="btn btn-primary w-full py-2.5 text-xs flex justify-center items-center gap-2"><i class="fas fa-id-card"></i> Tap Mock RFID Card</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 6. VIEW: RFID ATTENDANCE MODULE -->
+            <!-- ======================================================================= -->
+            <div id="view-attendance" class="tab-content space-y-6 hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Attendance Monitoring & RFID Logs</h2>
+                        <p class="text-xs text-slate-500">Real-time log tracking, RFID event capture, and daily anomalies</p>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs font-semibold">
+                        <select id="attendanceDeptFilter" onchange="renderAttendanceTab()" class="px-3.5 py-1.5 bg-white border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400">
+                            <option value="">All Departments</option>
+                        </select>
+                        <button onclick="openRFIDSimulatorModal()" class="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl flex items-center gap-1.5 shadow"><i class="fas fa-rss"></i> Live RFID Transit Simulator</button>
+                    </div>
+                </div>
+
+                <!-- Metrics Overview -->
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <div class="card p-4 bg-white border-l-4 border-blue-500 flex justify-between items-center">
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">Present Rate</p>
+                            <h4 class="text-xl font-extrabold text-slate-900 mt-1" id="att-present-rate">0%</h4>
+                        </div>
+                        <span class="text-blue-500 text-xl"><i class="fas fa-check-circle"></i></span>
+                    </div>
+                    <div class="card p-4 bg-white border-l-4 border-yellow-500 flex justify-between items-center">
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">Lates Logged</p>
+                            <h4 class="text-xl font-extrabold text-yellow-600 mt-1" id="att-lates-count">0</h4>
+                        </div>
+                        <span class="text-yellow-500 text-xl"><i class="fas fa-clock"></i></span>
+                    </div>
+                    <div class="card p-4 bg-white border-l-4 border-orange-500 flex justify-between items-center">
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">Undertimes</p>
+                            <h4 class="text-xl font-extrabold text-orange-600 mt-1" id="att-undertimes-count">0</h4>
+                        </div>
+                        <span class="text-orange-500 text-xl"><i class="fas fa-hourglass-half"></i></span>
+                    </div>
+                    <div class="card p-4 bg-white border-l-4 border-red-500 flex justify-between items-center">
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">Absences Recorded</p>
+                            <h4 class="text-xl font-extrabold text-red-600 mt-1" id="att-absences-count">0</h4>
+                        </div>
+                        <span class="text-red-500 text-xl"><i class="fas fa-calendar-times"></i></span>
+                    </div>
+                </div>
+
+                <!-- Attendance Log Table -->
+                <div class="card p-5 bg-white">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-history text-slate-500"></i> Real-time Attendance Feed</h3>
+                        <span class="text-[10px] bg-slate-100 text-slate-600 font-bold px-2 py-0.5 rounded-full" id="attendanceFeedCount">0 records</span>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="text-xs">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>Employee ID</th>
+                                    <th>Staff Name</th>
+                                    <th class="text-center">RFID UID</th>
+                                    <th class="text-center">Transit Event</th>
+                                    <th>Status Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceLogsTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 7. VIEW: PAYROLL HUB -->
+            <!-- ======================================================================= -->
+            <div id="view-payroll" class="tab-content space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Institutional Payroll Hub</h2>
+                        <p class="text-xs text-slate-500">Calculate net payouts, manage deductions, and preview payslips</p>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <select id="payrollCutoffPeriod" class="text-xs px-3 py-1.5 border border-slate-200 rounded-xl focus:outline-none focus:border-amber-400 bg-white">
+                            <option value="2026-07-01|2026-07-15">July 1-15, 2026 (J1)</option>
+                            <option value="2026-06-16|2026-06-30">June 16-30, 2026 (J2)</option>
+                        </select>
+                        <button onclick="processPayrollCalculation()" class="px-4 py-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1.5 shadow"><i class="fas fa-calculator"></i> Process Cutoff Pay</button>
+                    </div>
+                </div>
+
+                <!-- Processing status loader bar -->
+                <div id="payrollProcessingBar" class="hidden card p-5 bg-white space-y-3.5 animate-pulse border border-slate-200">
+                    <div class="flex justify-between items-center text-xs font-bold">
+                        <span class="text-indigo-600 flex items-center gap-2"><i class="fas fa-sync fa-spin"></i> Running batch calculation...</span>
+                        <span id="payrollPercent">0%</span>
+                    </div>
+                    <div class="w-full bg-slate-100 rounded-full h-3 border overflow-hidden">
+                        <div id="payrollProgressFilled" class="bg-indigo-600 h-3" style="width: 0%"></div>
+                    </div>
+                    <p class="text-[10px] text-slate-400">Processing SSS, PhilHealth, Pag-IBIG contributions, late deductions, and class advisory unit balances...</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left: Payroll calculation table -->
+                    <div class="lg:col-span-2 card p-5 bg-white space-y-4">
+                        <h3 class="font-bold text-sm text-slate-800 flex justify-between items-center">
+                            <span>Cutoff Processing summary</span>
+                            <span class="text-xs text-slate-400 font-normal">Active staff list</span>
+                        </h3>
+                        <div class="table-responsive">
+                            <table class="text-xs">
+                                <thead>
+                                    <tr>
+                                        <th>Staff ID</th>
+                                        <th>Staff Name</th>
+                                        <th class="text-right">Gross Pay</th>
+                                        <th class="text-right">Total Deduct</th>
+                                        <th class="text-right">Net Payout</th>
+                                        <th class="text-center">Status</th>
+                                        <th class="w-16 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="payrollSummaryTableBody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Right: Salary analytics -->
+                    <div class="space-y-6">
+                        <div class="card p-5 bg-white space-y-4">
+                            <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-info-circle text-blue-500"></i> Contributions Compliance</h3>
+                            <div class="space-y-3 text-xs leading-relaxed">
+                                <p class="text-slate-500 font-medium">SAGA-Core conforms to statutory rates for DepEd-accredited private schools:</p>
+                                <ul class="space-y-1.5 list-disc pl-4 text-slate-600 font-medium">
+                                    <li><strong>SSS</strong>: 4.5% Personal Contribution</li>
+                                    <li><strong>PhilHealth</strong>: 2.5% Employee share</li>
+                                    <li><strong>Pag-IBIG</strong>: Flat rate (PHP 200 max)</li>
+                                    <li><strong>Withholding Tax</strong>: TRAIN Law Bracketed</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="card p-5 bg-white text-center space-y-3">
+                            <h3 class="font-bold text-sm text-slate-800">Direct Banking File Export</h3>
+                            <p class="text-xs text-slate-500">Export the payroll ledger in Bank Transmittal format (.txt/.csv) for bulk institutional bank deposit.</p>
+                            <button onclick="alert('Demo File Downloaded: SAGA_Payroll_BPI_Transmittal_July2026.txt')" class="btn btn-outline btn-block text-xs py-2 flex justify-center items-center gap-1.5"><i class="fas fa-file-invoice"></i> Export Bank Transmittal File</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 8. VIEW: LEAVES QUEUE -->
+            <!-- ======================================================================= -->
+            <div id="view-leave" class="tab-content space-y-6 hidden">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Leave Requests & Approvals Queue</h2>
+                        <p class="text-xs text-slate-500">Manage time off, seminars, and medical leaves</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="flex gap-2">
+                            <button id="btnLeaveQueueList" onclick="switchLeaveTabView('list')" class="px-3.5 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold rounded-xl transition-all"><i class="fas fa-list mr-1"></i> Filings Queue</button>
+                            <button id="btnLeaveQueueCalendar" onclick="switchLeaveTabView('calendar')" class="px-3.5 py-1.5 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-xl transition-all"><i class="fas fa-calendar-alt mr-1"></i> Leave Calendar</button>
+                        </div>
+                        <span class="text-xs bg-indigo-50 border border-indigo-200 text-indigo-700 font-bold px-3 py-1 rounded-xl" id="leavesQueueStatusText">0 Pending leaves</span>
+                    </div>
+                </div>
+
+                <!-- Queue list container -->
+                <div id="leaveQueueListView" class="card p-5 bg-white space-y-4">
+                    <h3 class="font-bold text-sm text-slate-800">Pending Leave filings</h3>
+                    <div id="leaveQueueContainer" class="space-y-4">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+
+                <!-- Calendar container -->
+                <div id="leaveQueueCalendarView" class="hidden card p-5 bg-white space-y-4">
+                    <div class="flex justify-between items-center pb-2 border-b">
+                        <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2"><i class="fas fa-calendar-check text-amber-500"></i> Workforce Absence & Seminar Calendar</h3>
+                        <span class="text-xs text-slate-500 font-semibold">July 2026</span>
+                    </div>
+                    <div id="leaveCalendarMonthGrid" class="grid grid-cols-7 gap-1 text-center text-xs">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 9. VIEW: EXIT & CLEARANCE -->
+            <!-- ======================================================================= -->
+            <div id="view-exit" class="tab-content space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Separations & Exit Clearances</h2>
+                        <p class="text-xs text-slate-500">Process clearances, generate COEs, and archives profiles</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="switchExitTab('queue')" id="btnExitQueue" class="px-3.5 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold rounded-xl transition-all"><i class="fas fa-hourglass-half mr-1"></i> Clearance Queue</button>
+                        <button onclick="switchExitTab('separated')" id="btnExitSeparated" class="px-3.5 py-1.5 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-xl transition-all"><i class="fas fa-archive mr-1"></i> Separated Staff</button>
+                    </div>
+                </div>
+
+                <div class="card p-5 bg-white">
+                    <div id="exitQueueView">
+                        <h3 class="font-bold text-sm text-slate-800 mb-4">Pending Clearances</h3>
+                        <div id="exitQueueContainer" class="space-y-4">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <div id="exitSeparatedView" class="hidden">
+                        <h3 class="font-bold text-sm text-slate-800 mb-4">Separated Employees Registry</h3>
+                        <div class="table-responsive">
+                            <table class="text-xs">
+                                <thead>
+                                    <tr>
+                                        <th>Staff ID</th>
+                                        <th>Staff Name</th>
+                                        <th>Exit Reason</th>
+                                        <th>Clearance Date</th>
+                                        <th class="text-right">COE Document</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="exitSeparatedTableBody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 10. VIEW: DIGITAL 201 MANAGER -->
+            <!-- ======================================================================= -->
+            <div id="view-documents" class="tab-content space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Digital 201 Document Manager</h2>
+                        <p class="text-xs text-slate-500">Upload, monitor, and audit teacher compliance documentation</p>
+                    </div>
+                    <button onclick="trigger201Upload()" class="btn btn-primary btn-small"><i class="fas fa-upload"></i> Upload File</button>
+                </div>
+
+                <!-- Credential Monitoring alerts widget -->
+                <div class="card p-4 bg-orange-50 border-l-4 border-orange-500 text-orange-950 flex gap-3 rounded-r-xl">
+                    <i class="fas fa-exclamation-triangle text-xl text-orange-600 mt-1"></i>
+                    <div>
+                        <p class="font-bold text-xs">Credential Expiration Alert</p>
+                        <p class="text-[11px] text-orange-800 mt-0.5">Teacher Juan Dela Cruz: PRC License renewal is required by Aug 15, 2026. Auto-notifications have been active in their ESS Portal.</p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Left: Folders list -->
+                    <div class="space-y-3">
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Document Categories</p>
+                        <div class="space-y-1.5 text-xs font-semibold">
+                            <button class="w-full flex items-center justify-between p-2.5 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-800">
+                                <span><i class="fas fa-folder text-amber-500 mr-2"></i> Employment Contracts</span>
+                                <span class="bg-slate-200 text-[10px] px-2 py-0.5 rounded-full">4</span>
+                            </button>
+                            <button class="w-full flex items-center justify-between p-2.5 hover:bg-slate-100 rounded-lg text-slate-600">
+                                <span><i class="fas fa-folder text-amber-500 mr-2"></i> Professional Licenses (PRC)</span>
+                                <span class="bg-slate-100 text-[10px] px-2 py-0.5 rounded-full">3</span>
+                            </button>
+                            <button class="w-full flex items-center justify-between p-2.5 hover:bg-slate-100 rounded-lg text-slate-600">
+                                <span><i class="fas fa-folder text-amber-500 mr-2"></i> Academic Transcripts (TOR)</span>
+                                <span class="bg-slate-100 text-[10px] px-2 py-0.5 rounded-full">4</span>
+                            </button>
+                            <button class="w-full flex items-center justify-between p-2.5 hover:bg-slate-100 rounded-lg text-slate-600">
+                                <span><i class="fas fa-folder text-amber-500 mr-2"></i> Civil Status Files (PSA)</span>
+                                <span class="bg-slate-100 text-[10px] px-2 py-0.5 rounded-full">4</span>
+                            </button>
+                            <button class="w-full flex items-center justify-between p-2.5 hover:bg-slate-100 rounded-lg text-slate-600">
+                                <span><i class="fas fa-folder text-amber-500 mr-2"></i> Medical Clearance Results</span>
+                                <span class="bg-slate-100 text-[10px] px-2 py-0.5 rounded-full">4</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Files inside folder -->
+                    <div class="lg:col-span-3 card p-5 bg-white space-y-4">
+                        <div class="flex justify-between items-center">
+                            <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-file-pdf text-rose-500"></i> Employment Contracts Repository</h3>
+                            <span class="text-xs text-slate-400">Total Size: 8.2 MB</span>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="folderFilesContainer">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 11. VIEW: ADVANCED ANALYTICS -->
+            <!-- ======================================================================= -->
+            <div id="view-analytics" class="tab-content space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">Advanced Analytics Dashboard</h2>
+                        <p class="text-xs text-slate-500">Deep-dive into employee growth, turnover, and operational costs</p>
+                    </div>
+                    <span class="text-xs font-bold text-amber-600">Data compiled live</span>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="card p-5 bg-white">
+                        <h3 class="font-bold text-sm text-slate-800 mb-4"><i class="fas fa-chart-area text-blue-500"></i> Monthly Hiring Trends (Cumulative)</h3>
+                        <div class="h-64">
+                            <canvas id="chartAnalyticsHiring"></canvas>
+                        </div>
+                    </div>
+                    <div class="card p-5 bg-white">
+                        <h3 class="font-bold text-sm text-slate-800 mb-4"><i class="fas fa-chart-bar text-green-500"></i> Departmental Average Performance Rating</h3>
+                        <div class="h-64">
+                            <canvas id="chartAnalyticsPerformance"></canvas>
+                        </div>
+                    </div>
+                    <div class="card p-5 bg-white">
+                        <h3 class="font-bold text-sm text-slate-800 mb-4"><i class="fas fa-donate text-purple-500"></i> Monthly Payroll Costs</h3>
+                        <div class="h-64">
+                            <canvas id="chartAnalyticsPayroll"></canvas>
+                        </div>
+                    </div>
+                    <div class="card p-5 bg-white">
+                        <h3 class="font-bold text-sm text-slate-800 mb-4"><i class="fas fa-door-closed text-rose-500"></i> Exit & Offboarding Reason Trends</h3>
+                        <div class="h-64">
+                            <canvas id="chartAnalyticsExit"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 12. VIEW: REPORT GENERATOR -->
+            <!-- ======================================================================= -->
+            <div id="view-reports" class="tab-content space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900">HRIS Report Generator</h2>
+                        <p class="text-xs text-slate-500">Compile audit-ready files for Board review and administrative compliance</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="exportPrintedReport()" class="px-3.5 py-1.5 bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold rounded-xl flex items-center gap-1.5"><i class="fas fa-print"></i> Print Document</button>
+                        <button onclick="alert('Excel File Compiled: SAGA_HRIS_Compliance_Report.xlsx')" class="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5"><i class="fas fa-file-excel"></i> Export Excel</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+                    <!-- Configurator Panel -->
+                    <div class="space-y-4">
+                        <div class="card p-5 bg-white space-y-4">
+                            <h3 class="font-bold text-sm text-slate-800">Report Parameters</h3>
+                            <div class="space-y-3 text-xs">
+                                <div>
+                                    <label class="block font-bold text-slate-600 mb-1">Select Report Type</label>
+                                    <select id="reportCategorySelect" onchange="generateMockReportData()" class="w-full p-2 border rounded-lg">
+                                        <option value="employee">Staff Roster Report</option>
+                                        <option value="payroll">Payroll Summary Report</option>
+                                        <option value="attendance">Daily Attendance Log Report</option>
+                                        <option value="leave">Leaves & Filings Log</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-600 mb-1">Target Department</label>
+                                    <select class="w-full p-2 border rounded-lg">
+                                        <option value="">All Departments</option>
+                                        <option value="elementary">Elementary Department</option>
+                                        <option value="jhs">Junior High School</option>
+                                        <option value="shs">Senior High School</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-slate-600 mb-1">SY Term Range</label>
+                                    <select class="w-full p-2 border rounded-lg">
+                                        <option value="2026-2027">SY 2026 - 2027</option>
+                                        <option value="2025-2026">SY 2025 - 2026</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Compilation Preview Panel -->
+                    <div class="lg:col-span-3 card p-6 bg-white space-y-6" id="printedReportContent">
+                        <div class="text-center border-b pb-4">
+                            <img src="assets/school_logo.png" alt="SAGA Emblem" class="w-12 h-12 object-contain mx-auto mb-2">
+                            <h3 class="font-bold text-base text-slate-900">St. Aloysius Gonzaga Academy, Inc.</h3>
+                            <p class="text-[10px] text-slate-500 uppercase tracking-widest">Institutional HRIS Compliance Documentation Office</p>
+                            <p class="text-xs text-amber-600 font-bold mt-1" id="reportTitleText">Staff Roster & Faculty Profile Register</p>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="text-[11px]">
+                                <thead id="reportTableHead">
+                                    <!-- Populated dynamically -->
+                                </thead>
+                                <tbody id="reportTableBody">
+                                    <!-- Populated dynamically -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="flex justify-between items-center text-[10px] text-slate-400 pt-4 border-t">
+                            <p>Generated by SAGA-Core HRIS • Secure Authentication ID: SAGA-2026-X892</p>
+                            <p>Compliance Date: <span class="font-semibold text-slate-500" id="reportGeneratedTime">07/05/2026</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 13. VIEW: SYSTEM SETTINGS -->
+            <!-- ======================================================================= -->
+            <div id="view-settings" class="tab-content space-y-6 hidden">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">HRIS Institutional Settings</h2>
+                    <p class="text-xs text-slate-500">Configure school terms, roles, payroll rates, and access controls</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left: settings menu -->
+                    <div class="card p-5 bg-white space-y-4">
+                        <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-university text-blue-500"></i> Academy Information</h3>
+                        <div class="space-y-3.5 text-xs">
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Corporate Registered Name</label>
+                                <input type="text" value="St. Aloysius Gonzaga Academy, Inc." class="w-full p-2.5 border rounded-xl font-medium">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Institutional DepEd ID</label>
+                                <input type="text" value="DepEd-403912" class="w-full p-2.5 border rounded-xl font-medium">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Active School Year</label>
+                                <input type="text" value="SY 2026-2027 (First Semester)" class="w-full p-2.5 border rounded-xl font-medium">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Middle: Contribution details -->
+                    <div class="card p-5 bg-white space-y-4">
+                        <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-coins text-amber-500"></i> Rates & Statutory Config</h3>
+                        <div class="space-y-3.5 text-xs">
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">Overtime Multiplier Rate (Daily)</label>
+                                <input type="text" value="1.25x" class="w-full p-2.5 border rounded-xl font-semibold">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">SSS Contribution Employee rate</label>
+                                <input type="text" value="4.50%" class="w-full p-2.5 border rounded-xl font-semibold">
+                            </div>
+                            <div>
+                                <label class="block font-bold text-slate-600 mb-1">PhilHealth Employee share</label>
+                                <input type="text" value="2.50%" class="w-full p-2.5 border rounded-xl font-semibold">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Access matrix -->
+                    <div class="card p-5 bg-white space-y-4">
+                        <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-user-lock text-purple-500"></i> System Roles Matrix</h3>
+                        <div class="space-y-2.5 text-xs font-semibold leading-relaxed text-slate-600">
+                            <p class="text-slate-500 font-medium">Define module access based on active directory profiles:</p>
+                            <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+                                <span>HR Administrator</span>
+                                <span class="bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded text-[9px]">Full access</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+                                <span>HR Staff</span>
+                                <span class="bg-indigo-100 text-indigo-800 px-2 py-0.5 rounded text-[9px]">Read + Write Operations</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+                                <span>Dean / Principal</span>
+                                <span class="bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded text-[9px]">Approvals + Schedules</span>
+                            </div>
+                            <div class="flex justify-between items-center py-1.5 border-b border-slate-100">
+                                <span>Faculty Member</span>
+                                <span class="bg-slate-100 text-slate-600 px-2 py-0.5 rounded text-[9px]">Self Service (ESS)</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 14. VIEW: ARCHIVED FILES -->
+            <!-- ======================================================================= -->
+            <div id="view-archive" class="tab-content space-y-6 hidden">
+                <div>
+                    <h2 class="text-xl font-bold text-slate-900">Archived Employees & Historical Files</h2>
+                    <p class="text-xs text-slate-500">Review separated staff profiles, past contracts, and exit transcripts</p>
+                </div>
+
+                <div class="card p-5 bg-white">
+                    <h3 class="font-bold text-sm text-slate-800 mb-4"><i class="fas fa-file-archive text-amber-500"></i> Archive Registry</h3>
+                    <div class="table-responsive">
+                        <table class="text-xs">
+                            <thead>
+                                <tr>
+                                    <th>Archived ID</th>
+                                    <th>Staff Name</th>
+                                    <th>Role Held</th>
+                                    <th>Archived Date</th>
+                                    <th>Exit Reason</th>
+                                    <th class="text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="archivedRegistryTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 15. VIEW: EMPLOYEE SELF-SERVICE OVERVIEW (ESS) -->
+            <!-- ======================================================================= -->
+            <div id="view-ess-dashboard" class="tab-content space-y-6 hidden">
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h2 class="text-xl font-bold text-slate-900" id="essWelcomeText">Welcome Back, Teacher</h2>
+                        <p class="text-xs text-slate-500" id="essSubText">Faculty Member Self-Service Overview</p>
+                    </div>
+                    <span class="text-xs font-bold text-slate-400" id="essEmpIdText">EMP ID: 000</span>
+                </div>
+
+                <!-- ESS Quick stats -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="card p-4 bg-white border-l-4 border-yellow-500 flex justify-between items-center">
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">Leave Credits Available</p>
+                            <h4 class="text-xl font-extrabold text-slate-900 mt-1" id="essLeaveCreditsText">0 days</h4>
+                        </div>
+                        <span class="text-yellow-500 text-xl"><i class="fas fa-plane-departure"></i></span>
+                    </div>
+                    <div class="card p-4 bg-white border-l-4 border-green-500 flex justify-between items-center">
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">Time clocks This Month</p>
+                            <h4 class="text-xl font-extrabold text-green-600 mt-1" id="essTimeClockText">0 Present</h4>
+                        </div>
+                        <span class="text-green-500 text-xl"><i class="fas fa-check-circle"></i></span>
+                    </div>
+                    <div class="card p-4 bg-white border-l-4 border-indigo-500 flex justify-between items-center">
+                        <div>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">My Base Salary</p>
+                            <h4 class="text-xl font-extrabold text-indigo-600 mt-1" id="essSalaryText">₱0</h4>
+                        </div>
+                        <span class="text-indigo-500 text-xl"><i class="fas fa-receipt"></i></span>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Left: Announcements & schedule -->
+                    <div class="lg:col-span-2 space-y-6">
+                        <!-- Faculty Loading & Weekly Schedule -->
+                        <div class="card p-5 bg-white">
+                            <h3 class="font-bold text-sm text-slate-800 mb-4 flex items-center justify-between">
+                                <span><i class="fas fa-calendar-alt text-amber-500"></i> My Teaching Schedule (Weekly Loading)</span>
+                                <div class="flex gap-2">
+                                    <button id="btnEssScheduleList" onclick="toggleEssScheduleView('list')" class="px-2 py-0.5 bg-amber-100 text-amber-900 border border-amber-300 text-[10px] font-bold rounded">List View</button>
+                                    <button id="btnEssScheduleCalendar" onclick="toggleEssScheduleView('calendar')" class="px-2 py-0.5 text-[10px] font-bold text-slate-500 hover:text-slate-700">Calendar Grid</button>
+                                </div>
+                            </h3>
+                            
+                            <!-- List View -->
+                            <div id="essScheduleListView" class="table-responsive">
+                                <table class="text-[11px]">
+                                    <thead>
+                                        <tr>
+                                            <th>Subject Code</th>
+                                            <th>Subject Description</th>
+                                            <th>Schedule (Time)</th>
+                                            <th>Room</th>
+                                            <th>Section</th>
+                                            <th class="text-center">Units</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="essScheduleTableBody">
+                                        <!-- Populated dynamically -->
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <!-- Calendar Grid View -->
+                            <div id="essScheduleCalendarView" class="hidden space-y-2 pt-2">
+                                <div class="grid grid-cols-6 gap-1 text-center font-bold text-[10px] bg-slate-100 dark:bg-slate-800 p-1.5 rounded-lg text-slate-600">
+                                    <div>Time</div>
+                                    <div>Monday</div>
+                                    <div>Tuesday</div>
+                                    <div>Wednesday</div>
+                                    <div>Thursday</div>
+                                    <div>Friday</div>
+                                </div>
+                                <div id="essScheduleGridBody" class="space-y-1">
+                                    <!-- Populated dynamically by JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Announcements list -->
+                        <div class="card p-5 bg-white space-y-4">
+                            <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-bullhorn text-rose-500"></i> Academy Announcements</h3>
+                            <div class="space-y-3.5">
+                                <div class="p-3 bg-slate-50 rounded-xl border border-slate-200/40 text-xs">
+                                    <p class="font-bold text-slate-800">DepEd Compliance Orientation</p>
+                                    <p class="text-slate-500 mt-1">Please ensure all licensed teachers have updated profiles by submitting their renewed PRC ID card to the 201 manager folder. Deadline: July 20.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Quick request shortcut & warnings -->
+                    <div class="space-y-6">
+                        <div class="card p-5 bg-white space-y-4">
+                            <h3 class="font-bold text-sm text-slate-800">Quick Actions</h3>
+                            <div class="space-y-2">
+                                <button onclick="switchNavTab('ess-leave')" class="btn btn-primary btn-block text-xs py-2.5"><i class="fas fa-plane-departure"></i> Apply for Leave</button>
+                                <button onclick="switchNavTab('ess-attendance')" class="btn btn-outline btn-block text-xs py-2.5"><i class="fas fa-history"></i> Check My Logs</button>
+                            </div>
+                        </div>
+
+                        <!-- Emergency Contacts Widget -->
+                        <div class="card p-5 bg-white space-y-4 text-xs">
+                            <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-phone-alt text-emerald-500"></i> Academy Emergency Contacts</h3>
+                            <div class="space-y-2 font-medium">
+                                <p class="text-slate-600">HR Office Hotline: <span class="font-bold text-slate-900">+63 (02) 8882 1293</span></p>
+                                <p class="text-slate-600">IT Systems Support Desk: <span class="font-bold text-slate-900">support@saga-core.edu</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 16. VIEW: ESS ATTENDANCE -->
+            <!-- ======================================================================= -->
+            <div id="view-ess-attendance" class="tab-content space-y-6 hidden">
+                <div class="card p-5 bg-white">
+                    <h3 class="font-bold text-sm text-slate-800 mb-4"><i class="fas fa-history text-slate-500"></i> My Timekeeping Logs</h3>
+                    <div class="table-responsive">
+                        <table class="text-xs">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Clock In</th>
+                                    <th>Clock Out</th>
+                                    <th>Work Hours</th>
+                                    <th>Status Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="essAttendanceTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 17. VIEW: ESS PAYSLIPS -->
+            <!-- ======================================================================= -->
+            <div id="view-ess-payroll" class="tab-content space-y-6 hidden">
+                <div class="card p-5 bg-white">
+                    <h3 class="font-bold text-sm text-slate-800 mb-4"><i class="fas fa-receipt text-emerald-500"></i> My Payslips History</h3>
+                    <div class="table-responsive">
+                        <table class="text-xs">
+                            <thead>
+                                <tr>
+                                    <th>Payslip ID</th>
+                                    <th>Pay Period</th>
+                                    <th>Date Disbursed</th>
+                                    <th class="text-right">Gross Salary</th>
+                                    <th class="text-right">Total Deductions</th>
+                                    <th class="text-right">Net Payout</th>
+                                    <th class="w-24 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="essPayslipsTableBody">
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 18. VIEW: ESS REQUEST LEAVE FORM -->
+            <!-- ======================================================================= -->
+            <div id="view-ess-leave" class="tab-content space-y-6 hidden">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Form -->
+                    <div class="lg:col-span-2 card p-5 bg-white space-y-4">
+                        <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-plane-departure text-amber-500"></i> File Leave Request</h3>
+                        <form onsubmit="handleESSLeaveSubmit(event)" id="leaveApplicationForm" class="space-y-4 text-xs font-semibold">
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-slate-600 mb-1">Leave Category</label>
+                                    <select id="leaveType" required class="w-full p-2 border rounded-lg focus:outline-none focus:border-amber-400">
+                                        <option value="vacation">Vacation Leave / Seminar Study</option>
+                                        <option value="sick">Sick Leave (Medical Filing)</option>
+                                        <option value="emergency">Emergency / Domestic Leave</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-slate-600 mb-1">Supporting attachment (Optional)</label>
+                                    <input type="file" id="leaveAttachment" class="w-full p-1 border rounded-lg focus:outline-none">
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-slate-600 mb-1">Effective Date (From)</label>
+                                    <input type="date" id="leaveFromDate" required class="w-full p-2 border rounded-lg focus:outline-none">
+                                </div>
+                                <div>
+                                    <label class="block text-slate-600 mb-1">Effective Date (To)</label>
+                                    <input type="date" id="leaveToDate" required class="w-full p-2 border rounded-lg focus:outline-none">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-slate-600 mb-1">Filing Reason details</label>
+                                <textarea id="leaveReason" required placeholder="Explain why the leave is filed..." class="w-full p-2.5 border rounded-lg focus:outline-none" rows="3"></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary py-2.5 w-full flex justify-center items-center gap-1.5"><i class="fas fa-paper-plane"></i> Submit Request to Chair</button>
+                        </form>
+                    </div>
+
+                    <!-- Balance overview -->
+                    <div class="card p-5 bg-white space-y-4 text-xs">
+                        <h3 class="font-bold text-sm text-slate-800">My Leave Balances</h3>
+                        <div class="space-y-3 font-semibold">
+                            <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-lg">
+                                <span class="text-slate-500">Vacation Credits</span>
+                                <span class="font-bold text-slate-900" id="balVacation">15 days</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-lg">
+                                <span class="text-slate-500">Sick Credits</span>
+                                <span class="font-bold text-slate-900" id="balSick">10 days</span>
+                            </div>
+                            <div class="flex justify-between items-center p-2.5 bg-slate-50 rounded-lg">
+                                <span class="text-slate-500">Emergency Credits</span>
+                                <span class="font-bold text-slate-900" id="balEmergency">5 days</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ======================================================================= -->
+            <!-- 19. VIEW: ESS DOCUMENTS (MY 201) -->
+            <!-- ======================================================================= -->
+            <div id="view-ess-documents" class="tab-content space-y-6 hidden">
+                <div class="card p-5 bg-white space-y-4">
+                    <h3 class="font-bold text-sm text-slate-800"><i class="fas fa-folder-open text-amber-500"></i> My Digital 201 Compliance Files</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" id="ess201Container">
+                        <!-- Populated dynamically -->
+                    </div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- FOOTER BAR -->
+        <footer class="h-12 bg-white border-t border-slate-200 flex items-center justify-between px-6 text-[10px] font-bold text-slate-400 uppercase tracking-widest">
+            <p>© 2026 St. Aloysius Gonzaga Academy, Inc. • SAGA-Core HRIS Prototype</p>
+            <p>Institutional Software Capstone Project</p>
+        </footer>
+
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- MODALS AND SIMULATORS -->
+    <!-- ======================================================================= -->
+
+    <!-- 1. MODAL: PROFILE DETAILED VIEW (WITH DOCUMENT WORKFLOW) -->
+    <div id="profileDetailModal" class="modal-overlay">
+        <div class="modal modal-card max-w-4xl rounded-2xl overflow-hidden shadow-2xl transition-all">
+            <div class="modal-header">
+                <h2 class="modal-title flex items-center gap-2"><i class="fas fa-id-card text-blue-600"></i> Employee Profile Profile</h2>
+                <button onclick="closeProfileDetailModal()" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body p-6 space-y-6" id="profileDetailModalBody">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. MODAL: CREATE JOB POSTING -->
+    <div id="createJobModal" class="modal-overlay">
+        <div class="modal modal-card max-w-md rounded-2xl overflow-hidden shadow-2xl transition-all">
+            <div class="modal-header">
+                <h2 class="modal-title"><i class="fas fa-bullhorn text-amber-500"></i> Create Job Posting</h2>
+                <button onclick="closeCreateJobModal()" class="modal-close">&times;</button>
+            </div>
+            <form onsubmit="handleCreateJob(event)" class="modal-body p-5 space-y-4 text-xs font-semibold">
+                <div>
+                    <label class="block text-slate-600 mb-1">Job Title</label>
+                    <input type="text" id="newJobTitle" required placeholder="e.g. Junior High English Teacher" class="w-full p-2 border rounded-lg focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-600 mb-1">Target Department</label>
+                    <select id="newJobDept" required class="w-full p-2 border rounded-lg focus:outline-none">
+                        <option value="Elementary Department">Elementary Department</option>
+                        <option value="Junior High School (JHS)">Junior High School (JHS)</option>
+                        <option value="Senior High School (SHS)">Senior High School (SHS)</option>
+                        <option value="School Administration">School Administration</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-slate-600 mb-1">Salary Range</label>
+                    <input type="text" id="newJobSalary" required placeholder="e.g. ₱30,000 - ₱40,000/month" class="w-full p-2 border rounded-lg focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-slate-600 mb-1">Job Requirements</label>
+                    <textarea id="newJobRequirements" required placeholder="e.g. LPT certified, BSEd degree..." class="w-full p-2 border rounded-lg focus:outline-none" rows="2"></textarea>
+                </div>
+                <div>
+                    <label class="block text-slate-600 mb-1">Job Description</label>
+                    <textarea id="newJobDesc" required placeholder="Outline key classroom tasks..." class="w-full p-2 border rounded-lg focus:outline-none" rows="3"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeCreateJobModal()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg">Cancel</button>
+                    <button type="submit" class="px-4 py-2 bg-amber-400 hover:bg-amber-500 text-slate-950 rounded-lg font-bold">Publish Posting</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 3. MODAL: APPLICANT PROFILE DETAILS (AI COMPETE CARD) -->
+    <div id="applicantDetailModal" class="modal-overlay">
+        <div class="modal modal-card max-w-4xl rounded-2xl overflow-hidden shadow-2xl transition-all">
+            <div class="modal-header">
+                <h2 class="modal-title"><i class="fas fa-file-invoice-dollar text-indigo-600"></i> Applicant evaluation file</h2>
+                <button onclick="closeApplicantDetailModal()" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body p-6 space-y-6" id="applicantDetailModalBody">
+                <!-- Populated dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. MODAL: APPLICANT HIRE CONVERSION -->
+    <div id="conversionModal" class="modal-overlay">
+        <div class="modal modal-card max-w-md rounded-2xl overflow-hidden shadow-2xl p-6 text-center text-slate-900 relative">
+            <div id="confettiContainer" class="absolute inset-0 pointer-events-none"></div>
+            
+            <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-3xl mx-auto mb-4 animate-bounce">
+                <i class="fas fa-check-double"></i>
+            </div>
+            
+            <h2 class="text-xl font-bold mb-2">Hiring Decision Confirmed</h2>
+            <p class="text-xs text-slate-500 mb-6">Converting applicant profile into official Academy employee record...</p>
+
+            <div class="p-4 bg-slate-50 border rounded-xl space-y-3.5 text-xs text-left font-semibold">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Assigned Employee ID:</span>
+                    <span class="font-bold text-slate-800" id="convEmpId">EMP-0000000000000</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Employee Card Number:</span>
+                    <span class="font-bold text-slate-800" id="convEmpNum">2026-0000</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Generated RFID Card UID:</span>
+                    <span class="font-mono font-bold text-indigo-600" id="convRfid">SCAN READY</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">Portal Security Account:</span>
+                    <span class="font-bold text-slate-800" id="convPortalAcc">user.name</span>
+                </div>
+                <div class="flex justify-between items-center pt-2.5 border-t">
+                    <span class="text-slate-400">Digital 201 folders:</span>
+                    <span class="text-[10px] bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-bold">11 Folders Generated</span>
+                </div>
+            </div>
+
+            <div class="mt-6 flex justify-end">
+                <button onclick="closeConversionModal()" class="px-5 py-2.5 bg-amber-400 hover:bg-amber-500 text-slate-950 font-bold rounded-xl text-xs flex items-center gap-1.5 shadow"><i class="fas fa-play"></i> Initiate Onboarding Flow</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. MODAL: RFID SCAN SIMULATOR (ATTENDANCE TRANSIT) -->
+    <div id="rfidSimulatorModal" class="modal-overlay">
+        <div class="modal modal-card max-w-sm rounded-2xl overflow-hidden shadow-2xl p-6 text-center text-slate-900">
+            <h3 class="font-bold text-sm text-slate-800 mb-3.5 flex items-center justify-center gap-2"><i class="fas fa-rss-square text-blue-500"></i> RFID hardware Simulator</h3>
+            <p class="text-xs text-slate-500 mb-4">Select employee profile below to simulate a physical card swipe at the main security gates:</p>
+            
+            <div class="space-y-4 text-xs font-semibold text-left mb-6">
+                <div>
+                    <label class="block text-slate-600 mb-1">Select Employee Profile</label>
+                    <select id="simEmployeeSelect" class="w-full p-2.5 bg-white border rounded-lg focus:outline-none">
+                        <!-- Populated dynamically -->
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-slate-600 mb-1">Transit Gate Direction</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <button id="btnSimDirectionIn" onclick="setSimDirection('in')" class="py-2 bg-blue-100 border border-blue-400 text-blue-900 rounded-lg flex items-center justify-center gap-1.5 font-bold"><i class="fas fa-sign-in-alt"></i> CLOCK IN</button>
+                        <button id="btnSimDirectionOut" onclick="setSimDirection('out')" class="py-2 hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-lg flex items-center justify-center gap-1.5 font-bold"><i class="fas fa-sign-out-alt"></i> CLOCK OUT</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex gap-2 justify-end">
+                <button onclick="closeRFIDSimulatorModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-xs">Cancel</button>
+                <button onclick="triggerRFIDSwipeAction()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold flex items-center gap-1.5 shadow"><i class="fas fa-rss"></i> Simulate RFID Tap</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6. MODAL: COE DOCUMENT GENERATOR PREVIEW -->
+    <div id="coeModal" class="modal-overlay">
+        <div class="modal modal-card max-w-2xl rounded-2xl overflow-hidden shadow-2xl p-8 space-y-6">
+            <div class="text-right border-b pb-4">
+                <button onclick="closeCOEModal()" class="modal-close">&times;</button>
+            </div>
+            <div id="coePrintedArea" class="space-y-6 text-slate-900 font-serif leading-relaxed text-xs">
+                <!-- COE Letter contents populated dynamically -->
+            </div>
+            <div class="flex justify-end gap-2 text-xs pt-4 border-t">
+                <button onclick="closeCOEModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 rounded-lg">Close</button>
+                <button onclick="printCOEDocument()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-lg flex items-center gap-1.5"><i class="fas fa-print"></i> Print COE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 7. MODAL: ORG CHART VIEWER -->
+    <div id="orgChartModal" class="modal-overlay">
+        <div class="modal modal-card max-w-3xl rounded-2xl overflow-hidden shadow-2xl p-6">
+            <div class="modal-header">
+                <h2 class="modal-title"><i class="fas fa-sitemap text-amber-500"></i> Academy Organization Chart</h2>
+                <button onclick="closeOrgChartModal()" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body p-6 max-h-[70vh] overflow-auto space-y-6 text-xs text-center" id="orgChartContainer">
+                <!-- Org Chart nodes will be populated by JS -->
+            </div>
+        </div>
+    </div>
+
+    <!-- ======================================================================= -->
+    <!-- CHAT SUPPORT FLOAT WIDGET -->
+    <!-- ======================================================================= -->
+    <div class="fixed bottom-5 right-5 lg:right-24 z-40">
+        <!-- Floating chat button -->
+        <button id="chatFloatBtn" onclick="toggleSupportChat()" class="w-12 h-12 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-full flex items-center justify-center shadow-2xl transform active:scale-95 transition-all relative">
+            <i class="fas fa-comments text-xl"></i>
+            <span class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full animate-ping"></span>
+        </button>
+
+        <!-- Floating chat card panel -->
+        <div id="chatSupportCard" class="hidden absolute right-0 bottom-14 w-80 bg-white rounded-2xl border border-slate-200 shadow-2xl p-4 space-y-3 z-50 text-xs font-semibold">
+            <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+                <div class="flex items-center gap-2">
+                    <div class="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-pulse"></div>
+                    <span class="font-bold text-slate-800">SAGA HRIS Live Support Chat</span>
+                </div>
+                <button onclick="toggleSupportChat()" class="text-slate-400 hover:text-slate-700 text-base">&times;</button>
+            </div>
+
+            <!-- Messages lists -->
+            <div id="chatMessagesList" class="space-y-3 max-h-48 overflow-y-auto pr-1">
+                <div class="bg-slate-100 rounded-xl p-2.5 text-slate-600 max-w-[85%] text-[10px]">
+                    Hello! I'm SAGA-Core Assistant. Let me know if you need any help navigating this Institutional HRIS prototype!
+                </div>
+            </div>
+
+            <form onsubmit="handleSendSupportMsg(event)" class="flex gap-2 pt-2 border-t border-slate-100">
+                <input type="text" id="chatInputMessage" required placeholder="Type support question..." class="flex-1 p-2 border rounded-lg focus:outline-none">
+                <button type="submit" class="px-3 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-lg"><i class="fas fa-paper-plane"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script imports -->
+    <script src="app.js"></script>
+    <script src="dashboard_view.js"></script>
+</body>
+</html>
