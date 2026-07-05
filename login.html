@@ -61,23 +61,28 @@
             </div>
 
             <!-- Capstone Reviewer Helper Dropdown -->
-            <div class="mb-6 bg-slate-900/50 rounded-2xl border border-slate-700/60 p-4">
-                <div class="flex items-center gap-2 mb-2 text-amber-400 font-bold text-xs uppercase tracking-wider">
-                    <i class="fas fa-magic"></i>
-                    <span>Capstone Demo Role Auto-Filler</span>
+            <div class="mb-6 bg-slate-900/40 rounded-2xl border border-slate-700/50 p-4">
+                <div class="flex items-center gap-2 mb-2 text-amber-400 font-bold text-xs uppercase tracking-wider justify-between">
+                    <span><i class="fas fa-bolt mr-1"></i> Quick Demo Auto-Filler</span>
+                    <span class="text-[9px] bg-amber-400/20 text-amber-300 px-1.5 py-0.5 rounded font-extrabold uppercase">1-Click</span>
                 </div>
-                <p class="text-slate-300 text-[11px] mb-3 leading-relaxed">
-                    Select a preset organizational role below to automatically fill credentials and explore role-based dashboards:
+                <p class="text-slate-400 text-[10px] mb-3 leading-relaxed">
+                    Select an institutional role profile to load credentials and explore role-based screens:
                 </p>
-                <select id="roleSelector" onchange="autoFillRole()" class="w-full bg-slate-800/80 border border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-100 font-semibold focus:outline-none focus:border-amber-400">
-                    <option value="">-- Choose a Demo Role --</option>
-                    <option value="hr-admin">HR Administrator (Full Rights)</option>
-                    <option value="hr-staff">HR Staff (Operations View)</option>
-                    <option value="dean">Dean / Principal (Academic Approver)</option>
-                    <option value="dept-chair">Department Chair (Primary Reviewer)</option>
-                    <option value="faculty-juan">Faculty: Teacher Juan Dela Cruz (ESS Portal)</option>
-                    <option value="faculty-ana">Faculty: Teacher Ana Rodriguez (ESS Portal)</option>
-                </select>
+                <div class="grid grid-cols-2 gap-2 text-[10px] font-bold">
+                    <button type="button" onclick="autoFillRole('hr-admin')" class="p-2 bg-blue-900/30 hover:bg-blue-800/40 border border-blue-500/20 hover:border-blue-400 rounded-xl text-blue-300 transition text-left flex items-center justify-between focus:outline-none">
+                        <span>HR Administrator</span> <i class="fas fa-chevron-right text-[8px] opacity-60"></i>
+                    </button>
+                    <button type="button" onclick="autoFillRole('dept-chair')" class="p-2 bg-yellow-950/20 hover:bg-yellow-900/20 border border-amber-500/20 hover:border-amber-400 rounded-xl text-amber-300 transition text-left flex items-center justify-between focus:outline-none">
+                        <span>Dept Chair</span> <i class="fas fa-chevron-right text-[8px] opacity-60"></i>
+                    </button>
+                    <button type="button" onclick="autoFillRole('dean')" class="p-2 bg-emerald-900/30 hover:bg-emerald-800/40 border border-emerald-500/20 hover:border-emerald-400 rounded-xl text-emerald-300 transition text-left flex items-center justify-between focus:outline-none">
+                        <span>School Dean</span> <i class="fas fa-chevron-right text-[8px] opacity-60"></i>
+                    </button>
+                    <button type="button" onclick="autoFillRole('faculty-juan')" class="p-2 bg-indigo-900/30 hover:bg-indigo-800/40 border border-indigo-500/20 hover:border-indigo-400 rounded-xl text-indigo-300 transition text-left flex items-center justify-between focus:outline-none">
+                        <span>Teacher Juan (ESS)</span> <i class="fas fa-chevron-right text-[8px] opacity-60"></i>
+                    </button>
+                </div>
             </div>
 
             <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-5">
@@ -119,10 +124,18 @@
             </form>
         </div>
 
-        <div class="mt-6 text-center">
+        <div class="mt-6 text-center flex flex-col gap-2.5 items-center">
             <a href="index.html" class="inline-flex items-center gap-2 text-xs text-slate-400 hover:text-amber-400 transition-colors font-medium">
                 <i class="fas fa-arrow-left"></i>
                 <span>Back to Careers & Faculty Openings Portal</span>
+            </a>
+            <a href="rfid-tapping.html" target="_blank" class="inline-flex items-center gap-2 text-[11px] text-slate-500 hover:text-indigo-450 transition-colors font-medium">
+                <i class="fas fa-id-card"></i>
+                <span>Open School Gate RFID Kiosk Terminal (No Login Needed)</span>
+            </a>
+            <a href="#" onclick="if(confirm('Are you sure you want to reset all SAGA-Core demo database records to defaults? This will clear any test entries.')){ SAGA.resetData(); alert('Database Reset Successful!'); window.location.reload(); }" class="inline-flex items-center gap-2 text-[10px] text-slate-650 hover:text-amber-450 transition-colors font-medium mt-1">
+                <i class="fas fa-trash-restore"></i>
+                <span>Reset Demo Database to Preset Defaults</span>
             </a>
         </div>
     </div>
@@ -151,18 +164,21 @@
             'faculty-ana': { user: 'ana.rodriguez', pass: 'SecurePass456' }
         };
 
-        function autoFillRole() {
-            const selectedVal = document.getElementById('roleSelector').value;
-            if (!selectedVal) return;
-            const creds = roleCreds[selectedVal];
-            document.getElementById('username').value = creds.user;
-            document.getElementById('password').value = creds.pass;
+        let selectedDemoRole = 'hr-admin';
+
+        function autoFillRole(roleKey) {
+            selectedDemoRole = roleKey;
+            const creds = roleCreds[roleKey];
+            if (creds) {
+                document.getElementById('username').value = creds.user;
+                document.getElementById('password').value = creds.pass;
+            }
         }
 
         function handleLogin(event) {
             event.preventDefault();
             const username = document.getElementById('username').value.trim();
-            const role = document.getElementById('roleSelector').value || 'hr-admin'; // default to hr-admin if custom creds are typed
+            const role = selectedDemoRole;
             
             // Save active session in localStorage
             let sessionRole = 'HR Administrator';

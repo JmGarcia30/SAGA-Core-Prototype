@@ -1,193 +1,353 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SAGA-Core | Careers & Job Postings</title>
+    <title>SAGA-Core | Careers & Faculty Openings</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+            color: #1e293b;
+        }
+        .serif-title {
+            font-family: 'Poppins', sans-serif;
+            font-weight: 800;
+        }
+        .hero-gradient {
+            background: radial-gradient(circle at 80% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                        radial-gradient(circle at 10% 80%, rgba(245, 158, 11, 0.08) 0%, transparent 40%),
+                        linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        }
+        .glass-header {
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .glass-stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(8px);
+        }
+        .dribbble-card {
+            border: 1px solid rgba(226, 232, 240, 0.8);
+            box-shadow: 0 4px 20px -2px rgba(148, 163, 184, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .dribbble-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(99, 102, 241, 0.4);
+            box-shadow: 0 12px 28px -4px rgba(99, 102, 241, 0.12);
+        }
+        .tag-pill {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+        .tag-pill-active {
+            background: linear-gradient(135deg, #4f46e5 0%, #3730a3 100%);
+            color: #ffffff;
+            box-shadow: 0 4px 12px -2px rgba(79, 70, 229, 0.3);
+        }
+        .animate-fade-in {
+            animation: fadeIn 0.4s ease forwards;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
-
-<body class="bg-gray-50">
-    <!-- Navigation -->
-    <nav class="navbar sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <div class="nav-brand">
-                <div class="bg-white p-1 rounded-xl shadow-md border-2 border-amber-400 flex items-center justify-center">
-                    <img src="assets/school_logo.png" alt="St. Aloysius Gonzaga Academy Logo" class="w-9 h-9 object-contain">
+<body class="min-h-screen flex flex-col">
+    <!-- Frosted Navigation -->
+    <nav class="glass-header sticky top-0 z-50 border-b border-white/5 py-4 px-6 text-white">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-white p-1 rounded-xl shadow-md flex items-center justify-center">
+                    <img src="assets/school_logo.png" alt="St. Aloysius Gonzaga Academy Logo" class="w-8 h-8 object-contain">
                 </div>
                 <div>
-                    <span class="block text-lg font-bold tracking-wide text-white">St. Aloysius Gonzaga Academy Inc.</span>
-                    <span class="block text-[11px] font-semibold text-amber-400 tracking-wider uppercase">Institutional HRIS Portal • Est. 2015</span>
+                    <span class="block text-sm font-bold tracking-wide">St. Aloysius Gonzaga Academy Inc.</span>
+                    <span class="block text-[9px] font-bold text-amber-400 uppercase tracking-widest">Careers & Faculty Placement Portal</span>
                 </div>
             </div>
-            <div class="flex gap-6 items-center">
-                <a href="index.html" class="nav-link active font-semibold"><i class="fas fa-briefcase mr-1.5"></i>Careers</a>
-                <a href="login.html" class="nav-link font-semibold text-amber-400 hover:text-amber-300"><i class="fas fa-lock mr-1.5"></i>Portal Sign In</a>
+            <div class="flex gap-5 items-center">
+                <a href="index.html" class="text-xs font-bold text-amber-400 flex items-center gap-1.5"><i class="fas fa-briefcase"></i> Openings</a>
+                <a href="login.html" class="px-3.5 py-1.5 bg-amber-400 hover:bg-amber-500 text-slate-950 text-xs font-extrabold rounded-xl shadow-md shadow-amber-400/10 transition flex items-center gap-1.5"><i class="fas fa-lock"></i> Portal Sign In</a>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <section class="hero relative overflow-hidden">
-        <div class="max-w-4xl mx-auto relative z-10 flex flex-col items-center">
-            <div class="bg-white p-3 rounded-2xl shadow-xl border-4 border-amber-400 mb-4 flex items-center justify-center">
-                <img src="assets/school_logo.png" alt="St. Aloysius Gonzaga Academy Emblem" class="w-24 h-24 object-contain">
+    <!-- Dribbble Style Hero Header Section -->
+    <section class="hero-gradient text-white py-16 px-6 relative overflow-hidden flex flex-col items-center">
+        <!-- Background light visual effects -->
+        <div class="absolute w-72 h-72 rounded-full bg-indigo-500/10 -top-12 -left-12 blur-3xl"></div>
+        <div class="absolute w-80 h-80 rounded-full bg-amber-500/5 -bottom-16 -right-16 blur-3xl"></div>
+
+        <div class="max-w-4xl w-full text-center relative z-10 space-y-6">
+            <div class="inline-flex items-center gap-2 px-3 py-1 bg-white/10 rounded-full border border-white/10 text-[10px] font-extrabold uppercase tracking-widest text-amber-400 mb-2">
+                <i class="fas fa-sparkles animate-spin text-[8px]"></i> Now Accepting Applications for AY 2026-2027
             </div>
-            <h1 class="hero-title text-3xl md:text-4xl">St. Aloysius Gonzaga Academy Inc.</h1>
-            <p class="text-amber-400 font-bold text-sm md:text-base uppercase tracking-widest mb-3">
-                Spiritual Formation • Academic Excellence • Genuine Compassion
+            <h1 class="serif-title text-4xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+                Shape the Future of Catholic Education with SAGA
+            </h1>
+            <p class="text-xs sm:text-sm text-slate-300 max-w-2xl mx-auto leading-relaxed">
+                Join our esteemed academic faculty. We support our educators with competitive compensation packages, state-of-the-art administrative tools, wellness leaves, and continuous development programs.
             </p>
-            <p class="hero-subtitle text-slate-300 max-w-2xl text-sm md:text-base">
-                Join our esteemed academic faculty. We are accepting applications for dedicated educators across
-                Elementary, Junior High School (JHS), and Senior High School (SHS) departments.
-            </p>
+
+            <div class="pt-4 flex flex-wrap justify-center gap-3">
+                <a href="#openings-section" class="px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-xs font-bold rounded-xl shadow-lg shadow-indigo-600/20 transition flex items-center gap-1.5">Explore Openings <i class="fas fa-arrow-down"></i></a>
+                <button onclick="renderSubmittedApplicants()" class="px-5 py-2.5 bg-white/5 border border-white/15 hover:bg-white/10 text-xs font-bold rounded-xl transition flex items-center gap-1.5"><i class="fas fa-search"></i> Track My Application</button>
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="pt-10 grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto text-left">
+                <div class="glass-stat-card rounded-2xl p-4">
+                    <span class="block text-2xl font-extrabold text-white">120+</span>
+                    <span class="block text-[10px] font-semibold text-slate-400 uppercase mt-0.5">Faculty Members</span>
+                </div>
+                <div class="glass-stat-card rounded-2xl p-4">
+                    <span class="block text-2xl font-extrabold text-amber-400">100%</span>
+                    <span class="block text-[10px] font-semibold text-slate-400 uppercase mt-0.5">LET Board Pass Rate</span>
+                </div>
+                <div class="glass-stat-card rounded-2xl p-4">
+                    <span class="block text-2xl font-extrabold text-white">₱35k+</span>
+                    <span class="block text-[10px] font-semibold text-slate-400 uppercase mt-0.5">Avg. Starting Base</span>
+                </div>
+                <div class="glass-stat-card rounded-2xl p-4">
+                    <span class="block text-2xl font-extrabold text-white">Est. 2015</span>
+                    <span class="block text-[10px] font-semibold text-slate-400 uppercase mt-0.5">11 Years Excellence</span>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 py-12">
-        <!-- View Existing Applicants (Demo) -->
-        <div class="mb-12">
-            <button onclick="renderSubmittedApplicants()" class="btn btn-outline btn-small mb-6">
-                <i class="fas fa-list"></i> View Applicants in System (Demo)
-            </button>
-            <div id="applicants-list" class="hidden mb-8 card p-6">
-                <h3 class="text-lg font-bold mb-4">Applicants in System</h3>
-                <div id="applicants-content" class="space-y-3"></div>
+    <!-- Core Philosophy section -->
+    <section class="max-w-7xl w-full mx-auto px-6 py-12">
+        <div class="text-center max-w-xl mx-auto space-y-2 mb-10">
+            <h2 class="text-xs uppercase font-extrabold tracking-widest text-indigo-600">The SAGA Pedagogical Mission</h2>
+            <p class="serif-title text-2xl font-extrabold text-slate-800">Why Educators Thrive at Our Institution</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-500 border border-amber-200 flex items-center justify-center text-lg"><i class="fas fa-heart"></i></div>
+                <h3 class="font-bold text-slate-800 text-sm">Spiritual Character Formation</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">We develop students' moral and ethical foundations under Catholic values, preparing them for holistic and compassionate community service.</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-500 border border-indigo-200 flex items-center justify-center text-lg"><i class="fas fa-brain"></i></div>
+                <h3 class="font-bold text-slate-800 text-sm">Academic Rigor & Tech-Strand</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Equipped with physics, computer science labs, and interactive softwareStrand tools, we nurture research advisors and pedagogical leaders.</p>
+            </div>
+            <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition space-y-3">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-500 border border-emerald-200 flex items-center justify-center text-lg"><i class="fas fa-graduation-cap"></i></div>
+                <h3 class="font-bold text-slate-800 text-sm">Continuous Seminar Support</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Our HR department fully subsidizes PRC LET renewals, professional training courses, and school seminars for career growth.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Interactive Job Openings Area -->
+    <section class="max-w-7xl w-full mx-auto px-6 py-12 flex-1 space-y-8" id="openings-section">
+        
+        <!-- Tab Filters Header -->
+        <div class="flex flex-col md:flex-row justify-between items-start md:items-center border-b pb-4 gap-4">
+            <div>
+                <h2 class="serif-title text-2xl font-bold text-slate-800 flex items-center gap-2"><i class="fas fa-briefcase text-indigo-600"></i> Open Positions</h2>
+                <p class="text-xs text-slate-500 mt-1">Review active openings. Click apply to trigger instant HR database routing.</p>
+            </div>
+            
+            <!-- Filter Pills -->
+            <div class="flex flex-wrap gap-2 text-xs font-bold">
+                <button onclick="filterJobs('all')" id="tab-all" class="px-3.5 py-1.5 rounded-full transition tag-pill-active select-none">All Positions</button>
+                <button onclick="filterJobs('elementary')" id="tab-elementary" class="px-3.5 py-1.5 rounded-full transition tag-pill select-none">Elementary</button>
+                <button onclick="filterJobs('jhs')" id="tab-jhs" class="px-3.5 py-1.5 rounded-full transition tag-pill select-none">Junior High (JHS)</button>
+                <button onclick="filterJobs('shs')" id="tab-shs" class="px-3.5 py-1.5 rounded-full transition tag-pill select-none">Senior High (SHS)</button>
+                <button onclick="filterJobs('admin')" id="tab-admin" class="px-3.5 py-1.5 rounded-full transition tag-pill select-none">Guidance & Admin</button>
             </div>
         </div>
 
-        <!-- Job Postings Grid -->
-        <div class="dashboard-section">
-            <h2 class="section-title">
-                <i class="fas fa-briefcase text-blue-500"></i> Open Positions
-            </h2>
+        <!-- Dynamic Job Grid -->
+        <div id="jobs-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Rendered by JS -->
+        </div>
 
-            <div id="jobs-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Jobs will be populated here -->
+        <!-- Track applicants dashboard section (hidden until requested) -->
+        <div id="applicants-list" class="hidden border border-slate-200 bg-white rounded-3xl p-6 shadow-sm space-y-4">
+            <div class="flex justify-between items-center border-b pb-3">
+                <h3 class="font-bold text-sm text-slate-800 flex items-center gap-2"><i class="fas fa-tasks text-amber-500"></i> Candidate Application Tracking (Demo Sandbox)</h3>
+                <button onclick="document.getElementById('applicants-list').classList.add('hidden')" class="text-xs font-bold text-slate-400 hover:text-slate-600">Close</button>
+            </div>
+            <div id="applicants-content" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Rendered dynamically -->
             </div>
         </div>
 
-        <!-- Application Modal -->
-        <div id="applicationModal" class="modal-overlay">
-            <div class="modal">
-                <div class="modal-header">
-                    <h2 class="modal-title">Apply for Position</h2>
-                    <button onclick="closeApplicationModal()" class="modal-close">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <!-- HR Routing Banner -->
-                    <div
-                        class="bg-indigo-50 border-l-4 border-indigo-600 p-3 rounded-r-lg mb-4 text-xs text-indigo-900 flex items-center gap-3">
-                        <i class="fas fa-paper-plane text-indigo-600 text-xl"></i>
+    </section>
+
+    <!-- Faculty Testimonials Slider -->
+    <section class="bg-indigo-950/5 border-t border-b border-indigo-950/5 py-16 px-6">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            <div class="lg:col-span-4 space-y-4">
+                <h2 class="text-xs uppercase font-extrabold tracking-widest text-indigo-600">Faculty Testimonials</h2>
+                <h3 class="serif-title text-3xl font-extrabold text-slate-800">What Our Teachers Say About SAGA</h3>
+                <p class="text-xs text-slate-500 leading-relaxed">Read insights from active faculty members about how our institutional support drives educational success daily.</p>
+            </div>
+            
+            <div class="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Testimonial 1 -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs space-y-4">
+                    <p class="text-xs text-slate-600 italic leading-relaxed">
+                        "Teaching English here is incredibly rewarding. The SAGA-Core HR system makes my leave requests and attendance logs simple to monitor so I can focus 100% on class lesson modules."
+                    </p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-indigo-50 border flex items-center justify-center font-bold text-indigo-600 text-xs shrink-0">MS</div>
                         <div>
-                            <p class="font-bold text-sm">Direct HR Portal Routing</p>
-                            <p class="text-indigo-700">Submitting this application instantly parses your credentials and
-                                routes your candidate profile directly to the <strong>SAGA HR Master Portal</strong> for
-                                review.</p>
+                            <span class="block font-bold text-xs text-slate-800">Maria Teresa Santos, LPT</span>
+                            <span class="block text-[10px] text-slate-400 font-semibold uppercase">Grade School English Lead</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Testimonial 2 -->
+                <div class="bg-white p-6 rounded-2xl border border-slate-100 shadow-xs space-y-4">
+                    <p class="text-xs text-slate-600 italic leading-relaxed">
+                        "As a STEM instructor, SAGA provides robust physics facilities and funds my development workshops. The automated AI resume tracker routes application results immediately, which made onboarding fast."
+                    </p>
+                    <div class="flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-full bg-amber-50 border flex items-center justify-center font-bold text-amber-600 text-xs shrink-0">MR</div>
+                        <div>
+                            <span class="block font-bold text-xs text-slate-800">Engr. Mark Anthony Reyes, MS</span>
+                            <span class="block text-[10px] text-slate-400 font-semibold uppercase">SHS STEM Strand Specialist</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Application Modal Overlay -->
+    <div id="applicationModal" class="modal-overlay">
+        <div class="modal max-w-2xl">
+            <div class="modal-header">
+                <h2 class="modal-title text-base font-bold">Apply for Position</h2>
+                <button onclick="closeApplicationModal()" class="modal-close">&times;</button>
+            </div>
+            <div class="modal-body max-h-[500px] overflow-y-auto">
+                
+                <!-- Routing Banner -->
+                <div class="bg-indigo-50 border-l-4 border-indigo-600 p-4 rounded-r-2xl mb-5 text-xs text-indigo-900 flex items-center gap-3.5">
+                    <i class="fas fa-paper-plane text-indigo-600 text-2xl"></i>
+                    <div>
+                        <p class="font-extrabold text-sm">Direct HR Portal Routing</p>
+                        <p class="text-indigo-700 font-semibold mt-0.5">Your candidate application will be parsed dynamically by SAGA-Core AI. Extracted skills will calculate compatibility scores in the HR panel instantly.</p>
+                    </div>
+                </div>
+
+                <form id="applicationForm" onsubmit="submitApplication(event)" class="space-y-4">
+                    <input type="hidden" id="selectedJobId" value="">
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-xs font-semibold">
+                        <div class="form-group">
+                            <label class="block mb-1 text-slate-700">Full Name *</label>
+                            <input type="text" id="applicantName" required placeholder="Juan Dela Cruz" class="w-full p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-bold text-slate-800">
+                        </div>
+                        <div class="form-group">
+                            <label class="block mb-1 text-slate-700">Email Address *</label>
+                            <input type="email" id="applicantEmail" required placeholder="name@domain.com" class="w-full p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-bold text-slate-800">
                         </div>
                     </div>
 
-                    <form id="applicationForm" onsubmit="submitApplication(event)">
-                        <input type="hidden" id="selectedJobId" value="">
+                    <div class="form-group text-xs font-semibold">
+                        <label class="block mb-1 text-slate-700">Phone Number *</label>
+                        <input type="tel" id="applicantPhone" required placeholder="+63 9XX XXX XXXX" class="w-full p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 font-bold text-slate-800">
+                    </div>
 
-                        <div class="form-group">
-                            <label>Full Name *</label>
-                            <input type="text" id="applicantName" required placeholder="John Doe">
-                        </div>
+                    <!-- Preset Demo Resume Selector -->
+                    <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl text-xs space-y-2">
+                        <label class="block font-extrabold text-slate-900 uppercase tracking-wider flex items-center justify-between text-[10px]">
+                            <span><i class="fas fa-magic text-indigo-500 mr-1"></i> Preset Demo CV Auto-Filler</span>
+                            <span class="bg-indigo-100 text-indigo-800 text-[8px] px-1.5 py-0.5 rounded-full font-extrabold uppercase">Resume Parsing Sandbox</span>
+                        </label>
+                        <select id="mockResumeSelector" onchange="applyMockResumePreset()" class="w-full p-2.5 border border-slate-200 bg-white rounded-xl text-slate-700 font-bold focus:outline-none">
+                            <option value="">Choose a realistic mock applicant resume to auto-fill...</option>
+                            <option value="maria_santos">Maria Teresa Santos, LPT (GS Pedagogy Specialist)</option>
+                            <option value="mark_reyes">Engr. Mark Anthony Reyes, MS (SHS STEM Strand Specialist)</option>
+                            <option value="clarissa_loyola">Dr. Clarissa Loyola, RGC (Licensed Guidance Counselor)</option>
+                        </select>
+                    </div>
 
-                        <div class="form-group">
-                            <label>Email Address *</label>
-                            <input type="email" id="applicantEmail" required placeholder="john@example.com">
+                    <!-- PDF Upload Section -->
+                    <div class="form-group text-xs font-semibold">
+                        <label class="block mb-1 text-slate-700"><i class="fas fa-file-pdf text-red-500 mr-1"></i> Upload Resume & Application Letter *</label>
+                        <div class="border-2 border-dashed border-slate-200 hover:border-indigo-400 rounded-2xl p-6 text-center bg-slate-50 transition-colors cursor-pointer" onclick="document.getElementById('resumeFileInput').click()">
+                            <i class="fas fa-cloud-upload-alt text-3xl text-indigo-500 mb-2"></i>
+                            <p class="text-xs font-extrabold text-slate-800" id="pdfFileNameDisplay">Click or drag & drop to upload PDF resume file</p>
+                            <p class="text-[9.5px] text-slate-400 mt-1 font-semibold">Supported formats: PDF, DOCX (Max 10MB)</p>
+                            <input type="file" id="resumeFileInput" accept=".pdf,.doc,.docx" class="hidden" onchange="handlePDFUpload(event)">
                         </div>
+                    </div>
 
-                        <div class="form-group">
-                            <label>Phone Number *</label>
-                            <input type="tel" id="applicantPhone" required placeholder="+63 9XX XXX XXXX">
-                        </div>
-
-                        <!-- Preset Demo Resume Selector -->
-                        <div class="form-group mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                            <label
-                                class="block font-semibold text-blue-900 text-xs uppercase tracking-wider mb-1 flex items-center justify-between">
-                                <span><i class="fas fa-file-invoice text-blue-600 mr-1"></i> Demonstration Preset:
-                                    Auto-Fill Sample Resume</span>
-                                <span class="bg-blue-600 text-white text-[10px] px-1.5 py-0.5 rounded font-bold">AI
-                                    Parsing Test</span>
-                            </label>
-                            <select id="mockResumeSelector" onchange="applyMockResumePreset()"
-                                class="w-full p-2 border border-blue-300 rounded text-sm bg-white text-gray-800 font-medium focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                <option value="">Select a Sample Resume to test AI Skill Parsing...</option>
-                                <option value="maria_santos">Maria Teresa Santos, LPT (Elementary & JHS Pedagogy
-                                    Specialist)</option>
-                                <option value="mark_reyes">Engr. Mark Anthony Reyes, MS (SHS STEM & Computer Instructor)
-                                </option>
-                                <option value="clarissa_loyola">Dr. Clarissa Loyola, RGC (Registered Guidance Counselor)
-                                </option>
-                            </select>
-                        </div>
-
-                        <!-- PDF Upload Section -->
-                        <div class="form-group">
-                            <label class="block font-semibold text-gray-700 mb-1"><i
-                                    class="fas fa-file-pdf text-red-500 mr-1"></i> Upload Resume (PDF / DOCX) *</label>
-                            <div class="border-2 border-dashed border-gray-300 hover:border-blue-500 rounded-lg p-4 text-center bg-gray-50 transition-colors cursor-pointer"
-                                onclick="document.getElementById('resumeFileInput').click()">
-                                <i class="fas fa-cloud-upload-alt text-3xl text-blue-500 mb-2"></i>
-                                <p class="text-sm font-semibold text-gray-700" id="pdfFileNameDisplay">Click or drag &
-                                    drop to upload PDF resume</p>
-                                <p class="text-xs text-gray-500 mt-1">Supported formats: .pdf, .docx (Max 10MB)</p>
-                                <input type="file" id="resumeFileInput" accept=".pdf,.doc,.docx" class="hidden"
-                                    onchange="handlePDFUpload(event)">
-                            </div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="block font-semibold text-gray-700 mb-1">Extracted Document Text & Full
-                                Curriculum Vitae</label>
-                            <textarea id="applicantResume" rows="5"
-                                placeholder="Additional details or full realistic CV content..."
-                                class="font-mono text-xs p-3 border border-gray-300 rounded-lg w-full"></textarea>
-                            <p class="form-help text-xs text-gray-500 mt-1">
-                                <i class="fas fa-info-circle mr-1 text-blue-500"></i> The SAGA AI resume parser extracts
-                                key competencies (e.g. LPT, Pedagogy, K-12, STEM, Child Psychology) to calculate match
-                                scores.
-                            </p>
-                        </div>
-
-                        <div class="modal-footer gap-3">
-                            <button type="button" onclick="closeApplicationModal()" class="btn btn-outline flex-1">
-                                Cancel
-                            </button>
-                            <button type="submit" class="btn btn-primary flex-1">
-                                <i class="fas fa-paper-plane"></i> Submit Application
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    <div class="form-group text-xs font-semibold">
+                        <label class="block mb-1 text-slate-700">Full Curriculum Vitae / Resume Details</label>
+                        <textarea id="applicantResume" rows="4" placeholder="Details and CV text will populate here..." class="font-mono text-[10.5px] p-3 border border-slate-200 rounded-xl w-full focus:outline-none focus:ring-2 focus:ring-indigo-500 bg-slate-50 text-slate-800 font-bold"></textarea>
+                    </div>                    <div class="modal-footer gap-3 pt-2">
+                        <button type="button" onclick="closeApplicationModal()" class="btn btn-outline flex-1 border-slate-200 rounded-xl">Cancel</button>
+                        <button type="submit" class="btn btn-primary flex-1 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl border-none">
+                            <i class="fas fa-paper-plane"></i> Submit Application
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer class="bg-gray-900 text-gray-300 mt-12 py-8">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p>&copy; 2026 SAGA-Core Institutional HR System. All rights reserved.</p>
-            <p class="text-sm mt-2">Data Privacy Act of 2012 Compliant</p>
+    <!-- Modern Footer -->
+    <footer class="bg-slate-900 text-slate-400 mt-auto py-10 px-6 border-t border-white/5">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6 text-xs font-semibold">
+            <div class="flex items-center gap-3">
+                <div class="bg-white p-1 rounded-lg">
+                    <img src="assets/school_logo.png" alt="St. Aloysius Gonzaga Academy Logo" class="w-6 h-6 object-contain">
+                </div>
+                <span>&copy; 2026 St. Aloysius Gonzaga Academy Inc. All rights reserved.</span>
+            </div>
+            <div class="flex gap-4">
+                <a href="#" class="hover:text-white">Privacy Policy</a>
+                <span>•</span>
+                <a href="#" class="hover:text-white">Data Privacy compliance (RA 10173)</a>
+            </div>
         </div>
     </footer>
 
     <script src="app.js"></script>
     <script>
         let uploadedPDFName = "";
+        let currentActiveFilter = 'all';
 
-        // Load jobs on page load
         document.addEventListener('DOMContentLoaded', () => {
             loadJobs();
         });
+
+        function filterJobs(category) {
+            currentActiveFilter = category;
+            
+            // Switch active tag pill styles
+            const tabs = ['all', 'elementary', 'jhs', 'shs', 'admin'];
+            tabs.forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === category) {
+                    btn.className = "px-3.5 py-1.5 rounded-full transition tag-pill-active select-none cursor-pointer";
+                } else {
+                    btn.className = "px-3.5 py-1.5 rounded-full transition tag-pill select-none cursor-pointer hover:bg-slate-200";
+                }
+            });
+
+            loadJobs();
+        }
 
         function applyMockResumePreset() {
             const val = document.getElementById('mockResumeSelector').value;
@@ -198,83 +358,22 @@
                 document.getElementById('applicantEmail').value = "maria.santos@pedagogy.edu.ph";
                 document.getElementById('applicantPhone').value = "+63 917 888 7766";
                 uploadedPDFName = "Resume_Maria_Santos_LPT_Elementary_JHS.pdf";
-                document.getElementById('pdfFileNameDisplay').innerHTML = `<span class="text-green-600 font-bold"><i class="fas fa-file-pdf text-red-500 mr-1"></i> Loaded Preset: Resume_Maria_Santos_LPT_Elementary_JHS.pdf</span>`;
-                document.getElementById('applicantResume').value = `MARIA TERESA SANTOS, LPT
-Licensed Professional Teacher | PRC Reg. No. 0849201
-Email: maria.santos@pedagogy.edu.ph | Mobile: +63 917 888 7766
-
-PROFESSIONAL SUMMARY:
-Dedicated and passionate Licensed Professional Teacher (LPT) with over 6 years of teaching experience in Elementary Grade School and Junior High School (JHS) environments. Specialized in K-12 DepEd curriculum execution, classroom management, child psychology, creative lesson planning, and student assessment.
-
-EDUCATION & LICENSURE:
-• Bachelor of Elementary Education (BEEd), Major in General Education - Magna Cum Laude
-• Professional Regulation Commission (PRC) Board Licensure Examination for Professional Teachers (LPT) - Passed (88.40% Rating)
-
-KEY PEDAGOGY & TEACHING SKILLS:
-- K-12 DepEd Curriculum Alignment & Differentiated Instruction
-- Classroom Management & Positive Discipline Strategies
-- Child Psychology & Learner Behavioral Development
-- Lesson Planning, Instructional Material Development & Rubrics Assessment
-- Formative and Summative Evaluation
-
-PROFESSIONAL EXPERIENCE:
-Master Class Teacher | St. Jude Academic School (2022 - Present)
-• Facilitated English and Values Education classes for Grade 4 to Grade 7 students.
-• Formulated weekly DepEd-compliant Learning Modules and daily Lesson Plans.`;
+                document.getElementById('pdfFileNameDisplay').innerHTML = `<span class="text-green-600 font-bold"><i class="fas fa-check-circle mr-1"></i> Attached: Resume_Maria_Santos_LPT_Elementary_JHS.pdf</span>`;
+                document.getElementById('applicantResume').value = `MARIA TERESA SANTOS, LPT\nLicensed Professional Teacher | PRC Reg. No. 0849201\nEmail: maria.santos@pedagogy.edu.ph | Mobile: +63 917 888 7766\n\nPROFESSIONAL SUMMARY:\nLicensed Professional Teacher (LPT) with over 6 years of classroom experience teaching Elementary and Junior High (JHS) classes. Specialized in K-12 DepEd curriculum alignment, classroom management, Child Psychology, and student assessment.\n\nLICENSURE & DEGREES:\n• Bachelor of Elementary Education (BEEd) - Magna Cum Laude\n• PRC Licensure Exam for Teachers (LPT) - 88.40% Board Rating\n\nKEY SPECIALIZATION SKILLS:\n- K-12 DepEd Curriculum & Differentiated Instruction\n- Classroom Management & Behavioral Discipline\n- Child Psychology & Counseling Advisory\n- Formative & Summative assessment planning`;
             } else if (val === 'mark_reyes') {
                 document.getElementById('applicantName').value = "Engr. Mark Anthony Reyes, MS";
                 document.getElementById('applicantEmail').value = "mark.reyes@stem.edu.ph";
                 document.getElementById('applicantPhone').value = "+63 918 555 3322";
                 uploadedPDFName = "Resume_Engr_Mark_Reyes_SHS_STEM_Instructor.pdf";
-                document.getElementById('pdfFileNameDisplay').innerHTML = `<span class="text-green-600 font-bold"><i class="fas fa-file-pdf text-red-500 mr-1"></i> Loaded Preset: Resume_Engr_Mark_Reyes_SHS_STEM_Instructor.pdf</span>`;
-                document.getElementById('applicantResume').value = `ENGR. MARK ANTHONY REYES, MS
-Senior High School (SHS) STEM & Computer Science Instructor
-Email: mark.reyes@stem.edu.ph | Mobile: +63 918 555 3322
-
-PROFESSIONAL SUMMARY:
-Experienced STEM Educator and Computer Engineer specializing in Senior High School (SHS) STEM strand instruction, Computer Programming (Python, C++), Robotics, and Applied Physics. Proven track record in conducting laboratory sessions and mentoring students in science research competitions under DepEd K-12 standards.
-
-EDUCATION & DEGREES:
-• Master of Science in Computer Science (MSCS) - De La Salle University
-• Bachelor of Science in Computer Engineering (BS CoE) - Licensed Engineer
-
-CORE COMPETENCIES & TECH SKILLS:
-- STEM Curriculum Instruction & Physics Laboratory Management
-- Computer Science & Programming (Python, JavaScript, C++, HTML/CSS)
-- Educational Robotics & Microcontrollers (Arduino, Raspberry Pi)
-- Research Advisory & Capstone Project Mentorship
-- K-12 DepEd Technical-Vocational & Academic Strand Pedagogy
-
-PROFESSIONAL EXPERIENCE:
-Senior High Instructor (STEM Strand) | National Science Academy (2021 - Present)
-• Taught General Physics, Basic Calculus, and Computer Programming to Grade 11 & 12 students.`;
+                document.getElementById('pdfFileNameDisplay').innerHTML = `<span class="text-green-600 font-bold"><i class="fas fa-check-circle mr-1"></i> Attached: Resume_Engr_Mark_Reyes_SHS_STEM_Instructor.pdf</span>`;
+                document.getElementById('applicantResume').value = `ENGR. MARK ANTHONY REYES, MS\nSenior High School (SHS) STEM & Computer Science Instructor\nEmail: mark.reyes@stem.edu.ph | Mobile: +63 918 555 3322\n\nPROFESSIONAL SUMMARY:\nComputer Engineer and CS Instructor with 4 years of classroom experience teaching Senior High (SHS) STEM strand courses. Specialized in Computer Programming (Python, C++), Robotics, physics laboratory safety, and capstone research advisory.\n\nDEGREES & LICENSES:\n• Master of Science in Computer Science (MSCS) - DLSU\n• Licensed Computer Engineer (PRC Board)\n\nKEY SPECIALIZATION SKILLS:\n- STEM strand science & physics lab instruction\n- Programming Languages (Python, Javascript, C++)\n- Educational Robotics & Arduino platforms\n- Capstone mentorship & science advisory`;
             } else if (val === 'clarissa_loyola') {
                 document.getElementById('applicantName').value = "Dr. Clarissa Loyola, RGC";
                 document.getElementById('applicantEmail').value = "clarissa.loyola@guidance.edu.ph";
                 document.getElementById('applicantPhone').value = "+63 915 222 9988";
                 uploadedPDFName = "Resume_Dr_Clarissa_Loyola_Registered_Guidance_Counselor.pdf";
-                document.getElementById('pdfFileNameDisplay').innerHTML = `<span class="text-green-600 font-bold"><i class="fas fa-file-pdf text-red-500 mr-1"></i> Loaded Preset: Resume_Dr_Clarissa_Loyola_Registered_Guidance_Counselor.pdf</span>`;
-                document.getElementById('applicantResume').value = `DR. CLARISSA LOYOLA, RGC, RPm
-Registered Guidance Counselor (PRC RGC No. 003492)
-Email: clarissa.loyola@guidance.edu.ph | Mobile: +63 915 222 9988
-
-PROFESSIONAL SUMMARY:
-Registered Guidance Counselor (RGC) and Registered Psychometrician (RPm) with extensive experience in student counseling, behavioral assessment, mental health advocacy, and career guidance for Elementary, JHS, and SHS students.
-
-EDUCATION & LICENSURE:
-• Doctor of Philosophy (Ph.D.) in Guidance and Counseling
-• Professional Regulation Commission (PRC) Licensed Guidance Counselor (RGC) & Psychometrician (RPm)
-
-CORE SPECIALIZATIONS & COUNSELING SKILLS:
-- Student Mental Health Counseling & Psychological Assessment
-- Behavioral Intervention Plans & Child Psychology Advisory
-- Career Guidance Counseling & Senior High Strand Placement
-- Crisis Intervention & Peer Facilitator Group Training
-- Parent-Teacher Liaison & Student Welfare Advisory
-
-PROFESSIONAL EXPERIENCE:
-Head Guidance Counselor | Academy of Saint Mary (2020 - Present)
-• Supervised guidance office operations for K-12 student population.`;
+                document.getElementById('pdfFileNameDisplay').innerHTML = `<span class="text-green-600 font-bold"><i class="fas fa-check-circle mr-1"></i> Attached: Resume_Dr_Clarissa_Loyola_Registered_Guidance_Counselor.pdf</span>`;
+                document.getElementById('applicantResume').value = `DR. CLARISSA LOYOLA, RGC, RPm\nRegistered Guidance Counselor (PRC No. 003492)\nEmail: clarissa.loyola@guidance.edu.ph | Mobile: +63 915 222 9988\n\nPROFESSIONAL SUMMARY:\nLicensed Guidance Counselor (RGC) and Registered Psychometrician (RPm) with over 7 years of student counseling experience in private institutions. Expertise in mental health counseling, behavioral intervention, psychological assessment, and student orientation planning.\n\nDEGREES & COGNATES:\n• Doctor of Philosophy (Ph.D.) in Guidance and Counseling\n• PRC Licensed Counselor & Psychometrician\n\nKEY SPECIALIZATION SKILLS:\n- Student Mental Health Advisory & counseling\n- Behavioral Intervention Plans & Child Psychology\n- Career Orientation & Senior High Strand matching\n- Crisis response & Student Welfare audits`;
             }
         }
 
@@ -282,12 +381,11 @@ Head Guidance Counselor | Academy of Saint Mary (2020 - Present)
             const file = event.target.files[0];
             if (file) {
                 uploadedPDFName = file.name;
-                document.getElementById('pdfFileNameDisplay').innerHTML = `<span class="text-green-600 font-bold"><i class="fas fa-file-pdf text-red-500 mr-1"></i> Attached: ${file.name}</span>`;
+                document.getElementById('pdfFileNameDisplay').innerHTML = `<span class="text-green-600 font-bold"><i class="fas fa-check-circle mr-1"></i> Attached: ${file.name}</span>`;
 
-                // If textarea is empty, add simulated extracted text from file
                 const resumeTxt = document.getElementById('applicantResume');
                 if (!resumeTxt.value) {
-                    resumeTxt.value = `[Extracted from ${file.name}]: Licensed Professional Teacher (LPT) with specialization in classroom management, K-12 DepEd curriculum, lesson planning, and student assessment.`;
+                    resumeTxt.value = `[Parsed Text from ${file.name}]: Licensed Professional Teacher (LPT) specializing in classroom pedagogy, student assessment, child development, and lesson planning.`;
                 }
             }
         }
@@ -295,38 +393,60 @@ Head Guidance Counselor | Academy of Saint Mary (2020 - Present)
         function loadJobs() {
             const jobs = SAGA.getJobs();
             const container = document.getElementById('jobs-container');
+            
+            // Filter logic
+            const filtered = jobs.filter(job => {
+                if (currentActiveFilter === 'all') return true;
+                const dept = job.department.toLowerCase();
+                if (currentActiveFilter === 'elementary') return dept.includes('elementary');
+                if (currentActiveFilter === 'jhs') return dept.includes('junior');
+                if (currentActiveFilter === 'shs') return dept.includes('senior');
+                if (currentActiveFilter === 'admin') return dept.includes('guidance') || dept.includes('administrative');
+                return true;
+            });
 
-            container.innerHTML = jobs.map(job => `
-                <div class="card job-card p-6 fade-in">
-                    <div class="mb-4">
-                        <h3 class="text-lg font-bold text-gray-900">${job.title}</h3>
-                        <p class="text-sm text-gray-500 mt-1">
-                            <i class="fas fa-building mr-1"></i> ${job.department}
-                        </p>
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center text-slate-400 py-10 font-bold text-xs"><i class="fas fa-folder-open text-2xl mb-2 block"></i> No positions active under this filter.</div>`;
+                return;
+            }
+
+            container.innerHTML = filtered.map(job => {
+                let badgeColor = 'bg-slate-100 text-slate-700';
+                if (job.department.includes('Elementary')) badgeColor = 'bg-blue-50 text-blue-700 border border-blue-150';
+                else if (job.department.includes('Junior')) badgeColor = 'bg-emerald-50 text-emerald-700 border border-emerald-150';
+                else if (job.department.includes('Senior')) badgeColor = 'bg-indigo-50 text-indigo-700 border border-indigo-150';
+                else badgeColor = 'bg-amber-50 text-amber-700 border border-amber-150';
+
+                return `
+                    <div class="bg-white p-5 rounded-2xl dribbble-card flex flex-col justify-between h-[280px] animate-fade-in text-xs relative">
+                        <div class="space-y-2">
+                            <div class="flex justify-between items-start gap-2">
+                                <span class="px-2 py-0.5 text-[9px] font-extrabold rounded-full uppercase tracking-wider ${badgeColor}">${job.department.replace('Department', '').trim()}</span>
+                                <span class="text-[9px] font-bold text-slate-400 flex items-center gap-1"><i class="fas fa-briefcase"></i> Full-Time</span>
+                            </div>
+                            <h3 class="font-extrabold text-sm text-slate-900 tracking-tight line-clamp-1">${job.title}</h3>
+                            <p class="text-slate-500 font-semibold line-clamp-2 leading-relaxed text-[11px]">${job.description}</p>
+                            
+                            <div class="p-2.5 bg-slate-50 rounded-xl space-y-1 mt-1 font-semibold text-[10px] text-slate-600 line-clamp-2">
+                                <span class="font-bold text-slate-800">Requirements:</span> ${job.requirements}
+                            </div>
+                        </div>
+
+                        <div class="flex justify-between items-center border-t pt-3 mt-3">
+                            <span class="font-bold text-slate-900 text-xs">${job.salary}</span>
+                            <button onclick="openApplicationModal(${job.id})" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition flex items-center gap-1 border-none shadow-sm shadow-indigo-600/10 cursor-pointer">Apply Now <i class="fas fa-chevron-right text-[8px] opacity-75"></i></button>
+                        </div>
                     </div>
-                    
-                    <p class="text-gray-700 text-sm mb-4">${job.description}</p>
-                    
-                    <div class="bg-gray-50 p-3 rounded mb-4 text-sm">
-                        <p class="font-semibold text-gray-700 mb-2">Requirements:</p>
-                        <p class="text-gray-600">${job.requirements}</p>
-                    </div>
-                    
-                    <div class="flex justify-between items-center">
-                        <span class="text-lg font-bold text-blue-600">${job.salary}</span>
-                        <button onclick="openApplicationModal(${job.id})" class="btn btn-primary btn-small">
-                            <i class="fas fa-arrow-right"></i> Apply Now
-                        </button>
-                    </div>
-                </div>
-            `).join('');
+                `;
+            }).join('');
         }
 
         function openApplicationModal(jobId) {
             document.getElementById('selectedJobId').value = jobId;
             document.getElementById('applicationForm').reset();
             uploadedPDFName = "";
-            document.getElementById('pdfFileNameDisplay').innerHTML = `Click or drag & drop to upload PDF resume`;
+            document.getElementById('mockResumeSelector').value = "";
+            document.getElementById('pdfFileNameDisplay').innerHTML = `Click or drag & drop to upload PDF resume file`;
             document.getElementById('applicationModal').classList.add('active');
         }
 
@@ -337,98 +457,163 @@ Head Guidance Counselor | Academy of Saint Mary (2020 - Present)
         function submitApplication(event) {
             event.preventDefault();
 
-            const name = document.getElementById('applicantName').value;
-            const email = document.getElementById('applicantEmail').value;
-            const phone = document.getElementById('applicantPhone').value;
-            let resume = document.getElementById('applicantResume').value;
+            const name = document.getElementById('applicantName').value.trim();
+            const email = document.getElementById('applicantEmail').value.trim();
+            const phone = document.getElementById('applicantPhone').value.trim();
+            let resume = document.getElementById('applicantResume').value.trim();
             const jobId = document.getElementById('selectedJobId').value;
 
             if (!uploadedPDFName && !document.getElementById('resumeFileInput').files[0]) {
-                alert('Please upload your PDF resume file before submitting.');
+                alert('Please upload your PDF resume or choose a preset before submitting.');
                 return;
             }
 
             if (!resume) {
-                resume = `[PDF Resume Attached: ${uploadedPDFName || 'Applicant_Resume.pdf'}] Experienced LPT educator with strong background in lesson planning, classroom management, and K-12 DepEd curriculum execution.`;
+                resume = `[PDF Resume Attached: ${uploadedPDFName || 'Applicant_Resume.pdf'}] Professional applicant LPT with credentials in pedagogical curriculum management.`;
             }
 
             const fileName = uploadedPDFName || (document.getElementById('resumeFileInput').files[0] ? document.getElementById('resumeFileInput').files[0].name : "Resume.pdf");
 
-            // Add applicant to localStorage (auto-scores with AI)
+            // Save candidate to database (Only resume is uploaded on applying)
             const applicant = SAGA.addApplicant(name, email, phone, resume, jobId, fileName);
             const job = SAGA.getJobById(jobId);
 
-            // Show custom styled modal notification
             SAGA.showCustomAlert(
-                `Application Successfully Submitted & Routed to HR Portal.\n\nPosition: ${job ? job.title : 'Faculty Position'}\nApplicant ID: ${applicant.id}\nUploaded Document: ${fileName}\nAI Compatibility Score: ${applicant.compatibility_score || 85}/100\n\nYour candidate profile and extracted competencies are now active in the St. Aloysius Gonzaga Academy HR Recruitment Database for review!`,
-                "Application Sent to HR Master Portal"
+                `Your application has been successfully submitted to the SAGA HR Portal!\n\nApplicant ID: ${applicant.id}\nPosition: ${job ? job.title : 'Faculty Role'}\n\nYour resume will be reviewed by our Search & Screening Committee. You will receive an email notification once your application is under review. Thank you!`,
+                "Application Submitted Successfully"
             ).then(() => {
-                // Redirect user to login page
                 window.location.href = 'login.html';
             });
 
-            // Close modal and reset form
             closeApplicationModal();
             document.getElementById('applicationForm').reset();
             renderSubmittedApplicants();
         }
 
         function renderSubmittedApplicants() {
-            const applicantsList = document.getElementById('applicants-list');
+            const list = document.getElementById('applicants-list');
             const content = document.getElementById('applicants-content');
             const applicants = SAGA.getApplicants();
 
             if (applicants.length === 0) {
-                content.innerHTML = '<p class="text-gray-500">No applications recorded yet. Submit an application above to view tracking details.</p>';
+                content.innerHTML = `<div class="col-span-full p-6 text-center text-slate-400 italic text-xs">No active applications in sandbox memory yet. Complete the modal application above to test candidate routing.</div>`;
             } else {
                 content.innerHTML = applicants.slice().reverse().map(app => {
                     const job = SAGA.getJobById(app.jobId);
+                    let scoreBg = 'bg-amber-400 text-slate-900 border border-amber-500';
+                    if (app.compatibility_score >= 80) scoreBg = 'bg-emerald-500 text-white border border-emerald-600';
+                    else if (app.compatibility_score < 60) scoreBg = 'bg-rose-500 text-white border border-rose-600';
+
                     return `
-                        <div class="bg-white p-4 rounded-xl border-l-4 border-amber-500 border border-gray-200 shadow-sm space-y-2">
-                            <div class="flex justify-between items-start">
-                                <div>
-                                    <p class="font-bold text-gray-900 text-base">${app.name}</p>
-                                    <p class="text-sm text-gray-600"><i class="fas fa-envelope text-gray-400 mr-1"></i>${app.email} | <i class="fas fa-phone text-gray-400 mr-1"></i>${app.phone}</p>
-                                    <p class="text-sm mt-1.5 flex items-center gap-1.5">
-                                        <span class="font-bold text-gray-900">Position Applied:</span>
-                                        <span class="px-2 py-0.5 bg-amber-100 text-amber-900 font-extrabold rounded text-xs border border-amber-300">
-                                            ${job ? job.title : 'Faculty Position'}
-                                        </span>
-                                    </p>
-                                    <p class="text-xs text-gray-400 mt-1">
-                                        Filing Date: ${SAGA.formatDate(app.appliedDate)}
-                                    </p>
+                        <div class="bg-slate-50 border border-slate-200/80 p-4 rounded-2xl flex flex-col justify-between text-xs font-semibold gap-3">
+                            <div class="flex justify-between items-start gap-2">
+                                <div class="min-w-0">
+                                    <h4 class="font-extrabold text-slate-800 truncate">${app.name}</h4>
+                                    <p class="text-[10px] text-slate-400 mt-0.5 truncate">${app.email} • ${app.phone}</p>
                                 </div>
-                                <span class="px-2.5 py-1 rounded text-xs font-extrabold bg-slate-900 text-amber-400 border border-slate-700">
-                                    ${(app.status || 'applied').toUpperCase()}
-                                </span>
+                                <span class="px-2 py-0.5 text-[9px] font-extrabold rounded-full bg-slate-800 text-amber-400 uppercase tracking-widest shrink-0 border border-slate-700">${app.status || 'applied'}</span>
                             </div>
-                            ${app.compatibility_score ? `
-                                <div class="mt-3 flex items-center gap-3 pt-2 border-t border-gray-100">
-                                    <div class="px-2.5 py-1 rounded-full font-extrabold text-xs text-slate-950 ${app.compatibility_score >= 70 ? 'bg-amber-400 border border-amber-500' : 'bg-gray-200'}">
-                                        ${app.compatibility_score} / 100
-                                    </div>
-                                    <span class="text-xs font-bold text-gray-600">AI Pedagogy Match Rating</span>
+                            
+                            <div class="flex items-center justify-between border-t pt-2.5 mt-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-400 font-bold">Applied:</span>
+                                    <span class="px-2 py-0.5 bg-indigo-50 text-indigo-700 rounded border border-indigo-200/60 font-extrabold text-[10px]">${job ? job.title : 'Faculty Position'}</span>
                                 </div>
-                            ` : ''}
+                                <div class="flex items-center gap-1.5">
+                                    <span class="px-2 py-0.5 text-[10px] font-bold rounded-full ${scoreBg}">${app.compatibility_score || 80}/100</span>
+                                    <span class="text-[9px] text-slate-400">Match</span>
+                                </div>
+                            </div>
                         </div>
                     `;
                 }).join('');
             }
 
-            applicantsList.classList.remove('hidden');
-            applicantsList.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            list.classList.remove('hidden');
+            list.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        const showExistingApplicants = renderSubmittedApplicants;
-
-        // Close modal when clicking outside
+        // Close modal when clicking outside overlay
         document.getElementById('applicationModal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('applicationModal')) {
                 closeApplicationModal();
             }
         });
     </script>
-</body>
 
+    <!-- ======================================================================= -->
+    <!-- SAGA CHAT SUPPORT FLOAT WIDGET (LANDING PAGE) -->
+    <!-- ======================================================================= -->
+    <div class="fixed bottom-5 right-5 z-50" style="font-family: 'Poppins', sans-serif;">
+        <!-- Floating chat button -->
+        <button id="chatFloatBtn" onclick="document.getElementById('chatSupportCard').classList.toggle('hidden')" class="w-14 h-14 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full flex items-center justify-center shadow-2xl transform active:scale-95 transition-all relative border-none cursor-pointer">
+            <i class="fas fa-comments text-xl"></i>
+            <span class="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full border-2 border-white animate-pulse"></span>
+        </button>
+
+        <!-- Floating chat card panel -->
+        <div id="chatSupportCard" class="hidden absolute right-0 bottom-16 w-80 bg-white rounded-2xl border border-slate-200 shadow-2xl overflow-hidden z-50 text-xs font-semibold">
+            <!-- Header -->
+            <div class="flex justify-between items-center p-4 bg-indigo-600 text-white">
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center text-sm"><i class="fas fa-robot"></i></div>
+                    <div>
+                        <span class="font-bold text-sm block">SAGA Assistant</span>
+                        <span class="text-[9px] text-indigo-200 flex items-center gap-1"><span class="w-1.5 h-1.5 bg-emerald-400 rounded-full inline-block"></span> Online</span>
+                    </div>
+                </div>
+                <button onclick="document.getElementById('chatSupportCard').classList.add('hidden')" class="text-white/70 hover:text-white text-lg border-none bg-transparent cursor-pointer">&times;</button>
+            </div>
+
+            <!-- Messages area -->
+            <div id="chatMessagesList" class="space-y-3 max-h-52 overflow-y-auto p-4">
+                <div class="bg-slate-100 rounded-xl rounded-tl-none p-2.5 text-slate-600 max-w-[85%] text-[10px] leading-relaxed">
+                    Hi! Welcome to St. Aloysius Gonzaga Academy's career portal. I can answer questions about open positions, the application process, or school policies. How can I help?
+                </div>
+            </div>
+
+            <!-- Input -->
+            <form onsubmit="handleLandingChatMsg(event)" class="flex gap-2 p-3 border-t border-slate-100">
+                <input type="text" id="chatInputMessage" required placeholder="Ask about positions, process..." class="flex-1 p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-xs bg-slate-50">
+                <button type="submit" class="px-3.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl border-none cursor-pointer shadow-sm"><i class="fas fa-paper-plane"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function handleLandingChatMsg(e) {
+            e.preventDefault();
+            const input = document.getElementById('chatInputMessage');
+            const msg = input.value.trim();
+            const list = document.getElementById('chatMessagesList');
+            if (!msg) return;
+
+            // User message
+            list.innerHTML += `<div class="bg-indigo-600 text-white rounded-xl rounded-tr-none p-2.5 ml-auto max-w-[85%] text-[10px] text-right font-medium">${msg}</div>`;
+            input.value = '';
+            list.scrollTop = list.scrollHeight;
+
+            // Bot reply
+            setTimeout(() => {
+                let reply = "Thank you for your inquiry! For detailed information about our positions, please browse the listings above and click 'Apply Now' on any role that matches your qualifications.";
+
+                const lower = msg.toLowerCase();
+                if (lower.includes('apply') || lower.includes('how')) {
+                    reply = "To apply: 1) Browse our open positions above, 2) Click 'Apply Now', 3) Upload your resume/application letter, 4) Submit! Our HR Search & Screening Committee will review your credentials and contact you.";
+                } else if (lower.includes('require') || lower.includes('document') || lower.includes('need')) {
+                    reply = "For initial application, you only need to submit your Resume and Application Letter. Once recruited, you will be asked to submit: Transcript of Records, Diploma, PRC LET License, NBI Clearance, Letters of Recommendation, and other credentials through our Onboarding Portal.";
+                } else if (lower.includes('salary') || lower.includes('pay') || lower.includes('compensation')) {
+                    reply = "Salary ranges are listed on each job posting. Our compensation packages are competitive and comply with DepEd standards. Benefits include leave credits, HMO, and professional development opportunities.";
+                } else if (lower.includes('process') || lower.includes('hiring') || lower.includes('step')) {
+                    reply = "Our hiring process follows Article V policy: 1) Submit resume, 2) Written examinations, 3) Teaching demonstration, 4) Department Head interview, 5) President's final interview, 6) Employment contract signing, 7) School policy orientation.";
+                } else if (lower.includes('contact') || lower.includes('email') || lower.includes('phone')) {
+                    reply = "You can reach our HR Department at hr@sagacademy.edu.ph or call us at (02) 8123-4567. Office hours are Monday-Friday, 8:00 AM to 5:00 PM.";
+                }
+
+                list.innerHTML += `<div class="bg-slate-100 rounded-xl rounded-tl-none p-2.5 text-slate-600 max-w-[85%] text-[10px] leading-relaxed">${reply}</div>`;
+                list.scrollTop = list.scrollHeight;
+            }, 800);
+        }
+    </script>
+</body>
 </html>

@@ -23,7 +23,7 @@
             </div>
             <div class="flex gap-6 items-center">
                 <a href="index.html" class="nav-link font-semibold">Careers & Faculty Openings</a>
-                <a href="hr-hiring.html" class="nav-link font-semibold">HR Master Portal</a>
+                <a href="dashboard.html" class="nav-link font-semibold">HR Master Portal</a>
                 <a href="employee-ess.html" class="nav-link font-semibold">Employee Self-Service</a>
             </div>
         </div>
@@ -175,7 +175,7 @@
 
     <!-- Clearance Modal -->
     <div id="clearanceModal" class="modal-overlay">
-        <div class="modal">
+        <div class="modal max-w-2xl">
             <div class="modal-header">
                 <h2 class="modal-title">Approve & Archive Employee</h2>
                 <button onclick="closeClearanceModal()" class="modal-close">&times;</button>
@@ -183,17 +183,59 @@
             <div class="modal-body">
                 <div id="clearanceSummary" class="space-y-4 mb-6"></div>
 
+                <!-- Clearance Checklist -->
+                <div class="mb-6 p-4 bg-slate-50 border rounded-xl space-y-3">
+                    <h4 class="font-extrabold text-xs text-slate-900 uppercase tracking-wider border-b pb-1.5"><i class="fas fa-tasks text-red-500 mr-1"></i> Department Clearance Check-off</h4>
+                    <div class="space-y-2 text-xs font-semibold">
+                        <label class="flex items-center justify-between p-2.5 bg-white border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                            <span class="flex items-center gap-2"><i class="fas fa-graduation-cap text-slate-400"></i> 1. Academic Turnover (Grades & Syllabus)</span>
+                            <input type="checkbox" id="clearance-academic" onchange="checkClearanceConditions()" class="rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
+                        </label>
+                        <label class="flex items-center justify-between p-2.5 bg-white border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                            <span class="flex items-center gap-2"><i class="fas fa-book-reader text-slate-400"></i> 2. Library Desk (Books & Media cleared)</span>
+                            <input type="checkbox" id="clearance-library" onchange="checkClearanceConditions()" class="rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
+                        </label>
+                        <label class="flex items-center justify-between p-2.5 bg-white border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                            <span class="flex items-center gap-2"><i class="fas fa-laptop text-slate-400"></i> 3. Property & Asset Turnover (Laptops, Keys, Files - Article VIII)</span>
+                            <input type="checkbox" id="clearance-property" onchange="checkClearanceConditions()" class="rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
+                        </label>
+                        <label class="flex items-center justify-between p-2.5 bg-white border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                            <span class="flex items-center gap-2"><i class="fas fa-coins text-slate-400"></i> 4. Accounting Desk (Settlements & Loans)</span>
+                            <input type="checkbox" id="clearance-finance" onchange="checkClearanceConditions()" class="rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
+                        </label>
+                        <label class="flex items-center justify-between p-2.5 bg-white border border-slate-200 rounded-xl cursor-pointer hover:bg-slate-50 transition">
+                            <span class="flex items-center gap-2"><i class="fas fa-file-contract text-slate-400"></i> 5. HR Audit (Exit Interview forms)</span>
+                            <input type="checkbox" id="clearance-hr" onchange="checkClearanceConditions()" class="rounded border-slate-300 text-red-600 focus:ring-red-500 cursor-pointer">
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Exit Interview Form -->
+                <div class="mb-6 p-4 bg-slate-50 border rounded-xl space-y-3">
+                    <h4 class="font-extrabold text-xs text-slate-900 uppercase tracking-wider border-b pb-1.5"><i class="fas fa-comments text-amber-500 mr-1"></i> Exit Interview notes</h4>
+                    <div class="space-y-3 text-xs">
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Tenure Rating (Overall Experience) *</label>
+                            <select id="exitRating" class="w-full p-2.5 border rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-red-500 font-semibold text-slate-800">
+                                <option value="5">5 - Highly Satisfied</option>
+                                <option value="4">4 - Satisfied</option>
+                                <option value="3">3 - Neutral / Satisfactory</option>
+                                <option value="2">2 - Dissatisfied</option>
+                                <option value="1">1 - Highly Dissatisfied</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-bold text-slate-700 mb-1">Exit Comments / Remarks *</label>
+                            <textarea id="exitNotes" rows="3" required placeholder="Record key feedback, primary reason for exit, and clearance status remarks..." class="w-full p-2.5 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-red-500 font-semibold text-slate-800"></textarea>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="alert alert-warning mb-6">
                     <i class="fas fa-exclamation-triangle"></i>
                     <div>
                         <p class="font-semibold mb-1">Final Action</p>
-                        <p class="text-sm">This will immediately:</p>
-                        <ul class="text-sm list-disc list-inside mt-2 space-y-1">
-                            <li>Revoke employee's portal access</li>
-                            <li>Mark as "Separated"</li>
-                            <li>Archive employee record</li>
-                            <li>Generate Certificate of Employment</li>
-                        </ul>
+                        <p class="text-sm">This will immediately revoke portal credentials, set separation date, and archive records.</p>
                     </div>
                 </div>
 
@@ -201,7 +243,7 @@
 
                 <div class="modal-footer gap-3">
                     <button onclick="closeClearanceModal()" class="btn btn-outline flex-1">Cancel</button>
-                    <button onclick="confirmClearance()" class="btn btn-danger flex-1">
+                    <button id="btnConfirmClearance" onclick="confirmClearance()" class="btn btn-danger flex-1 bg-red-650 hover:bg-red-700 text-white border-none cursor-not-allowed opacity-50" disabled>
                         <i class="fas fa-check"></i> Approve & Archive
                     </button>
                 </div>
@@ -211,17 +253,24 @@
 
     <!-- COE View Modal -->
     <div id="coeModal" class="modal-overlay">
-        <div class="modal">
+        <div class="modal max-w-2xl">
             <div class="modal-header">
-                <h2 class="modal-title">Certificate of Employment</h2>
+                <h2 class="modal-title">Archived Offboarding Documents</h2>
                 <button onclick="closeCOEModal()" class="modal-close">&times;</button>
             </div>
             <div class="modal-body">
-                <div id="coeContent" class="bg-white p-8 border-2 border-gray-300 min-h-96"></div>
+                <!-- Toggle Tab Buttons -->
+                <div class="flex border-b border-gray-200 mb-4 text-xs font-bold">
+                    <button id="tabBtnCOE" onclick="switchCOEDocumentTab('coe')" class="py-2 px-4 border-b-2 border-indigo-600 text-indigo-600 focus:outline-none">Certificate of Employment (COE)</button>
+                    <button id="tabBtnCOC" onclick="switchCOEDocumentTab('coc')" class="py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 focus:outline-none">Clearance Certificate (COC)</button>
+                </div>
+                
+                <div id="coeContent" class="bg-white p-8 border border-gray-300 rounded-xl shadow-inner min-h-96 max-h-[450px] overflow-y-auto font-serif"></div>
+                
                 <div class="modal-footer gap-3 mt-6">
                     <button onclick="closeCOEModal()" class="btn btn-outline flex-1">Close</button>
-                    <button onclick="downloadCOE()" class="btn btn-primary flex-1">
-                        <i class="fas fa-download"></i> Download PDF
+                    <button onclick="downloadCOE()" class="btn btn-primary flex-1 border-none bg-blue-600 text-white hover:bg-blue-700">
+                        <i class="fas fa-download"></i> Download Document
                     </button>
                 </div>
             </div>
@@ -372,32 +421,94 @@
 
             const job = SAGA.getJobById(employee.jobId);
 
+            // Calculate Notice Period compliance (Article VIII)
+            let noticeStatusHTML = '';
+            if (employee.exitInitiatedDate) {
+                const initiated = new Date(employee.exitInitiatedDate);
+                const diffTime = Math.abs(new Date() - initiated);
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                
+                if (diffDays < 30) {
+                    noticeStatusHTML = `
+                        <div class="bg-amber-50 p-4 rounded-lg border-l-4 border-amber-500 text-xs">
+                            <p class="text-amber-800 font-bold uppercase text-[10px] flex items-center gap-1.5"><i class="fas fa-exclamation-triangle"></i> Article VIII: Exit Notice Period Check</p>
+                            <p class="font-bold text-slate-800 mt-1">Notice Served: <span class="text-amber-700">${diffDays} / 30 days</span></p>
+                            <p class="text-[10px] text-slate-500 mt-1">Employee has served less than the mandatory 1-month (30 days) exit notice period prior to final separation clearance.</p>
+                        </div>
+                    `;
+                } else {
+                    noticeStatusHTML = `
+                        <div class="bg-emerald-50 p-4 rounded-lg border-l-4 border-emerald-500 text-xs">
+                            <p class="text-emerald-800 font-bold uppercase text-[10px] flex items-center gap-1.5"><i class="fas fa-check-circle"></i> Article VIII: Exit Notice Period Check</p>
+                            <p class="font-bold text-slate-800 mt-1">Notice Served: <span class="text-emerald-700">${diffDays} / 30 days (Completed)</span></p>
+                            <p class="text-[10px] text-slate-500 mt-1">Notice period successfully served in full compliance with institutional policies.</p>
+                        </div>
+                    `;
+                }
+            } else {
+                noticeStatusHTML = `
+                    <div class="bg-amber-50 p-4 rounded-lg border-l-4 border-amber-500 text-xs">
+                        <p class="text-amber-800 font-bold uppercase text-[10px] flex items-center gap-1.5"><i class="fas fa-exclamation-triangle"></i> Article VIII: Exit Notice Period Check</p>
+                        <p class="font-bold text-slate-800 mt-1">Notice Served: <span class="text-amber-700">0 / 30 days (No Notice Logged)</span></p>
+                        <p class="text-[10px] text-slate-500 mt-1">No separation notice timestamp recorded in database. Early override is required.</p>
+                    </div>
+                `;
+            }
+
             const summary = document.getElementById('clearanceSummary');
             summary.innerHTML = `
-                <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
-                    <p class="text-sm text-gray-600">Employee Name</p>
-                    <p class="font-bold text-gray-900 text-lg">${employee.name}</p>
+                <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500 text-xs">
+                    <p class="text-gray-500 font-bold uppercase text-[10px]">Employee Name</p>
+                    <p class="font-extrabold text-slate-800 text-base">${employee.name}</p>
                 </div>
-                <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
-                    <p class="text-sm text-gray-600">Position</p>
-                    <p class="font-bold text-gray-900">${job ? job.title : 'Unknown'}</p>
+                <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500 text-xs">
+                    <p class="text-gray-500 font-bold uppercase text-[10px]">Position</p>
+                    <p class="font-bold text-slate-800">${job ? job.title : 'Unknown'}</p>
                 </div>
-                <div class="grid grid-cols-2 gap-4">
+                <div class="grid grid-cols-2 gap-4 text-xs">
                     <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
-                        <p class="text-sm text-gray-600">Onboarded</p>
-                        <p class="font-bold text-gray-900">${new Date(employee.onboardedDate).toLocaleDateString()}</p>
+                        <p class="text-gray-500 font-bold uppercase text-[10px]">Onboarded</p>
+                        <p class="font-bold text-slate-800">${employee.onboardedDate ? new Date(employee.onboardedDate).toLocaleDateString() : 'N/A'}</p>
                     </div>
                     <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
-                        <p class="text-sm text-gray-600">Exit Reason</p>
-                        <p class="font-bold text-gray-900 capitalize">${(employee.exitReason || 'N/A').replace(/_/g, ' ')}</p>
+                        <p class="text-gray-500 font-bold uppercase text-[10px]">Exit Reason</p>
+                        <p class="font-bold text-slate-800 capitalize">${(employee.exitReason || 'N/A').replace(/_/g, ' ')}</p>
                     </div>
                 </div>
+                ${noticeStatusHTML}
             `;
+
+            // Reset inputs
+            document.getElementById('clearance-academic').checked = false;
+            document.getElementById('clearance-library').checked = false;
+            document.getElementById('clearance-property').checked = false;
+            document.getElementById('clearance-finance').checked = false;
+            document.getElementById('clearance-hr').checked = false;
+            document.getElementById('exitNotes').value = '';
+            document.getElementById('exitRating').value = '5';
+            checkClearanceConditions();
 
             // Generate COE preview
             generateCOEPreview(employee);
 
             document.getElementById('clearanceModal').classList.add('active');
+        }
+
+        function checkClearanceConditions() {
+            const academic = document.getElementById('clearance-academic').checked;
+            const library = document.getElementById('clearance-library').checked;
+            const property = document.getElementById('clearance-property').checked;
+            const finance = document.getElementById('clearance-finance').checked;
+            const hr = document.getElementById('clearance-hr').checked;
+            
+            const btn = document.getElementById('btnConfirmClearance');
+            if (academic && library && property && finance && hr) {
+                btn.disabled = false;
+                btn.classList.remove('cursor-not-allowed', 'opacity-50');
+            } else {
+                btn.disabled = true;
+                btn.classList.add('cursor-not-allowed', 'opacity-50');
+            }
         }
 
         function generateCOEPreview(employee) {
@@ -407,7 +518,7 @@
             const coeHTML = `
                 <div style="text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #000;">
                     <h2 style="font-size: 18px; font-weight: bold; margin: 0;">SAGA-CORE INSTITUTIONAL HR SYSTEM</h2>
-                    <p style="margin: 5px 0; font-size: 14px; color: #666;">Human Resources Department</p>
+                    <p style="margin: 5px 0; font-size: 12px; color: #666;">Human Resources Department</p>
                 </div>
 
                 <h3 style="text-align: center; font-size: 16px; font-weight: bold; margin: 30px 0;">CERTIFICATE OF EMPLOYMENT</h3>
@@ -418,7 +529,7 @@
                     <p style="margin: 20px 0; text-align: justify;">
                         This is to certify that <strong>${employee.name}</strong> was employed by SAGA-Core as a 
                         <strong>${job ? job.title : 'Employee'}</strong> in the <strong>${job ? job.department : 'Department'}</strong> 
-                        from <strong>${new Date(employee.onboardedDate).toLocaleDateString()}</strong> to 
+                        from <strong>${employee.onboardedDate ? new Date(employee.onboardedDate).toLocaleDateString() : 'N/A'}</strong> to 
                         <strong>${today.toLocaleDateString()}</strong>.
                     </p>
 
@@ -446,10 +557,29 @@
         }
 
         function confirmClearance() {
+            const notes = document.getElementById('exitNotes').value.trim();
+            const rating = document.getElementById('exitRating').value;
+
+            if (!notes) {
+                alert("Please record the exit interview notes first.");
+                return;
+            }
+
+            // Save exit interview in SAGA core database
+            const data = SAGA.getData();
+            if (data.employees[selectedEmployeeForClearance]) {
+                data.employees[selectedEmployeeForClearance].exitInterview = {
+                    rating: parseInt(rating),
+                    notes: notes,
+                    completedDate: new Date().toISOString()
+                };
+                SAGA.saveData(data);
+            }
+
             const result = SAGA.approveAndArchiveEmployee(selectedEmployeeForClearance);
             
             if (result) {
-                alert(`✅ Employee Archived!\n\nName: ${result.employeeId}\nAccess Revoked\nCertificate Generated\n\nRecord moved to secure archive.`);
+                alert(`✅ Clearance approved and employee records archived securely.`);
                 closeClearanceModal();
                 loadData();
                 switchTab('pending');
@@ -459,6 +589,166 @@
         function closeClearanceModal() {
             document.getElementById('clearanceModal').classList.remove('active');
             selectedEmployeeForClearance = null;
+        }
+
+        let activeArchivedEmployee = null;
+        let activeCOEDocumentTab = 'coe';
+
+        function viewCOE(employeeId) {
+            const archived = SAGA.getArchivedEmployees().find(a => a.id === employeeId);
+            if (!archived) {
+                alert('Record not found');
+                return;
+            }
+            activeArchivedEmployee = archived;
+            switchCOEDocumentTab('coe');
+            document.getElementById('coeModal').classList.add('active');
+        }
+
+        function switchCOEDocumentTab(tab) {
+            activeCOEDocumentTab = tab;
+            const btnCOE = document.getElementById('tabBtnCOE');
+            const btnCOC = document.getElementById('tabBtnCOC');
+
+            if (tab === 'coe') {
+                btnCOE.className = "py-2 px-4 border-b-2 border-indigo-600 text-indigo-600 font-extrabold focus:outline-none";
+                btnCOC.className = "py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-extrabold focus:outline-none";
+                renderCOEDoc();
+            } else {
+                btnCOE.className = "py-2 px-4 border-b-2 border-transparent text-gray-500 hover:text-gray-700 font-extrabold focus:outline-none";
+                btnCOC.className = "py-2 px-4 border-b-2 border-indigo-600 text-indigo-600 font-extrabold focus:outline-none";
+                renderCOCDoc();
+            }
+        }
+
+        function renderCOEDoc() {
+            if (!activeArchivedEmployee) return;
+            const employee = activeArchivedEmployee;
+            const job = SAGA.getJobById(employee.jobId);
+            const today = new Date(employee.clearanceApprovedDate || Date.now());
+
+            const coeHTML = `
+                <div style="text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #000; font-family: sans-serif;">
+                    <h2 style="font-size: 18px; font-weight: bold; margin: 0; color: #0f172a;">ST. ALOYSIUS GONZAGA ACADEMY INC.</h2>
+                    <p style="margin: 5px 0; font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;">Office of the Director of Human Resources</p>
+                </div>
+
+                <h3 style="text-align: center; font-size: 16px; font-weight: bold; margin: 30px 0; font-family: sans-serif; text-transform: uppercase;">Certificate of Employment</h3>
+
+                <div style="margin: 30px 0; line-height: 1.8; font-size: 14px; color: #334155;">
+                    <p style="margin: 10px 0; font-weight: bold;">TO WHOM IT MAY CONCERN:</p>
+                    
+                    <p style="margin: 20px 0; text-align: justify;">
+                        This is to certify that <strong>${employee.name}</strong> was employed at St. Aloysius Gonzaga Academy Inc. as a 
+                        <strong>${job ? job.title : 'Employee'}</strong> in the <strong>${job ? job.department : 'Academic Department'}</strong> 
+                        from <strong>${employee.onboardedDate ? new Date(employee.onboardedDate).toLocaleDateString('en-PH', {year:'numeric',month:'long',day:'numeric'}) : 'N/A'}</strong> to 
+                        <strong>${new Date(employee.clearanceApprovedDate).toLocaleDateString('en-PH', {year:'numeric',month:'long',day:'numeric'})}</strong>.
+                    </p>
+
+                    <p style="margin: 20px 0; text-align: justify;">
+                        During their tenure, the employee demonstrated professional conduct, standard academic compliance, and fulfilled all pedagogical and institutional duties.
+                    </p>
+
+                    <p style="margin: 20px 0; text-align: justify;">
+                        This certification is issued upon their request for whatever lawful and professional purpose it may serve.
+                    </p>
+                </div>
+
+                <div style="margin-top: 60px; font-family: sans-serif; font-size: 13px;">
+                    <div style="margin: 20px 0;">
+                        <p style="margin: 0; font-weight: bold; border-top: 1px solid #94a3b8; display: inline-block; padding-top: 5px; width: 180px;">Dr. Albert Tan</p>
+                        <p style="margin: 3px 0; font-size: 11px; color: #64748b;">HR Director, Office of HR</p>
+                    </div>
+                    <p style="margin-top: 30px; font-size: 11px; color: #94a3b8; font-family: monospace;">
+                        System Verification ID: ${employee.id} • Issued: ${today.toLocaleDateString()}
+                    </p>
+                </div>
+            `;
+            document.getElementById('coeContent').innerHTML = coeHTML;
+        }
+
+        function renderCOCDoc() {
+            if (!activeArchivedEmployee) return;
+            const employee = activeArchivedEmployee;
+            const job = SAGA.getJobById(employee.jobId);
+            const today = new Date(employee.clearanceApprovedDate || Date.now());
+
+            const cocHTML = `
+                <div style="text-align: center; margin-bottom: 40px; padding-bottom: 20px; border-bottom: 2px solid #000; font-family: sans-serif;">
+                    <h2 style="font-size: 18px; font-weight: bold; margin: 0; color: #0f172a;">ST. ALOYSIUS GONZAGA ACADEMY INC.</h2>
+                    <p style="margin: 5px 0; font-size: 12px; color: #64748b; font-weight: bold; text-transform: uppercase; letter-spacing: 0.05em;">Office of the Director of Human Resources</p>
+                </div>
+
+                <h3 style="text-align: center; font-size: 16px; font-weight: bold; margin: 30px 0; font-family: sans-serif; text-transform: uppercase;">Official Clearance Certificate</h3>
+
+                <div style="margin: 30px 0; line-height: 1.8; font-size: 14px; color: #334155;">
+                    <p style="margin: 20px 0; text-align: justify;">
+                        This is to certify that <strong>${employee.name}</strong>, formerly serving as a 
+                        <strong>${job ? job.title : 'Employee'}</strong>, has been officially cleared of all academic, property, equipment, library, and cashiering liabilities with St. Aloysius Gonzaga Academy Inc. upon separation on 
+                        <strong>${new Date(employee.clearanceApprovedDate).toLocaleDateString('en-PH', {year:'numeric',month:'long',day:'numeric'})}</strong>.
+                    </p>
+
+                    <h4 style="font-size: 12px; font-weight: bold; text-transform: uppercase; border-bottom: 1px solid #cbd5e1; padding-bottom: 5px; margin-top: 25px;">Institutional Audit Turnover Sign-offs:</h4>
+                    <table style="width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; font-family: sans-serif;">
+                        <tbody>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 6px 0;">Academic Dept. Syllabus & Grades Turnover</td>
+                                <td style="text-align: right; padding: 6px 0; color: #16a34a; font-weight: bold;">✓ SIGNED & CLEARED</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 6px 0;">Library Desk resource return</td>
+                                <td style="text-align: right; padding: 6px 0; color: #16a34a; font-weight: bold;">✓ SIGNED & CLEARED</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 6px 0;">Property laptop & assets custody release</td>
+                                <td style="text-align: right; padding: 6px 0; color: #16a34a; font-weight: bold;">✓ SIGNED & CLEARED</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 6px 0;">Accounting Desk accounts & loan settlement</td>
+                                <td style="text-align: right; padding: 6px 0; color: #16a34a; font-weight: bold;">✓ SIGNED & CLEARED</td>
+                            </tr>
+                            <tr style="border-bottom: 1px solid #f1f5f9;">
+                                <td style="padding: 6px 0;">Human Resources Desk (Audit)</td>
+                                <td style="text-align: right; padding: 6px 0; color: #16a34a; font-weight: bold;">✓ SIGNED & CLEARED</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <p style="margin: 25px 0; text-align: justify;">
+                        <strong>Exit Interview tenure rating:</strong> ${employee.exitInterview?.rating || 5}/5.0 stars<br>
+                        <strong>Separation Feedback Remarks:</strong> <em>"${employee.exitInterview?.notes || 'No remarks logged.'}"</em>
+                    </p>
+                </div>
+
+                <div style="margin-top: 50px; font-family: sans-serif; font-size: 13px; display: flex; justify-content: space-between;">
+                    <div>
+                        <p style="margin: 0; font-weight: bold; border-top: 1px solid #94a3b8; display: inline-block; padding-top: 5px; width: 160px;">Dr. Albert Tan</p>
+                        <p style="margin: 3px 0; font-size: 11px; color: #64748b;">HR Director, Office of HR</p>
+                    </div>
+                    <div style="text-align: right;">
+                        <p style="margin: 0; font-weight: bold; border-top: 1px solid #94a3b8; display: inline-block; padding-top: 5px; width: 160px; text-align: right;">Accounting Cashier</p>
+                        <p style="margin: 3px 0; font-size: 11px; color: #64748b; text-align: right;">Finance Department Desk</p>
+                    </div>
+                </div>
+            `;
+            document.getElementById('coeContent').innerHTML = cocHTML;
+        }
+
+        function downloadCOE() {
+            if (!activeArchivedEmployee) return;
+            const docName = activeCOEDocumentTab === 'coe' ? 'Certificate_of_Employment' : 'Clearance_Certificate';
+            
+            // Print simulation window popup
+            const mywindow = window.open('', 'PRINT', 'height=650,width=900');
+            mywindow.document.write('<html><head><title>' + docName + '</title>');
+            mywindow.document.write('</head><body style="padding:40px; font-family: Georgia, serif;">');
+            mywindow.document.write(document.getElementById('coeContent').innerHTML);
+            mywindow.document.write('</body></html>');
+            mywindow.document.close();
+            mywindow.focus();
+            mywindow.print();
+            mywindow.close();
+            return true;
         }
 
         function viewEmployeeDetails(employeeId) {

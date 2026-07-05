@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAGA-Core | IoT RFID Gate Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.45);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+        .pulse-ring {
+            animation: pulse-border 2s infinite;
+        }
+        @keyframes pulse-border {
+            0% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7);
+            }
+            70% {
+                transform: scale(1);
+                box-shadow: 0 0 0 20px rgba(99, 102, 241, 0);
+            }
+            100% {
+                transform: scale(0.95);
+                box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+            }
+        }
+        .scanner-line {
+            animation: scan 3s infinite linear;
+        }
+        @keyframes scan {
+            0% { top: 0%; }
+            50% { top: 100%; }
+            100% { top: 0%; }
+        }
+        .fade-in-up {
+            animation: fadeInUp 0.4s ease forwards;
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col font-sans select-none">
+    <!-- Navbar -->
+    <nav class="glass-card sticky top-0 z-50 border-b border-white/5 py-4 px-6">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-white p-1 rounded-xl shadow-md flex items-center justify-center">
+                    <img src="assets/school_logo.png" alt="St. Aloysius Gonzaga Academy Logo" class="w-8 h-8 object-contain">
+                </div>
+                <div>
+                    <span class="block text-sm font-bold tracking-wide text-white">St. Aloysius Gonzaga Academy Inc.</span>
+                    <span class="block text-[9px] font-bold text-indigo-400 uppercase tracking-wider">IoT-RFID Gate Transit Kiosk</span>
+                </div>
+            </div>
+            <div class="flex gap-4">
+                <a href="dashboard.html" class="px-3.5 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-bold rounded-lg border border-slate-700 transition flex items-center gap-1.5"><i class="fas fa-home"></i> Back to Admin Dashboard</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <div class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
+        
+        <!-- Left: Kiosk Standby/Scan Terminal (Column 7) -->
+        <div class="lg:col-span-8 flex flex-col justify-between items-center glass-card rounded-3xl p-8 relative overflow-hidden shadow-2xl min-h-[580px]">
+            
+            <!-- Floating Live Clock -->
+            <div class="text-center mt-4">
+                <div id="liveTime" class="text-5xl sm:text-6xl font-extrabold text-amber-400 tracking-wider font-mono">00:00:00</div>
+                <div id="liveDate" class="text-xs sm:text-sm text-slate-400 font-semibold tracking-widest uppercase mt-2">Sunday, July 5, 2026</div>
+            </div>
+
+            <!-- Scanner Visualizer / Standing Container -->
+            <div class="my-8 flex flex-col items-center justify-center relative w-full flex-1">
+                
+                <!-- STANDBY SCANNING STATE -->
+                <div id="kioskStandby" class="flex flex-col items-center space-y-6">
+                    <div class="w-48 h-48 rounded-full border-4 border-indigo-500/30 flex items-center justify-center relative pulse-ring bg-indigo-950/20">
+                        <!-- Scanning line effect -->
+                        <div class="absolute w-full h-0.5 bg-indigo-400/60 shadow-lg scanner-line top-0"></div>
+                        <i class="fas fa-rss text-6xl text-indigo-400 animate-pulse"></i>
+                    </div>
+                    <div class="text-center">
+                        <h3 class="text-lg font-bold text-slate-200">Terminal Ready</h3>
+                        <p class="text-xs text-slate-400 mt-1.5 flex items-center justify-center gap-1.5"><i class="fas fa-wifi text-emerald-500 animate-ping"></i> Tap NFC/RFID Security Badge to Clock IN/OUT</p>
+                    </div>
+                </div>
+
+                <!-- GREETING / SCAN COMPLETED STATE -->
+                <div id="kioskFeedback" class="hidden w-full max-w-lg p-6 bg-slate-900/60 border border-white/10 rounded-2xl backdrop-blur-md text-xs space-y-5 fade-in-up">
+                    <div class="flex items-center gap-4 border-b border-white/5 pb-4">
+                        <!-- Employee Avatar Placeholder -->
+                        <div class="w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center border border-indigo-500/30 text-2xl shrink-0 font-bold" id="employeeAvatar">
+                            JD
+                        </div>
+                        <div class="min-w-0 flex-1">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <h2 class="text-lg font-extrabold text-white truncate" id="employeeName">Teacher Juan Dela Cruz</h2>
+                                <span id="logDirectionBadge" class="px-2.5 py-0.5 text-[10px] font-bold rounded-full uppercase tracking-wider">CLOCK IN</span>
+                            </div>
+                            <p class="text-slate-400 font-semibold mt-0.5" id="employeeTitle">Elementary Class Adviser</p>
+                            <p class="text-[10px] text-slate-500" id="employeeIdText">EMP_1624896000000</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 text-slate-300">
+                        <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
+                            <span class="text-slate-400 font-semibold">Verification Status</span>
+                            <span class="font-bold text-emerald-400 flex items-center gap-1 text-[10px]"><i class="fas fa-check-circle"></i> CARD CLEARANCE APPROVED</span>
+                        </div>
+                        <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl">
+                            <span class="text-slate-400 font-semibold">Logged Timestamp</span>
+                            <span class="font-mono font-bold text-white text-[13px]" id="logTimestamp">07:30:15 AM</span>
+                        </div>
+                    </div>
+
+                    <div class="p-3.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-center font-bold text-xs" id="greetingMessage">
+                        Good morning! Welcome to campus. Have a wonderful day of teaching!
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Terminal Footnote -->
+            <div class="text-[10px] text-slate-500 font-semibold uppercase tracking-wider text-center">
+                Terminal ID: GATE-ACC-01 • SAGA-Core Secure IoT Link
+            </div>
+        </div>
+
+        <!-- Right: Hardware Simulation Dashboard (Column 4) -->
+        <div class="lg:col-span-4 glass-card rounded-3xl p-6 flex flex-col justify-between shadow-lg">
+            <div class="space-y-5">
+                <div class="border-b border-white/5 pb-4">
+                    <h3 class="font-bold text-base text-slate-100 flex items-center gap-2"><i class="fas fa-terminal text-indigo-400"></i> Hardware Simulator console</h3>
+                    <p class="text-xs text-slate-400 mt-1">Simulate scanning a registered physical badge card at the receiver gate.</p>
+                </div>
+
+                <!-- Simulation Settings -->
+                <div class="p-3.5 bg-slate-900/40 border border-white/5 rounded-xl text-xs space-y-3">
+                    <div class="font-bold text-slate-300 uppercase tracking-wider text-[10px]">Simulation Controls</div>
+                    <div class="flex gap-2">
+                        <button onclick="setOverrideDirection('auto')" id="btnDirAuto" class="flex-1 py-2 rounded-lg font-bold border border-indigo-500 text-indigo-300 bg-indigo-500/10 shadow-sm transition text-center select-none text-[10px]">Auto Detect</button>
+                        <button onclick="setOverrideDirection('in')" id="btnDirIn" class="flex-1 py-2 rounded-lg font-bold border border-white/5 hover:bg-slate-800 text-slate-400 transition text-center select-none text-[10px]">Force IN</button>
+                        <button onclick="setOverrideDirection('out')" id="btnDirOut" class="flex-1 py-2 rounded-lg font-bold border border-white/5 hover:bg-slate-800 text-slate-400 transition text-center select-none text-[10px]">Force OUT</button>
+                    </div>
+                </div>
+
+                <!-- Active Staff list -->
+                <div class="space-y-3">
+                    <div class="flex justify-between items-center text-xs">
+                        <span class="font-bold text-slate-300 uppercase tracking-wider text-[10px]">Registered Gate Badges</span>
+                        <span id="badgeCount" class="px-2 py-0.5 bg-slate-800 text-slate-400 rounded text-[10px] font-bold">0 cards</span>
+                    </div>
+
+                    <div id="simStaffContainer" class="space-y-2.5 overflow-y-auto max-h-[300px] pr-1">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-6 border-t border-white/5 pt-4 text-[11px] text-slate-400 space-y-2 leading-relaxed bg-slate-900/20 p-3.5 rounded-xl border">
+                <p class="font-bold text-slate-300 uppercase tracking-wider text-[9px]"><i class="fas fa-info-circle text-indigo-400 mr-1"></i> Auto-detection logic:</p>
+                <p>The gate checks the employee's timeline logs today. If the last log type is "IN", this swipe defaults to "OUT" (Clocking out). Otherwise, it registers as "IN" (Clocking in). Force buttons will override this behavior.</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Alert / System Sound toggle -->
+    <div class="px-6 py-4 glass-card border-t border-white/5 flex flex-col sm:flex-row justify-between items-center text-xs text-slate-400 gap-4 mt-6">
+        <div>
+            SAGA-Core Institutional IoT Terminal Systems Version 1.4.2
+        </div>
+        <div class="flex items-center gap-2">
+            <i class="fas fa-volume-up text-slate-500"></i>
+            <span class="font-semibold">Synthesized Beep Sounds Enabled</span>
+        </div>
+    </div>
+
+    <!-- SAGA core app scripts -->
+    <script src="app.js"></script>
+    <script>
+        let overrideDirection = 'auto'; // auto, in, out
+        let feedbackTimer = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // Start clock
+            setInterval(updateClock, 1000);
+            updateClock();
+
+            // Load simulator staff list
+            loadSimStaff();
+        });
+
+        function updateClock() {
+            const now = new Date();
+            const hours = String(now.getHours() % 12 || 12).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const seconds = String(now.getSeconds()).padStart(2, '0');
+            const ampm = now.getHours() >= 12 ? 'PM' : 'AM';
+
+            document.getElementById('liveTime').textContent = `${hours}:${minutes}:${seconds} ${ampm}`;
+
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('liveDate').textContent = now.toLocaleDateString('en-US', options);
+        }
+
+        function setOverrideDirection(dir) {
+            overrideDirection = dir;
+            const btnAuto = document.getElementById('btnDirAuto');
+            const btnIn = document.getElementById('btnDirIn');
+            const btnOut = document.getElementById('btnDirOut');
+
+            btnAuto.className = "flex-1 py-2 rounded-lg font-bold border border-white/5 hover:bg-slate-800 text-slate-400 transition text-center select-none text-[10px]";
+            btnIn.className = "flex-1 py-2 rounded-lg font-bold border border-white/5 hover:bg-slate-800 text-slate-400 transition text-center select-none text-[10px]";
+            btnOut.className = "flex-1 py-2 rounded-lg font-bold border border-white/5 hover:bg-slate-800 text-slate-400 transition text-center select-none text-[10px]";
+
+            if (dir === 'auto') {
+                btnAuto.className = "flex-1 py-2 rounded-lg font-bold border border-indigo-500 text-indigo-300 bg-indigo-500/10 shadow-sm transition text-center select-none text-[10px]";
+            } else if (dir === 'in') {
+                btnIn.className = "flex-1 py-2 rounded-lg font-bold border border-emerald-500 text-emerald-300 bg-emerald-500/10 shadow-sm transition text-center select-none text-[10px]";
+            } else {
+                btnOut.className = "flex-1 py-2 rounded-lg font-bold border border-amber-500 text-amber-300 bg-amber-500/10 shadow-sm transition text-center select-none text-[10px]";
+            }
+        }
+
+        function loadSimStaff() {
+            const data = SAGA.getData();
+            const container = document.getElementById('simStaffContainer');
+            
+            // Filter employees who have rfidCardId linked AND are status 'active' or 'onboarding'
+            const roster = Object.values(data.employees).filter(e => e.rfidCardId && (e.status === 'active' || e.status === 'onboarding'));
+
+            document.getElementById('badgeCount').textContent = `${roster.length} registered cards`;
+
+            if (roster.length === 0) {
+                container.innerHTML = `<div class="p-6 text-center text-slate-500 italic text-[11px]">No registered badges. Go to HR Admin Dashboard -> Onboarding to link security cards.</div>`;
+                return;
+            }
+
+            container.innerHTML = roster.map(emp => {
+                const initials = emp.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+                const job = SAGA.getJobById(emp.jobId);
+                const role = job ? job.title : 'Faculty';
+
+                return `
+                    <div class="p-3 bg-white/5 border border-white/5 rounded-2xl flex justify-between items-center hover:bg-white/10 transition gap-3 text-xs">
+                        <div class="flex items-center gap-2.5 min-w-0">
+                            <div class="w-8 h-8 rounded-xl bg-slate-800 text-indigo-300 font-extrabold flex items-center justify-center shrink-0 border border-white/5">${initials}</div>
+                            <div class="min-w-0">
+                                <h4 class="font-bold text-slate-200 truncate">${emp.name}</h4>
+                                <p class="text-[9px] text-slate-400 truncate">${role} • UID: ${emp.rfidCardId}</p>
+                            </div>
+                        </div>
+                        <button onclick="simulateSwipe('${emp.id}')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-lg shrink-0 text-[10px] border-none shadow-sm flex items-center gap-1.5"><i class="fas fa-fingerprint"></i> Simulate Swipe</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function simulateSwipe(employeeId) {
+            const employee = SAGA.getEmployeeById(employeeId);
+            if (!employee) return;
+
+            // Determine log direction
+            let direction = 'in';
+            if (overrideDirection === 'auto') {
+                // Fetch attendance logs for today
+                const todayStr = new Date().toLocaleDateString();
+                const logs = SAGA.getAttendanceLogs(employeeId, 1);
+                const logsToday = logs.filter(l => l.date === todayStr);
+
+                if (logsToday.length > 0) {
+                    const lastLog = logsToday[logsToday.length - 1];
+                    direction = lastLog.type === 'in' ? 'out' : 'in';
+                }
+            } else {
+                direction = overrideDirection;
+            }
+
+            // Play synthesized success sound buzzer
+            playBeep('success');
+
+            // Record entry in database
+            const entry = SAGA.recordTimeEntry(employeeId, direction);
+            
+            // Format initials
+            const initials = employee.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+            document.getElementById('employeeAvatar').textContent = initials;
+            
+            // Populate card details
+            document.getElementById('employeeName').textContent = employee.name;
+            document.getElementById('employeeTitle').textContent = SAGA.getJobById(employee.jobId)?.title || 'Faculty Role';
+            document.getElementById('employeeIdText').textContent = `ID: ${employee.id} • Card UID: ${employee.rfidCardId}`;
+            
+            // Setup direction badge
+            const badge = document.getElementById('logDirectionBadge');
+            badge.textContent = `CLOCK ${direction.toUpperCase()}`;
+            if (direction === 'in') {
+                badge.className = "px-2.5 py-0.5 text-[10px] font-extrabold rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wider";
+                document.getElementById('greetingMessage').innerHTML = `Good morning! Welcome to campus. Have a wonderful day of teaching! <i class="fas fa-smile text-emerald-400 ml-1"></i>`;
+                document.getElementById('greetingMessage').className = "p-3.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 rounded-xl text-center font-bold text-xs";
+            } else {
+                badge.className = "px-2.5 py-0.5 text-[10px] font-extrabold rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 uppercase tracking-wider";
+                document.getElementById('greetingMessage').innerHTML = `Clock-out recorded. Thank you for your service today! Safe travels home! <i class="fas fa-home text-amber-400 ml-1"></i>`;
+                document.getElementById('greetingMessage').className = "p-3.5 bg-amber-500/10 border border-amber-500/20 text-amber-400 rounded-xl text-center font-bold text-xs";
+            }
+
+            document.getElementById('logTimestamp').textContent = new Date(entry.timestamp).toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+            // Display Feedback Card, Hide Standby
+            document.getElementById('kioskStandby').classList.add('hidden');
+            document.getElementById('kioskFeedback').classList.remove('hidden');
+
+            // Audit log trail entry
+            const trailMsg = `IoT RFID scan received at Gate Transit Terminal for [${employee.name}]: CLOCK ${direction.toUpperCase()} recorded.`;
+            
+            // Append log trail directly in shared data
+            const data = SAGA.getData();
+            if (data.systemLogs) {
+                data.systemLogs.unshift({
+                    timestamp: new Date().toISOString(),
+                    message: trailMsg
+                });
+                SAGA.saveData(data);
+            }
+
+            // Set timeout to restore standby state after 4 seconds
+            if (feedbackTimer) clearTimeout(feedbackTimer);
+            feedbackTimer = setTimeout(() => {
+                document.getElementById('kioskFeedback').classList.add('hidden');
+                document.getElementById('kioskStandby').classList.remove('hidden');
+            }, 4000);
+        }
+
+        function playBeep(type) {
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                if (type === 'success') {
+                    oscillator.type = 'sine';
+                    oscillator.frequency.setValueAtTime(880, audioCtx.currentTime); // High pitch A5
+                    gainNode.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                    oscillator.start();
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+                    oscillator.stop(audioCtx.currentTime + 0.15);
+                } else {
+                    oscillator.type = 'sawtooth';
+                    oscillator.frequency.setValueAtTime(220, audioCtx.currentTime); // Low pitch A3
+                    gainNode.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    oscillator.start();
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+                    oscillator.stop(audioCtx.currentTime + 0.3);
+                }
+            } catch (e) {
+                console.warn("Web Audio API blocked or not supported by browser: ", e);
+            }
+        }
+    </script>
+</body>
+</html>

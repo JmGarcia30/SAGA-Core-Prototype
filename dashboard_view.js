@@ -360,6 +360,75 @@ function renderOverviewMetrics() {
             </div>
         `).join('');
     }
+
+    // Refresh pending requests queue in side menu & bell alerts
+    renderRequestsSidebar();
+    checkCredentialMonitoringAlerts();
+}
+
+function renderRequestsSidebar() {
+    const data = SAGA.getData();
+    const container = document.getElementById('dashboard-requests-sidebar');
+    const countBadge = document.getElementById('sideRequestsCount');
+    if (!container) return;
+
+    let html = '';
+    let count = 0;
+
+    // 1. Leave Requests
+    const leaves = data.leaveRequests || [];
+    const pendingLeaves = leaves.filter(l => l.status === 'pending');
+    pendingLeaves.forEach(req => {
+        count++;
+        const emp = data.employees[req.employeeId] || { name: 'Staff Member' };
+        html += `
+            <div class="p-2.5 bg-yellow-50/50 border border-yellow-100 rounded-xl flex items-start gap-2.5 hover:bg-yellow-50 transition cursor-pointer" onclick="switchNavTab('leave')">
+                <div class="w-7 h-7 rounded-full bg-yellow-100 text-yellow-600 flex items-center justify-center text-xs shrink-0"><i class="fas fa-plane-departure"></i></div>
+                <div class="min-w-0 flex-1">
+                    <p class="font-bold text-slate-800 truncate">${emp.name}</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5 font-medium leading-none">Filed Leave: ${req.leaveType.toUpperCase()}</p>
+                </div>
+            </div>
+        `;
+    });
+
+    // 2. Pending Exit Clearances
+    const pendingExits = Object.values(data.employees).filter(e => e.status === 'pending_exit');
+    pendingExits.forEach(emp => {
+        count++;
+        html += `
+            <div class="p-2.5 bg-red-50/50 border border-red-100 rounded-xl flex items-start gap-2.5 hover:bg-red-50 transition cursor-pointer" onclick="switchNavTab('exit')">
+                <div class="w-7 h-7 rounded-full bg-red-100 text-red-600 flex items-center justify-center text-xs shrink-0"><i class="fas fa-door-open"></i></div>
+                <div class="min-w-0 flex-1">
+                    <p class="font-bold text-slate-800 truncate">${emp.name}</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5 font-medium leading-none">Clearance Check-off Required</p>
+                </div>
+            </div>
+        `;
+    });
+
+    // 3. New Job Applicants
+    const newApps = (data.applicants || []).filter(a => a.isNew);
+    newApps.forEach(app => {
+        count++;
+        const job = SAGA.getJobById(app.jobId) || { title: 'Faculty Strand' };
+        html += `
+            <div class="p-2.5 bg-indigo-50/50 border border-indigo-150 rounded-xl flex items-start gap-2.5 hover:bg-indigo-50 transition cursor-pointer" onclick="switchNavTab('applicants')">
+                <div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs shrink-0"><i class="fas fa-user-tie"></i></div>
+                <div class="min-w-0 flex-1">
+                    <p class="font-bold text-slate-800 truncate">${app.name}</p>
+                    <p class="text-[10px] text-slate-500 mt-0.5 font-medium leading-none">Candidate Applied: ${job.title}</p>
+                </div>
+            </div>
+        `;
+    });
+
+    if (count === 0) {
+        html = `<p class="text-slate-400 italic text-center py-4 leading-relaxed text-[11px]">No pending staff actions today.</p>`;
+    }
+
+    countBadge.textContent = count;
+    container.innerHTML = html;
 }
 
 function initializeCharts() {
@@ -546,27 +615,42 @@ function deleteJobPostingCampaign(id) {
 // ============================================================================
 // 3. JOB APPLICANTS (ATS Leaderboard & AI Parsing)
 // ============================================================================
+let selectedATSJobFilter = 'all';
+
 function renderApplicantsDropdowns() {
     const jobs = SAGA.getJobs();
-    const jobFilter = document.getElementById('filterAppJob');
-    
-    // Save current selection value
-    const curVal = jobFilter.value;
+    const container = document.getElementById('jobFilterPillsContainer');
+    if (!container) return;
 
-    jobFilter.innerHTML = '<option value="">All Job Listings</option>' + 
-        jobs.map(j => `<option value="${j.id}">${j.title.slice(0, 30)}...</option>`).join('');
+    let html = `
+        <button onclick="selectATSJobFilter('all')" id="btnJobFilter-all" class="px-3.5 py-1.5 rounded-xl transition text-[10px] font-bold select-none cursor-pointer ${selectedATSJobFilter === 'all' ? 'bg-indigo-650 text-white shadow-sm border-none' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}">
+            All Listings
+        </button>
+    `;
 
-    jobFilter.value = curVal;
+    html += jobs.map(j => `
+        <button onclick="selectATSJobFilter('${j.id}')" id="btnJobFilter-${j.id}" class="px-3.5 py-1.5 rounded-xl transition text-[10px] font-bold select-none cursor-pointer ${selectedATSJobFilter == j.id ? 'bg-indigo-650 text-white shadow-sm border-none' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}">
+            ${j.title}
+        </button>
+    `).join('');
+
+    container.innerHTML = html;
+}
+
+function selectATSJobFilter(jobId) {
+    selectedATSJobFilter = jobId;
+    renderApplicantsDropdowns();
+    renderApplicantsList();
 }
 
 function renderApplicantsList() {
     const data = SAGA.getData();
-    const selectedJobId = document.getElementById('filterAppJob').value;
+    const selectedJobId = selectedATSJobFilter;
     const selectedStatus = document.getElementById('filterAppStatus').value;
 
     let filtered = data.applicants || [];
 
-    if (selectedJobId) {
+    if (selectedJobId && selectedJobId !== 'all') {
         filtered = filtered.filter(a => a.jobId === parseInt(selectedJobId));
     }
     if (selectedStatus) {
@@ -585,35 +669,40 @@ function renderApplicantsList() {
     body.innerHTML = filtered.map((app, index) => {
         const job = SAGA.getJobById(app.jobId);
         const rank = index + 1;
-        const score = app.compatibility_score || 'N/A';
+        const score = app.compatibility_score;
+        const scoreDisplay = score !== null && score !== undefined ? `${score}%` : '<span class="italic text-slate-400">Pending</span>';
         
         let scoreClass = 'bg-slate-100 text-slate-700';
-        if (app.compatibility_score >= 85) scoreClass = 'bg-emerald-100 text-emerald-900 border border-emerald-300 font-extrabold';
-        else if (app.compatibility_score >= 70) scoreClass = 'bg-amber-100 text-amber-900 border border-amber-300';
-        else if (app.compatibility_score) scoreClass = 'bg-rose-100 text-rose-900 border border-rose-300';
+        if (score >= 85) scoreClass = 'bg-emerald-100 text-emerald-900 border border-emerald-300 font-extrabold';
+        else if (score >= 70) scoreClass = 'bg-amber-100 text-amber-900 border border-amber-300';
+        else if (score) scoreClass = 'bg-rose-100 text-rose-900 border border-rose-300';
 
         let statusClass = 'badge-applied';
         if (app.status === 'scored') statusClass = 'badge-scored';
+        else if (app.status === 'under_review') statusClass = 'badge-under-review';
         else if (app.status === 'hired' || app.status === 'onboarding') statusClass = 'badge-hired';
+
+        // Add visual dot indicator for unread applicants
+        const unreadDot = app.isNew ? `<span class="w-1.5 h-1.5 rounded-full bg-indigo-650 animate-ping inline-block mr-1"></span>` : '';
 
         return `
             <tr class="hover:bg-slate-50 transition-colors cursor-pointer" onclick="selectApplicantForAI('${app.id}')">
                 <td class="text-center font-bold text-slate-800">${rank}</td>
                 <td>
-                    <p class="font-bold text-slate-900">${app.name}</p>
+                    <p class="font-bold text-slate-900 flex items-center gap-1">${unreadDot}${app.name}</p>
                     <p class="text-[10px] text-slate-400">${app.email}</p>
                 </td>
                 <td class="font-medium text-slate-700">${job ? job.title : 'Faculty Listing'}</td>
                 <td class="text-center">
-                    <span class="px-2 py-0.5 rounded text-[10px] ${scoreClass}">${score}%</span>
+                    <span class="px-2 py-0.5 rounded text-[10px] ${scoreClass}">${scoreDisplay}</span>
                 </td>
                 <td class="text-center">
-                    <span class="badge ${statusClass} text-[9px] uppercase font-bold tracking-wider">${app.status}</span>
+                    <span class="badge ${statusClass} text-[9px] uppercase font-bold tracking-wider">${app.status.replace('_', ' ')}</span>
                 </td>
                 <td class="text-right" onclick="event.stopPropagation()">
                     <div class="flex justify-end gap-1.5">
-                        <button onclick="selectApplicantForAI('${app.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] rounded font-bold" title="Open AI evaluation"><i class="fas fa-brain"></i> Score</button>
-                        ${app.status === 'scored' ? `<button onclick="initiateHiringProcess('${app.id}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[10px] rounded font-bold shadow-sm" title="Hire Candidate"><i class="fas fa-check"></i> Hire</button>` : ''}
+                        <button onclick="selectApplicantForAI('${app.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-750 text-[10px] rounded font-bold" title="Open AI evaluation"><i class="fas fa-brain"></i> View Details</button>
+                        ${(app.status === 'scored' || app.status === 'under_review' || app.status === 'applied') ? `<button onclick="initiateHiringProcess('${app.id}')" class="px-2.5 py-1 bg-indigo-650 hover:bg-indigo-700 text-white text-[10px] rounded font-bold shadow-sm" title="Recruit & Onboard"><i class="fas fa-user-plus"></i> Recruit</button>` : ''}
                     </div>
                 </td>
             </tr>
@@ -624,15 +713,66 @@ function renderApplicantsList() {
     if (filtered.length > 0 && !selectedApplicantId) {
         selectApplicantForAI(filtered[0].id);
     }
-}
-
-function selectApplicantForAI(id) {
+}function selectApplicantForAI(id) {
     selectedApplicantId = id;
     const app = SAGA.getApplicantById(id);
+    
+    // Clear "isNew" unread flag once HR selects them to review
+    if (app && app.isNew) {
+        const db = SAGA.getData();
+        const targetApp = db.applicants.find(a => a.id === id);
+        if (targetApp) {
+            targetApp.isNew = false;
+            SAGA.saveData(db);
+        }
+        // Refresh request indicators on overview
+        renderRequestsSidebar();
+        checkCredentialMonitoringAlerts();
+    }
+
     const job = SAGA.getJobById(app.jobId);
     const panel = document.getElementById('aiEvaluationCard');
 
     if (!app) return;
+
+    // If AI evaluation is pending (score is null), show appraisal scan block
+    if (app.compatibility_score === null || app.compatibility_score === undefined) {
+        panel.innerHTML = `
+            <div class="space-y-4 text-center py-8 font-sans">
+                <div class="w-16 h-16 bg-indigo-50 border border-indigo-150 text-indigo-650 rounded-full flex items-center justify-center text-xl mx-auto shadow-sm animate-pulse">
+                    <i class="fas fa-brain animate-bounce"></i>
+                </div>
+                <div class="space-y-1">
+                    <h3 class="font-extrabold text-sm text-slate-900">${app.name}</h3>
+                    <p class="text-[10px] text-indigo-700 font-bold uppercase tracking-wider">AI Evaluation Pending</p>
+                    <p class="text-[10px] text-slate-400 max-w-xs mx-auto leading-relaxed mt-1">This application resume transcript has not been processed. Click the scan button below to parse competencies and compute matching metrics.</p>
+                </div>
+
+                <div class="space-y-2.5 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-left">
+                    <p class="text-[9px] text-slate-400 font-bold uppercase tracking-wider"><i class="fas fa-file-alt text-slate-450 mr-1"></i> Submitted CV Transcript</p>
+                    <div class="text-[10px] text-slate-600 line-clamp-3 font-mono leading-relaxed bg-white border p-2.5 rounded-lg max-h-16 overflow-y-auto">
+                        ${app.resume}
+                    </div>
+                </div>
+
+                <button onclick="runAIScoringOnDemand('${app.id}')" id="btnRunAIScoring" class="w-full py-3 bg-indigo-650 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex justify-center items-center gap-1.5 border-none shadow-md cursor-pointer transition-all"><i class="fas fa-microchip"></i> Run SAGA AI CV Appraisal</button>
+            </div>
+        `;
+        return;
+    }
+
+    // Initialize Milestones tracking for School Policy compliance if missing
+    if (!app.milestones) {
+        app.milestones = {
+            documentsSubmitted: true,
+            writtenExam: false,
+            teachingDemo: false,
+            deptHeadInterview: false,
+            presidentInterview: false,
+            contractSigned: false,
+            policyOrientation: false
+        };
+    }
 
     const score = app.compatibility_score || 85;
     
@@ -651,6 +791,10 @@ function selectApplicantForAI(id) {
         strengths = ['Basic pedagogical certifications'];
         weaknesses.push('Lacks LPT professional Board License');
     }
+
+    // Calculate completed milestones percentage
+    const milestoneCount = Object.values(app.milestones).filter(Boolean).length;
+    const milestonesPct = Math.round((milestoneCount / 7) * 100);
 
     panel.innerHTML = `
         <div class="space-y-4">
@@ -678,11 +822,46 @@ function selectApplicantForAI(id) {
                 </div>
             </div>
 
+            <!-- Job Requirements Match (Check compatibility) -->
+            <div class="space-y-1.5 p-3.5 bg-slate-50 border border-slate-200 rounded-2xl">
+                <div class="flex justify-between items-center pb-1.5 border-b border-slate-200">
+                    <span class="text-[10px] text-slate-400 font-bold uppercase">Target Job Requirements</span>
+                    <span class="text-[9px] bg-indigo-100 text-indigo-850 font-extrabold px-1.5 py-0.5 rounded-md">DepEd Standard</span>
+                </div>
+                <p class="text-[10px] text-slate-700 font-semibold leading-relaxed mt-1.5">${job ? job.requirements : 'LPT Board Certified, BSEd/BSE/MA degree holder.'}</p>
+            </div>
+
+            <!-- Compatibility breakdown -->
+            <div class="space-y-2">
+                <p class="text-[10px] text-slate-400 font-bold uppercase">Compatibility Analysis Breakdown</p>
+                <div class="grid grid-cols-2 gap-2 text-[9px] font-semibold">
+                    <div class="p-2 bg-slate-50 border rounded-xl flex items-center justify-between">
+                        <span class="text-slate-500">Pedagogical Match:</span>
+                        <span class="text-indigo-700 font-extrabold">${score >= 85 ? '92%' : '84%'}</span>
+                    </div>
+                    <div class="p-2 bg-slate-50 border rounded-xl flex items-center justify-between">
+                        <span class="text-slate-500">Licensure (LPT):</span>
+                        <span class="text-indigo-700 font-extrabold">${app.resume.toLowerCase().includes('lpt') || app.resume.toLowerCase().includes('board') ? '100%' : '50%'}</span>
+                    </div>
+                    <div class="p-2 bg-slate-50 border rounded-xl flex items-center justify-between">
+                        <span class="text-slate-500">Subject Competency:</span>
+                        <span class="text-indigo-700 font-extrabold">${score >= 90 ? '95%' : '86%'}</span>
+                    </div>
+                    <div class="p-2 bg-slate-50 border rounded-xl flex items-center justify-between">
+                        <span class="text-slate-500">Classroom Command:</span>
+                        <span class="text-indigo-700 font-extrabold">${score >= 80 ? '90%' : '80%'}</span>
+                    </div>
+                </div>
+            </div>
+
             <!-- Resume preview box -->
             <div class="space-y-1.5">
-                <p class="text-[10px] text-slate-400 font-bold uppercase">Extracted CV Transcript</p>
-                <div class="bg-slate-50 border p-3 rounded-xl max-h-36 overflow-y-auto text-[10px] text-slate-600 leading-relaxed font-mono">
-                    <p class="font-bold text-slate-800 mb-1"><i class="fas fa-file-pdf text-rose-500 mr-1.5"></i> ${app.resumeFileName}</p>
+                <div class="flex justify-between items-center">
+                    <p class="text-[10px] text-slate-400 font-bold uppercase">Extracted CV Transcript</p>
+                    <button onclick="openResumePreviewModal('${app.id}')" class="text-[9px] text-indigo-600 font-bold hover:underline bg-transparent border-none p-0 cursor-pointer flex items-center gap-1"><i class="fas fa-expand-alt"></i> View Full Resume</button>
+                </div>
+                <div class="bg-slate-50 border p-3 rounded-xl max-h-32 overflow-y-auto text-[10px] text-slate-600 leading-relaxed font-mono">
+                    <p class="font-bold text-slate-800 mb-1 flex items-center gap-1"><i class="fas fa-file-pdf text-rose-500"></i> ${app.resumeFileName}</p>
                     ${app.resume}
                 </div>
             </div>
@@ -695,6 +874,88 @@ function selectApplicantForAI(id) {
                         ? app.extracted_skills.map(s => `<span class="px-2 py-0.5 bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-bold rounded-lg uppercase tracking-wider">${s.skill}</span>`).join('')
                         : `<span class="text-[10px] text-slate-400 italic">No competencies parsed yet</span>`
                     }
+                </div>
+            </div>
+
+            <!-- Document Received Checklist (HR checks off as applicant submits physically) -->
+            <div class="space-y-2 p-4 bg-blue-50/40 border border-blue-200/50 rounded-2xl text-left font-sans">
+                <div class="flex justify-between items-center pb-2 border-b border-blue-150">
+                    <h4 class="text-[10px] text-blue-900 font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="fas fa-folder-open text-blue-600"></i> Documents Received (Art. V)</h4>
+                    <span class="text-[9px] bg-blue-100 text-blue-900 font-extrabold px-1.5 py-0.5 rounded-full">${(() => {
+                        const docs = app.documentsSubmitted || {};
+                        const keys = ['resume','tor','diploma','prcLicense','recommendations','nbiClearance'];
+                        const done = keys.filter(k => docs[k]).length;
+                        return Math.round((done / keys.length) * 100);
+                    })()}%</span>
+                </div>
+                <p class="text-[9px] text-slate-400 italic">Check off as the applicant physically submits each document to HR:</p>
+                <div class="space-y-1.5 pt-1 text-[10px] font-semibold text-slate-700">
+                    <label class="flex items-center gap-2.5 cursor-default">
+                        <input type="checkbox" checked disabled class="w-3.5 h-3.5 text-blue-500 border-slate-300 rounded pointer-events-none">
+                        <span class="line-through text-slate-450"><i class="fas fa-file-alt text-slate-400 mr-1"></i> Resume & Application Letter</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" ${app.documentsSubmitted?.tor ? 'checked' : ''} onchange="toggleDocReceived('${app.id}', 'tor')" class="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
+                        <span class="${app.documentsSubmitted?.tor ? 'line-through text-slate-450 font-normal' : ''}"><i class="fas fa-graduation-cap text-indigo-500 mr-1"></i> Transcript of Records (TOR)</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" ${app.documentsSubmitted?.diploma ? 'checked' : ''} onchange="toggleDocReceived('${app.id}', 'diploma')" class="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
+                        <span class="${app.documentsSubmitted?.diploma ? 'line-through text-slate-450 font-normal' : ''}"><i class="fas fa-award text-amber-500 mr-1"></i> Photocopy of Diploma</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" ${app.documentsSubmitted?.prcLicense ? 'checked' : ''} onchange="toggleDocReceived('${app.id}', 'prcLicense')" class="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
+                        <span class="${app.documentsSubmitted?.prcLicense ? 'line-through text-slate-450 font-normal' : ''}"><i class="fas fa-id-card text-emerald-500 mr-1"></i> PRC LET License</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" ${app.documentsSubmitted?.serviceRecord ? 'checked' : ''} onchange="toggleDocReceived('${app.id}', 'serviceRecord')" class="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
+                        <span class="${app.documentsSubmitted?.serviceRecord ? 'line-through text-slate-450 font-normal' : ''}"><i class="fas fa-briefcase text-slate-500 mr-1"></i> Previous Employment Cert</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" ${app.documentsSubmitted?.recommendations ? 'checked' : ''} onchange="toggleDocReceived('${app.id}', 'recommendations')" class="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
+                        <span class="${app.documentsSubmitted?.recommendations ? 'line-through text-slate-450 font-normal' : ''}"><i class="fas fa-users text-blue-500 mr-1"></i> 3 Recommendation Letters</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" ${app.documentsSubmitted?.nbiClearance ? 'checked' : ''} onchange="toggleDocReceived('${app.id}', 'nbiClearance')" class="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
+                        <span class="${app.documentsSubmitted?.nbiClearance ? 'line-through text-slate-450 font-normal' : ''}"><i class="fas fa-shield-alt text-rose-500 mr-1"></i> NBI Clearance</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" ${app.documentsSubmitted?.marriageContract ? 'checked' : ''} onchange="toggleDocReceived('${app.id}', 'marriageContract')" class="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
+                        <span class="${app.documentsSubmitted?.marriageContract ? 'line-through text-slate-450 font-normal' : ''}"><i class="fas fa-ring text-pink-500 mr-1"></i> Marriage Contract (if applicable)</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Official School Hiring Process Milestones Compliance -->
+            <div class="space-y-2 p-4 bg-amber-50/40 border border-amber-250/50 rounded-2xl text-left font-sans">
+                <div class="flex justify-between items-center pb-2 border-b border-amber-105">
+                    <h4 class="text-[10px] text-amber-955 font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="fas fa-clipboard-list text-amber-600"></i> Hiring Process Tracker</h4>
+                    <span class="text-[9px] bg-amber-100 text-amber-900 font-extrabold px-1.5 py-0.5 rounded-full">${milestonesPct}%</span>
+                </div>
+                <div class="space-y-1.5 pt-1.5 text-[10px] font-semibold text-slate-700">
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" ${app.milestones.writtenExam ? 'checked' : ''} onchange="toggleHiringMilestone('${app.id}', 'writtenExam')" class="w-3.5 h-3.5 text-indigo-650 border-slate-300 rounded focus:ring-indigo-550">
+                        <span class="${app.milestones.writtenExam ? 'line-through text-slate-450 font-normal' : ''}">1. Undergo written examinations</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" ${app.milestones.teachingDemo ? 'checked' : ''} onchange="toggleHiringMilestone('${app.id}', 'teachingDemo')" class="w-3.5 h-3.5 text-indigo-650 border-slate-300 rounded focus:ring-indigo-550">
+                        <span class="${app.milestones.teachingDemo ? 'line-through text-slate-450 font-normal' : ''}">2. Perform teaching demonstration</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" ${app.milestones.deptHeadInterview ? 'checked' : ''} onchange="toggleHiringMilestone('${app.id}', 'deptHeadInterview')" class="w-3.5 h-3.5 text-indigo-650 border-slate-300 rounded focus:ring-indigo-550">
+                        <span class="${app.milestones.deptHeadInterview ? 'line-through text-slate-450 font-normal' : ''}">3. Department Head Interview</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" ${app.milestones.presidentInterview ? 'checked' : ''} onchange="toggleHiringMilestone('${app.id}', 'presidentInterview')" class="w-3.5 h-3.5 text-indigo-650 border-slate-300 rounded focus:ring-indigo-550">
+                        <span class="${app.milestones.presidentInterview ? 'line-through text-slate-450 font-normal' : ''}">4. Endorsement & President Interview</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" ${app.milestones.contractSigned ? 'checked' : ''} onchange="toggleHiringMilestone('${app.id}', 'contractSigned')" class="w-3.5 h-3.5 text-indigo-650 border-slate-300 rounded focus:ring-indigo-550">
+                        <span class="${app.milestones.contractSigned ? 'line-through text-slate-450 font-normal' : ''}">5. Sign the Employment Contract</span>
+                    </label>
+                    <label class="flex items-center gap-2.5 cursor-pointer">
+                        <input type="checkbox" ${app.milestones.policyOrientation ? 'checked' : ''} onchange="toggleHiringMilestone('${app.id}', 'policyOrientation')" class="w-3.5 h-3.5 text-indigo-650 border-slate-300 rounded focus:ring-indigo-550">
+                        <span class="${app.milestones.policyOrientation ? 'line-through text-slate-450 font-normal' : ''}">6. School Policy Orientation</span>
+                    </label>
                 </div>
             </div>
 
@@ -714,12 +975,220 @@ function selectApplicantForAI(id) {
                 </div>
             </div>
 
-            <!-- Hire Action bottom -->
-            ${app.status === 'scored' ? `
-                <button onclick="initiateHiringProcess('${app.id}')" class="w-full mt-2 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl shadow-lg shadow-emerald-500/20 transition-all text-xs flex justify-center items-center gap-1.5"><i class="fas fa-check-double"></i> Approve & Issue Contract</button>
+            <!-- Email Status / Notify Button -->
+            <div class="pt-2">
+                ${app.emailSent ? `
+                    <div class="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-xl text-center flex items-center justify-center gap-1.5 font-bold text-[10px] shadow-xs">
+                        <i class="fas fa-check-circle text-emerald-600"></i> Receipt Email Sent (Under Review)
+                    </div>
+                ` : `
+                    <button onclick="sendReceiptEmail('${app.id}')" class="w-full py-2.5 bg-indigo-650 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all text-[10px] flex justify-center items-center gap-1.5 border-none shadow-sm cursor-pointer"><i class="fas fa-envelope"></i> Send Receipt & Under Review Email</button>
+                `}
+            </div>
+
+            <!-- Recruit Action bottom -->
+            ${(app.status === 'scored' || app.status === 'under_review' || app.status === 'applied') ? `
+                <button onclick="initiateHiringProcessValidated('${app.id}')" class="w-full py-3 bg-indigo-650 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all text-xs flex justify-center items-center gap-1.5 border-none cursor-pointer"><i class="fas fa-user-plus"></i> Recruit & Initiate Onboarding</button>
             ` : ''}
         </div>
     `;
+}
+
+function toggleDocReceived(appId, docKey) {
+    const db = SAGA.getData();
+    const app = db.applicants.find(a => a.id === appId);
+    if (!app) return;
+
+    if (!app.documentsSubmitted) {
+        app.documentsSubmitted = {
+            resume: true, tor: false, diploma: false, prcLicense: false,
+            serviceRecord: false, recommendations: false, nbiClearance: false, marriageContract: false
+        };
+    }
+
+    app.documentsSubmitted[docKey] = !app.documentsSubmitted[docKey];
+    SAGA.saveData(db);
+    logSystemAuditTrail(`HR ${app.documentsSubmitted[docKey] ? 'verified receipt of' : 'unchecked'} document [${docKey}] for applicant: ${app.name}`);
+    selectApplicantForAI(appId);
+    renderApplicantsList();
+}
+
+function toggleHiringMilestone(appId, milestoneKey) {
+    const db = SAGA.getData();
+    const app = db.applicants.find(a => a.id === appId);
+    if (!app) return;
+
+    if (!app.milestones) {
+        app.milestones = {
+            documentsSubmitted: true,
+            writtenExam: false,
+            teachingDemo: false,
+            deptHeadInterview: false,
+            presidentInterview: false,
+            contractSigned: false,
+            policyOrientation: false
+        };
+    }
+
+    app.milestones[milestoneKey] = !app.milestones[milestoneKey];
+    
+    // Auto-update orientationCompleted helper if step 7 checked
+    if (milestoneKey === 'policyOrientation') {
+        const emp = Object.values(db.employees).find(e => e.applicantId === appId);
+        if (emp) {
+            emp.orientationCompleted = app.milestones.policyOrientation;
+        }
+    }
+
+    SAGA.saveData(db);
+    selectApplicantForAI(appId);
+    renderApplicantsList();
+}
+
+function initiateHiringProcessValidated(appId) {
+    const app = SAGA.getApplicantById(appId);
+    if (!app) return;
+
+    const milestones = app.milestones || { documentsSubmitted: true };
+    const required = ['documentsSubmitted', 'writtenExam', 'teachingDemo', 'deptHeadInterview', 'presidentInterview', 'contractSigned'];
+    const missing = required.filter(k => !milestones[k]);
+
+    if (missing.length > 0) {
+        const labels = {
+            writtenExam: "Undergo written examinations (Step 2)",
+            teachingDemo: "Perform teaching demonstration (Step 3)",
+            deptHeadInterview: "Undergo interview with the Head of the Department (Step 4)",
+            presidentInterview: "Endorsed to the President for final interview (Step 5)",
+            contractSigned: "Sign the Employment Contract (Step 6)"
+        };
+        const missingLabels = missing.map(m => `• ${labels[m] || m}`).join('\n');
+        SAGA.showCustomAlert(
+            `School Hiring Policy Compliance Alert:\n\nThis applicant cannot be finalized for hire yet. Under Article V rules, they must first complete the following process steps:\n\n${missingLabels}\n\nPlease check off these completed milestones in their profile checklist card first.`,
+            "Hiring Milestones Incomplete"
+        );
+        return;
+    }
+
+    // Call actual hiring
+    initiateHiringProcess(appId);
+}
+
+function runAIScoringOnDemand(appId) {
+    const app = SAGA.getApplicantById(appId);
+    if (!app) return;
+
+    // Show loading state on button
+    const btn = document.getElementById('btnRunAIScoring');
+    if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Analyzing Resume...';
+        btn.classList.add('opacity-75');
+    }
+
+    // Simulate AI processing delay
+    setTimeout(() => {
+        SAGA.parseAndScoreApplicant(appId);
+        logSystemAuditTrail(`HR manually triggered AI CV Appraisal for candidate: ${app.name}. Score: ${SAGA.getApplicantById(appId).compatibility_score}%`);
+        renderApplicantsList();
+        selectApplicantForAI(appId);
+    }, 1200);
+}
+
+function sendReceiptEmail(appId) {
+    const app = SAGA.getApplicantById(appId);
+    if (!app) return;
+    const job = SAGA.getJobById(app.jobId);
+    const jobTitle = job ? job.title : "Faculty Position";
+
+    const emailBody = `
+Dear ${app.name},
+
+Thank you for submitting your application and resume for the position of ${jobTitle} at St. Aloysius Gonzaga Academy.
+
+We have received your credentials (${app.resumeFileName}) and your application is currently under review by our Search and Screening Committee. We will contact you if your qualifications match our current institutional requirements.
+
+Best regards,
+Human Resources Department
+St. Aloysius Gonzaga Academy
+    `;
+
+    SAGA.showCustomConfirm(
+        `Simulating formal notification email delivery to ${app.email}:\n\n--------------------------------------------\nSubject: Application Received - ${jobTitle}\n--------------------------------------------\n${emailBody}\n--------------------------------------------\n\nClick Confirm to send this receipt notification.`,
+        "Simulate Email Notification"
+    ).then(confirm => {
+        if (confirm) {
+            const db = SAGA.getData();
+            const targetApp = db.applicants.find(a => a.id === appId);
+            if (targetApp) {
+                targetApp.emailSent = true;
+                targetApp.status = "under_review";
+                SAGA.saveData(db);
+            }
+            logSystemAuditTrail(`Sent application receipt notification email to candidate: ${app.name} (${app.email}).`);
+            selectApplicantForAI(appId);
+            renderApplicantsList();
+            SAGA.showCustomAlert(`Notification email sent successfully to ${app.email}! Candidate status is now flagged as Under Review.`, "Email Dispatched");
+        }
+    });
+}
+
+function openResumePreviewModal(appId) {
+    const app = SAGA.getApplicantById(appId);
+    if (!app) return;
+
+    const job = SAGA.getJobById(app.jobId);
+    const jobTitle = job ? job.title : "Faculty Position";
+
+    const modalHtml = `
+        <div id="resumePreviewModal" class="modal-overlay active">
+            <div class="modal max-w-2xl bg-white p-8 rounded-3xl shadow-2xl relative overflow-hidden" style="font-family: 'Poppins', sans-serif;">
+                <button onclick="closeResumePreviewModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 border-none bg-transparent text-xl cursor-pointer font-bold">&times;</button>
+                
+                <div class="flex items-center gap-3 pb-4 border-b">
+                    <div class="w-10 h-10 rounded-full bg-slate-900 text-amber-400 font-extrabold flex items-center justify-center text-sm shadow-sm">${app.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div>
+                    <div>
+                        <h4 class="font-extrabold text-sm text-slate-900 leading-tight">${app.name}</h4>
+                        <p class="text-[10px] text-slate-400 font-semibold mt-0.5">Application Document (Targeting: ${jobTitle})</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 space-y-4 max-h-[400px] overflow-y-auto pr-2">
+                    <div class="bg-indigo-50/50 p-4 rounded-2xl border border-indigo-100 flex justify-between items-center text-xs">
+                        <div class="space-y-0.5">
+                            <p class="font-bold text-slate-800"><i class="fas fa-file-pdf text-red-500 mr-1.5"></i> ${app.resumeFileName || 'Resume.pdf'}</p>
+                            <p class="text-[10px] text-slate-500">File Type: PDF Document • Securely Stored in SAGA-Core</p>
+                        </div>
+                        <a href="#" onclick="event.preventDefault(); window.print();" class="px-3.5 py-1.5 bg-indigo-650 hover:bg-indigo-700 text-white rounded-xl font-bold no-underline flex items-center gap-1.5 text-[10px]"><i class="fas fa-print"></i> Print / Download</a>
+                    </div>
+
+                    <div class="space-y-3 p-5 bg-slate-50 border rounded-2xl text-left">
+                        <h5 class="font-bold text-xs text-slate-900 uppercase tracking-wider border-b pb-1.5 flex items-center gap-1.5"><i class="fas fa-align-left text-slate-500"></i> Full Extracted Resume Content</h5>
+                        <pre class="text-[11px] text-slate-600 leading-relaxed whitespace-pre-wrap font-sans mt-2" style="font-family: 'Poppins', sans-serif;">${app.resume}</pre>
+                    </div>
+                </div>
+
+                <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
+                    <button onclick="closeResumePreviewModal()" class="px-4 py-2 border rounded-xl font-bold text-xs text-slate-700 hover:bg-slate-100 cursor-pointer">Close Viewer</button>
+                    ${!app.emailSent ? `
+                        <button onclick="closeResumePreviewModal(); sendReceiptEmail('${app.id}')" class="px-4 py-2 bg-indigo-650 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer border-none shadow-sm"><i class="fas fa-envelope"></i> Send Receipt Email</button>
+                    ` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+
+    let modalContainer = document.getElementById('resumePreviewModalContainer');
+    if (!modalContainer) {
+        modalContainer = document.createElement('div');
+        modalContainer.id = 'resumePreviewModalContainer';
+        document.body.appendChild(modalContainer);
+    }
+    modalContainer.innerHTML = modalHtml;
+}
+
+function closeResumePreviewModal() {
+    const modal = document.getElementById('resumePreviewModal');
+    if (modal) modal.classList.remove('active');
 }
 
 function bulkScoreApplicants() {
@@ -748,10 +1217,21 @@ function initiateHiringProcess(appId) {
     if (!app) return;
 
     SAGA.showCustomConfirm(
-        `Are you sure you want to hire ${app.name} as an active Academy Faculty?\n\nThis will trigger employee code generation, ESS account provisioning, and RFID card registration.`,
+        `Are you sure you want to hire ${app.name} as an active Academy Faculty?\n\nThis will convert their application, generate credentials, and trigger the mandatory 201 Onboarding checklist.`,
         "Approve Candidate Hiring"
     ).then(confirm => {
         if (confirm) {
+            const enteredScore = prompt("Enter final Board Panel Interview Score (70-100):", "90") || "90";
+            const enteredComments = prompt("Enter Board Panel Evaluator Comments:", "Excellent teaching demonstration, strong pedagogical foundations and class control.") || "Excellent teaching demonstration, strong pedagogical foundations and class control.";
+            
+            // Lock in interview scores on applicant record
+            SAGA.hireApplicant(appId, {
+                score: parseInt(enteredScore),
+                status: "Passed Board Panel",
+                comments: enteredComments,
+                interviewer: "Academy Search & Screening Board"
+            });
+
             // Run conversion
             const username = app.name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10) + Math.floor(Math.random() * 100);
             const employee = SAGA.createEmployee(app.id, username, "TempPass123!");
@@ -759,7 +1239,7 @@ function initiateHiringProcess(appId) {
             if (!employee) return;
 
             // Trigger audit log
-            logSystemAuditTrail(`Approved hiring request for [${app.name}]. Provisioned ESS Account.`);
+            logSystemAuditTrail(`Approved hiring request for [${app.name}]. Panel Score: ${enteredScore}%. Provisioned ESS Account.`);
 
             // Trigger success animation modal
             showConversionModal(employee);
@@ -1082,9 +1562,75 @@ function openProfileDetailModal(id) {
                     </div>
                 </div>
 
+                <!-- Disciplinary & Conduct Incident Log (Article VII Compliance) -->
+                <div class="card p-5 bg-white space-y-4">
+                    <h3 class="font-bold text-sm text-slate-800 flex items-center justify-between">
+                        <span><i class="fas fa-gavel text-rose-500"></i> Disciplinary & Conduct Incident Log (Article VII)</span>
+                        <span class="text-[9px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full">Policy Compliance</span>
+                    </h3>
+                    
+                    <!-- Incident table/list -->
+                    <div class="table-responsive max-h-40 overflow-y-auto border rounded-xl">
+                        <table class="text-[10px] w-full border-collapse">
+                            <thead>
+                                <tr class="bg-slate-50 border-b">
+                                    <th class="p-2 text-left font-extrabold text-slate-600">Date</th>
+                                    <th class="p-2 text-left font-extrabold text-slate-600">Offense Category</th>
+                                    <th class="p-2 text-left font-extrabold text-slate-600">Sanction Issued</th>
+                                    <th class="p-2 text-left font-extrabold text-slate-600">Notes / Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${(!emp.conductLogs || emp.conductLogs.length === 0) ? `
+                                    <tr><td colspan="4" class="text-center py-4 text-slate-400 italic">No disciplinary incidents logged for this employee.</td></tr>
+                                ` : emp.conductLogs.map(log => `
+                                    <tr class="border-t border-slate-100 hover:bg-slate-50 transition-colors">
+                                        <td class="p-2 font-semibold text-slate-600 whitespace-nowrap">${log.date}</td>
+                                        <td class="p-2 font-extrabold text-slate-900">${log.offense}</td>
+                                        <td class="p-2"><span class="px-2 py-0.5 text-[8px] font-extrabold rounded-lg border tracking-wider uppercase ${log.sanction.includes('Suspension') || log.sanction.includes('Dismissal') ? 'bg-rose-50 text-rose-800 border-rose-200' : 'bg-amber-50 text-amber-800 border-amber-200'}">${log.sanction}</span></td>
+                                        <td class="p-2 text-slate-500 leading-normal font-medium">${log.details}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Log Incident Form -->
+                    <div class="p-3.5 bg-slate-50 border border-slate-200/60 rounded-xl space-y-3">
+                        <h4 class="font-bold text-[10px] text-slate-800 uppercase tracking-wider flex items-center gap-1"><i class="fas fa-plus-circle text-indigo-500"></i> Record New Disciplinary Action</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div class="space-y-1">
+                                <label class="text-[9px] text-slate-400 font-bold block">Offense Category *</label>
+                                <select id="conductOffense" class="w-full p-2 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-semibold text-slate-700">
+                                    <option value="Negligence of Duty (Minor Infraction)">Negligence / Minor Infraction</option>
+                                    <option value="Unexcused Tardiness / Attendance Issues">Unexcused Tardiness / Attendance Issues</option>
+                                    <option value="Insubordination / Disobedience">Insubordination / Disobedience</option>
+                                    <option value="AWOL (Absence Without Official Leave)">AWOL (Absence Without Official Leave)</option>
+                                    <option value="Breach of Ethics / School Code">Breach of Ethics / School Code</option>
+                                </select>
+                            </div>
+                            <div class="space-y-1">
+                                <label class="text-[9px] text-slate-400 font-bold block">Sanction / Disciplinary Action *</label>
+                                <select id="conductSanction" class="w-full p-2 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-semibold text-slate-700">
+                                    <option value="Oral Warning">Oral Warning</option>
+                                    <option value="Written Warning">Written Warning</option>
+                                    <option value="1-3 Day Suspension">1-3 Day Suspension</option>
+                                    <option value="4-10 Day Suspension">4-10 Day Suspension</option>
+                                    <option value="Dismissal / Separation">Dismissal / Separation</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <label class="text-[9px] text-slate-400 font-bold block">Supporting Details / Notes *</label>
+                            <input type="text" id="conductDetails" placeholder="Explain the incident and reference school code..." class="w-full p-2 border border-slate-200 rounded-lg text-xs bg-white focus:outline-none focus:ring-1 focus:ring-amber-500 font-medium">
+                        </div>
+                        <button onclick="logConductIncident('${emp.id}')" class="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-[10px] w-full transition-all border-none shadow-sm cursor-pointer">Record Incident Log</button>
+                    </div>
+                </div>
+
                 <!-- Exit Process Trigger -->
                 ${emp.status !== 'pending_exit' && emp.status !== 'separated' ? `
-                    <div class="p-4 bg-rose-50 border border-rose-200/50 rounded-xl flex justify-between items-center">
+                    <div class="p-4 bg-rose-50 border border-rose-250/50 rounded-xl flex justify-between items-center">
                         <div>
                             <h4 class="font-bold text-xs text-rose-950">Initiate Separation Process</h4>
                             <p class="text-[10px] text-rose-800 mt-0.5">Route clearance filing to initiate retirement, resignation, or exit process.</p>
@@ -1102,6 +1648,43 @@ function openProfileDetailModal(id) {
 
 function closeProfileDetailModal() {
     document.getElementById('profileDetailModal').classList.remove('active');
+}
+
+function logConductIncident(empId) {
+    const offense = document.getElementById('conductOffense').value;
+    const sanction = document.getElementById('conductSanction').value;
+    const details = document.getElementById('conductDetails').value.trim();
+
+    if (!details) {
+        SAGA.showCustomAlert('Please enter supporting details and notes for the incident.', 'Validation Error');
+        return;
+    }
+
+    const data = SAGA.getData();
+    const emp = data.employees[empId];
+    if (!emp) return;
+
+    if (!emp.conductLogs) {
+        emp.conductLogs = [];
+    }
+
+    const newLog = {
+        id: "COND_" + Date.now(),
+        date: new Date().toISOString().split('T')[0],
+        offense,
+        sanction,
+        details,
+        loggedBy: "HR Office Admin"
+    };
+
+    emp.conductLogs.push(newLog);
+    SAGA.saveData(data);
+    logSystemAuditTrail(`HR recorded disciplinary action for ${emp.name}: [${offense}] -> [${sanction}].`);
+
+    // Refresh views
+    openProfileDetailModal(empId);
+    renderEmployeeDirectory();
+    SAGA.showCustomAlert(`Successfully recorded conduct incident for ${emp.name} in compliance with Article VII.`, 'Incident Logged');
 }
 
 function triggerSeparationExit(id) {
@@ -1130,55 +1713,174 @@ function renderOnboardingTab() {
     const onboardList = Object.values(data.employees).filter(e => e.status === 'onboarding');
     const container = document.getElementById('onboardingListContainer');
 
-    document.getElementById('onboardingProgressHeader').textContent = `${onboardList.length} staff currently in onboarding`;
+    document.getElementById('onboardingProgressHeader').textContent = `${onboardList.length} staff currently in onboarding pipeline`;
 
     if (onboardList.length === 0) {
-        container.innerHTML = `<div class="p-12 text-center text-slate-400 italic text-xs">No active staff in orientation pipeline. All hires completed.</div>`;
+        container.innerHTML = `
+            <div class="p-12 text-center text-slate-400 italic text-xs bg-slate-50 rounded-2xl border border-dashed">
+                <i class="fas fa-check-circle text-2xl text-emerald-500 mb-2 block"></i>
+                No active staff in orientation pipeline. All hired profiles are finalized.
+            </div>`;
         return;
     }
 
     container.innerHTML = onboardList.map(emp => {
-        // Mock onboarding checklist steps completion status:
-        // We'll calculate progress based on whether RFID card exists
+        const docs = emp.documents || {
+            resume: true,
+            tor: false,
+            prcLicense: false,
+            diploma: false,
+            serviceRecord: false,
+            recommendations: false,
+            nbiClearance: false,
+            marriageContract: false
+        };
+
         const steps = [
-            { name: 'Welcome & System Enrollment', done: true },
-            { name: 'Personal Profile Completed', done: true },
-            { name: 'Statutory Government IDs Lodged', done: true },
-            { name: 'DepEd Academic Credentials Verified', done: true },
-            { name: 'Upload PSA / Let Certificates', done: true },
-            { name: 'Accept Faculty Conduct Handbook', done: true },
-            { name: 'Sign Employment Contract Acknowledgement', done: true },
-            { name: 'IoT-RFID Security Card Registration', done: !!emp.rfidCardId },
-            { name: 'Activate ESS portal login credentials', done: true },
-            { name: 'Completed Orientation Briefing', done: !!emp.rfidCardId }
+            { key: 'resume', name: 'Letter & Resume Verified', done: !!docs.resume },
+            { key: 'tor', name: 'Transcript of Records (TOR)', done: !!docs.tor },
+            { key: 'diploma', name: 'Photocopy of Diploma', done: !!docs.diploma },
+            { key: 'prcLicense', name: 'PRC LET Exam License', done: !!docs.prcLicense },
+            { key: 'serviceRecord', name: 'Employment Service Cert', done: !!docs.serviceRecord },
+            { key: 'recommendations', name: '3 Recommendation Letters', done: !!docs.recommendations },
+            { key: 'nbiClearance', name: 'NBI Clearance Certificate', done: !!docs.nbiClearance },
+            { key: 'marriageContract', name: 'Marriage Contract (if applicable)', done: !!docs.marriageContract },
+            { key: 'rfid', name: 'NFC/RFID Gate Card Bind', done: !!emp.rfidCardId },
+            { key: 'orientation', name: 'Campus Policy Orientation', done: !!emp.orientationCompleted }
         ];
 
         const completedCount = steps.filter(s => s.done).length;
         const progressPct = Math.round((completedCount / steps.length) * 100);
 
+        const job = SAGA.getJobById(emp.jobId);
+        const positionTitle = job ? job.title : "Faculty Member";
+
+        const interview = emp.interview || {
+            status: "Passed Panel Interview",
+            score: 85,
+            date: new Date().toLocaleDateString('en-PH'),
+            comments: "Passed initial screening and recruitment checks.",
+            interviewer: "Search Panel"
+        };
+
         return `
-            <div class="p-4 bg-slate-50 border rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
-                <div class="space-y-1.5 flex-1 font-semibold">
-                    <h4 class="font-extrabold text-sm text-slate-900">${emp.name}</h4>
-                    <div class="flex justify-between items-center max-w-sm">
-                        <span class="text-slate-400">Checklist progress:</span>
-                        <span class="text-indigo-600 font-extrabold">${progressPct}% (${completedCount}/${steps.length} Steps)</span>
+            <div class="card p-6 border border-slate-200 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all space-y-4 mb-4">
+                <!-- Top Row: Profile Details -->
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 border-b border-slate-100 pb-4">
+                    <div class="space-y-1">
+                        <div class="flex items-center gap-2">
+                            <h4 class="font-extrabold text-sm text-slate-900">${emp.name}</h4>
+                            <span class="px-2.5 py-0.5 text-[9px] font-bold bg-amber-100 text-amber-800 border border-amber-200 rounded-full uppercase tracking-wider animate-pulse">Onboarding</span>
+                        </div>
+                        <p class="text-xs text-slate-500 font-semibold"><i class="fas fa-briefcase mr-1.5 text-slate-400"></i>${positionTitle} • <span class="text-slate-400 font-normal">Username:</span> ${emp.username}</p>
+                        <p class="text-[10px] text-slate-400">Employee ID: <strong class="text-slate-700">${emp.id}</strong> • Applied: ${SAGA.formatDate(emp.onboardedDate || new Date().toISOString())}</p>
                     </div>
-                    <div class="w-full bg-slate-200 rounded-full h-2 max-w-sm overflow-hidden">
-                        <div class="bg-indigo-600 h-2" style="width: ${progressPct}%"></div>
+                    
+                    <div class="flex flex-col sm:flex-row items-center gap-3">
+                        <div class="text-right sm:border-r pr-3 space-y-0.5 w-full sm:w-auto">
+                            <div class="text-xs text-slate-400 font-semibold">Checklist Progress</div>
+                            <div class="font-extrabold text-sm text-indigo-600">${progressPct}% (${completedCount}/${steps.length} completed)</div>
+                            <div class="w-full sm:w-28 bg-slate-200 h-1.5 rounded-full overflow-hidden inline-block">
+                                <div class="bg-indigo-600 h-full" style="width: ${progressPct}%"></div>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
+                            ${!emp.rfidCardId ? `
+                                <button onclick="bindRFIDScanTarget('${emp.id}', '${emp.name}')" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all border-none"><i class="fas fa-id-card"></i> Link RFID</button>
+                            ` : `
+                                <div class="text-center shrink-0">
+                                    <span class="px-2.5 py-1 text-[10px] bg-emerald-100 text-emerald-800 font-bold border border-emerald-200 rounded-lg flex items-center gap-1"><i class="fas fa-check-circle"></i> Card: ${emp.rfidCardId}</span>
+                                    <button onclick="bindRFIDScanTarget('${emp.id}', '${emp.name}')" class="text-[9px] text-indigo-500 font-bold hover:underline mt-1 block w-full text-center border-none bg-transparent p-0">Change Card</button>
+                                </div>
+                            `}
+                            <button onclick="finalizeOnboarding('${emp.id}')" class="px-3.5 py-2 ${completedCount >= steps.length - 1 ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-none' : 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed'} text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all"><i class="fas fa-check-circle"></i> Complete Onboarding</button>
+                        </div>
                     </div>
                 </div>
 
-                <div class="flex items-center gap-3">
-                    ${!emp.rfidCardId ? `
-                        <button onclick="bindRFIDScanTarget('${emp.id}', '${emp.name}')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl flex items-center gap-1.5 shadow-sm"><i class="fas fa-id-card"></i> Enroll RFID Card</button>
-                    ` : `
-                        <button onclick="finalizeOnboarding('${emp.id}')" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl flex items-center gap-1.5 shadow-sm"><i class="fas fa-check-circle"></i> Complete Orientation</button>
-                    `}
+                <!-- Mid Grid: Interview Score & Document Checks -->
+                <div class="grid grid-cols-1 md:grid-cols-12 gap-5">
+                    <!-- Left Column: Interview Details -->
+                    <div class="md:col-span-5 bg-slate-50 p-4 border border-slate-200/60 rounded-2xl space-y-3">
+                        <h5 class="font-extrabold text-xs text-slate-900 uppercase tracking-wider flex items-center gap-1.5"><i class="fas fa-comments text-amber-500"></i> Recruitment Interview Details</h5>
+                        <div class="flex items-center gap-2.5 bg-white p-2.5 border border-slate-200/60 rounded-xl shadow-xs">
+                            <div class="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 font-extrabold flex items-center justify-center text-base border border-amber-300 shrink-0">${interview.score}%</div>
+                            <div>
+                                <p class="text-xs font-bold text-slate-800">${interview.status}</p>
+                                <p class="text-[9px] text-slate-400">Date: ${interview.date} • Board Panel</p>
+                            </div>
+                        </div>
+                        <div class="space-y-1">
+                            <p class="text-[10px] text-slate-400 font-bold uppercase">Evaluator Comments</p>
+                            <p class="text-xs text-slate-600 font-medium italic leading-relaxed">"${interview.comments}"</p>
+                            <p class="text-[9px] text-slate-400 font-semibold mt-1">Interviewer: ${interview.interviewer}</p>
+                        </div>
+                    </div>
+
+                    <!-- Right Column: Documents Audit Verification Checklist -->
+                    <div class="md:col-span-7 space-y-2">
+                        <h5 class="font-extrabold text-xs text-slate-900 uppercase tracking-wider flex items-center gap-1.5"><i class="fas fa-folder-open text-blue-500"></i> HR Digital Document Audit & Verification</h5>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                            <!-- Resume toggle -->
+                            <div class="p-2.5 bg-slate-50 border border-slate-200/60 rounded-xl flex items-center justify-between font-semibold select-none">
+                                <span class="flex items-center gap-2"><i class="fas fa-file-pdf text-red-500"></i> 1. Letter & Resume CV</span>
+                                <input type="checkbox" checked disabled class="rounded border-slate-300 text-blue-600">
+                            </div>
+
+                            <!-- TOR -->
+                            <label class="p-2.5 ${docs.tor ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex items-center justify-between cursor-pointer font-semibold select-none transition-all">
+                                <span class="flex items-center gap-2"><i class="fas fa-graduation-cap ${docs.tor ? 'text-emerald-600' : 'text-slate-400'}"></i> 2. Academic TOR</span>
+                                <input type="checkbox" ${docs.tor ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'tor', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            </label>
+
+                            <!-- Diploma -->
+                            <label class="p-2.5 ${docs.diploma ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex items-center justify-between cursor-pointer font-semibold select-none transition-all">
+                                <span class="flex items-center gap-2"><i class="fas fa-certificate ${docs.diploma ? 'text-emerald-600' : 'text-slate-400'}"></i> 3. Photocopy of Diploma</span>
+                                <input type="checkbox" ${docs.diploma ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'diploma', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            </label>
+
+                            <!-- PRC License -->
+                            <label class="p-2.5 ${docs.prcLicense ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex items-center justify-between cursor-pointer font-semibold select-none transition-all">
+                                <span class="flex items-center gap-2"><i class="fas fa-id-badge ${docs.prcLicense ? 'text-emerald-600' : 'text-slate-400'}"></i> 4. PRC LET License</span>
+                                <input type="checkbox" ${docs.prcLicense ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'prcLicense', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            </label>
+
+                            <!-- Previous Employment Cert -->
+                            <label class="p-2.5 ${docs.serviceRecord ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex items-center justify-between cursor-pointer font-semibold select-none transition-all">
+                                <span class="flex items-center gap-2"><i class="fas fa-briefcase ${docs.serviceRecord ? 'text-emerald-600' : 'text-slate-400'}"></i> 5. Previous Employment Cert</span>
+                                <input type="checkbox" ${docs.serviceRecord ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'serviceRecord', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            </label>
+
+                            <!-- 3 Recommendation Letters -->
+                            <label class="p-2.5 ${docs.recommendations ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex items-center justify-between cursor-pointer font-semibold select-none transition-all">
+                                <span class="flex items-center gap-2"><i class="fas fa-envelope-open-text ${docs.recommendations ? 'text-emerald-600' : 'text-slate-400'}"></i> 6. 3 Recommendation Letters</span>
+                                <input type="checkbox" ${docs.recommendations ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'recommendations', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            </label>
+
+                            <!-- NBI Clearance -->
+                            <label class="p-2.5 ${docs.nbiClearance ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex items-center justify-between cursor-pointer font-semibold select-none transition-all">
+                                <span class="flex items-center gap-2"><i class="fas fa-gavel ${docs.nbiClearance ? 'text-emerald-600' : 'text-slate-400'}"></i> 7. NBI Clearance</span>
+                                <input type="checkbox" ${docs.nbiClearance ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'nbiClearance', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            </label>
+
+                            <!-- Marriage Contract -->
+                            <label class="p-2.5 ${docs.marriageContract ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex items-center justify-between cursor-pointer font-semibold select-none transition-all">
+                                <span class="flex items-center gap-2"><i class="fas fa-ring ${docs.marriageContract ? 'text-emerald-600' : 'text-slate-400'}"></i> 8. Marriage Contract</span>
+                                <input type="checkbox" ${docs.marriageContract ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'marriageContract', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            </label>
+                        </div>
+                    </div>
                 </div>
             </div>
         `;
     }).join('');
+}
+
+function toggleEmployeeDocumentStatus(empId, docKey, checked) {
+    const toggles = { [docKey]: checked };
+    SAGA.updateEmployeeDocuments(empId, toggles);
+    logSystemAuditTrail(`HR toggled document verification [${docKey}] to [${checked ? 'VERIFIED' : 'PENDING'}] for employee ID [${empId}].`);
+    renderOnboardingTab();
 }
 
 function bindRFIDScanTarget(empId, empName) {
@@ -1251,13 +1953,15 @@ function finalizeOnboarding(id) {
     if (!emp) return;
 
     SAGA.showCustomConfirm(
-        `Do you confirm the institutional completion checklist for ${emp.name}?\n\nThis will activate their status to Active in the Academy directory and grant ESS access.`,
+        `Do you confirm the institutional completion checklist for ${emp.name}?\n\nThis will activate their status to Active in the Academy directory, set their onboarded date, and grant ESS access.`,
         "Complete Onboarding orientation"
     ).then(confirm => {
         if (confirm) {
             const data = SAGA.getData();
             if (data.employees[id]) {
                 data.employees[id].status = 'active';
+                data.employees[id].orientationCompleted = true;
+                data.employees[id].onboardedDate = new Date().toISOString();
                 SAGA.saveData(data);
             }
             logSystemAuditTrail(`Completed onboarding orientation checklist for [${emp.name}]. Activated faculty account.`);
@@ -1857,12 +2561,25 @@ function previewDocumentSimulation(name) {
 function checkCredentialMonitoringAlerts() {
     const countBadge = document.getElementById('notifBadge');
     const notifPanelList = document.getElementById('notifPanelList');
+    if (!countBadge || !notifPanelList) return;
+
+    const data = SAGA.getData();
+    const newApplicants = (data.applicants || []).filter(a => a.isNew);
 
     const alerts = [
         { title: 'PRC License Renewal Needed', desc: 'Teacher Juan Dela Cruz: license expires Aug 15, 2026.', type: 'danger', icon: 'fa-exclamation-triangle' },
         { title: 'Leave Filing Sign-off Required', desc: '1 New vacation request pending review.', type: 'warning', icon: 'fa-user-clock' },
         { title: 'Institutional Birthday', desc: 'Teacher Ana Rodriguez celebrates birthday today! 🎂', type: 'info', icon: 'fa-birthday-cake' }
     ];
+
+    if (newApplicants.length > 0) {
+        alerts.unshift({
+            title: 'New Job Candidate Applied',
+            desc: `${newApplicants.length} candidate(s) waiting for AI scoring in ATS.`,
+            type: 'info',
+            icon: 'fa-user-plus'
+        });
+    }
 
     countBadge.textContent = alerts.length;
     
@@ -2291,25 +3008,87 @@ function handleESSLeaveSubmit(e) {
 function renderESSDocuments() {
     const currentEmpId = activeUser.employeeId || 'EMP_1624896000000';
     const container = document.getElementById('ess201Container');
+    if (!container) return;
 
-    const folders = [
-        { name: 'My Employment Contracts', count: 1, icon: 'fa-file-signature' },
-        { name: 'My Board Licenses & LET', count: 1, icon: 'fa-id-card' },
-        { name: 'Academic TOR & Diplomas', count: 2, icon: 'fa-graduation-cap' }
+    const data = SAGA.getData();
+    const employee = data.employees[currentEmpId];
+    if (!employee) {
+        container.innerHTML = `<p class="text-slate-400 italic text-xs">No employee record loaded.</p>`;
+        return;
+    }
+
+    const docs = employee.documents || {
+        resume: true,
+        tor: false,
+        diploma: false,
+        prcLicense: false,
+        serviceRecord: false,
+        recommendations: false,
+        nbiClearance: false,
+        marriageContract: false,
+        otherDocs: []
+    };
+
+    const docDefinitions = [
+        { key: 'resume', name: 'Curriculum Vitae / Resume', desc: 'Letter of Application & CV', icon: 'fa-file-alt' },
+        { key: 'tor', name: 'Transcript of Records (TOR)', desc: 'Official copy certified by registrar', icon: 'fa-graduation-cap' },
+        { key: 'diploma', name: 'Photocopy of Diploma', desc: 'Degree completion diploma copy', icon: 'fa-certificate' },
+        { key: 'prcLicense', name: 'PRC License / LET Board Certificate', desc: 'LPT Licensure registration', icon: 'fa-id-badge' },
+        { key: 'serviceRecord', name: 'Certification of Previous Employment', desc: 'Service record from past employers', icon: 'fa-briefcase' },
+        { key: 'recommendations', name: '3 Letters of Recommendation', desc: 'Attesting to moral character', icon: 'fa-envelope-open-text' },
+        { key: 'nbiClearance', name: 'NBI Clearance Certificate', desc: 'Valid criminal history record check', icon: 'fa-balance-scale' },
+        { key: 'marriageContract', name: 'Marriage Contract (if applicable)', desc: 'For married employees registry', icon: 'fa-ring' }
     ];
 
-    container.innerHTML = folders.map(f => `
-        <div class="card p-4 bg-white border flex items-center justify-between gap-3 text-xs font-semibold hover:border-amber-400 transition-colors">
-            <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-full bg-amber-50 text-amber-500 flex items-center justify-center text-sm"><i class="fas ${f.icon}"></i></div>
-                <div>
-                    <p class="font-bold text-slate-900">${f.name}</p>
-                    <p class="text-[9px] text-slate-400 mt-0.5">${f.count} File(s) encrypted</p>
+    let html = docDefinitions.map(def => {
+        const isUploaded = !!docs[def.key];
+        
+        return `
+            <div class="card p-4 bg-white border border-slate-200/80 flex items-center justify-between gap-3 text-xs shadow-xs hover:border-amber-450 hover:shadow-sm transition-all">
+                <div class="flex items-center gap-2.5 min-w-0">
+                    <div class="w-8 h-8 rounded-full ${isUploaded ? 'bg-emerald-50 text-emerald-600 border border-emerald-250' : 'bg-slate-50 text-slate-400 border border-slate-200'} flex items-center justify-center text-sm shrink-0">
+                        <i class="fas ${def.icon}"></i>
+                    </div>
+                    <div class="min-w-0 truncate font-semibold">
+                        <p class="font-extrabold text-slate-800 truncate">${def.name}</p>
+                        <p class="text-[9px] text-slate-400 mt-0.5 truncate">${def.desc}</p>
+                    </div>
+                </div>
+                <div class="shrink-0 flex items-center gap-2">
+                    ${isUploaded ? `
+                        <span class="px-2.5 py-1 text-[9px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-250 rounded-full flex items-center gap-0.5"><i class="fas fa-check"></i> Verified</span>
+                    ` : `
+                        <span class="px-2.5 py-1 text-[9px] font-extrabold bg-rose-100 text-rose-800 border border-rose-250 rounded-full flex items-center gap-0.5"><i class="fas fa-times"></i> Missing</span>
+                    `}
                 </div>
             </div>
-            <button onclick="alert('Viewing personal 201 folder items')" class="px-2 py-1 bg-slate-100 hover:bg-slate-200 rounded text-[9px] font-bold">Open</button>
-        </div>
-    `).join('');
+        `;
+    }).join('');
+
+    const otherDocs = docs.otherDocs || [];
+    if (otherDocs.length > 0) {
+        html += `
+            <div class="col-span-full border-t pt-4 mt-2">
+                <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider mb-3">Other Submitted Credentials</h4>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    ${otherDocs.map(o => `
+                        <div class="p-3 bg-slate-50 border border-slate-200/60 rounded-xl flex items-center justify-between text-xs font-semibold">
+                            <div class="flex gap-2.5 items-center truncate">
+                                <i class="fas fa-certificate text-indigo-500 text-sm"></i>
+                                <div class="truncate">
+                                    <p class="font-bold text-slate-800 truncate">${o.fileName}</p>
+                                    <p class="text-[9px] text-slate-400 uppercase font-bold">${o.docType.toUpperCase()}</p>
+                                </div>
+                            </div>
+                            <span class="text-[9px] font-bold text-slate-400 shrink-0">${new Date(o.uploadedAt).toLocaleDateString()}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+        `;
+    }
+
+    container.innerHTML = html;
 }
 
 // ============================================================================

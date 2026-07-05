@@ -23,7 +23,7 @@
             </div>
             <div class="flex gap-6 items-center">
                 <a href="index.html" class="nav-link font-semibold">Careers & Faculty Openings</a>
-                <a href="hr-hiring.html" class="nav-link font-semibold">HR Master Portal</a>
+                <a href="dashboard.html" class="nav-link font-semibold">HR Master Portal</a>
                 <a href="employee-ess.html" class="nav-link font-semibold">Employee Self-Service</a>
             </div>
         </div>
@@ -77,109 +77,148 @@
         </div>
 
         <!-- Onboarding Form -->
+        <!-- Onboarding Form -->
         <div id="onboardingForm" class="card p-8 hidden">
-            <h2 class="text-2xl font-bold text-gray-900 mb-6">Employee Profile Setup</h2>
+            <!-- Wizard Header Indicators -->
+            <div class="flex flex-col sm:flex-row justify-between items-center border-b pb-6 mb-6 gap-3">
+                <div id="stepIndicator1" class="flex items-center gap-2 text-blue-600 font-bold border-b-2 border-blue-600 pb-2">
+                    <span class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold">1</span> Account Setup
+                </div>
+                <div id="stepIndicator2" class="flex items-center gap-2 text-slate-400 font-semibold pb-2">
+                    <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold">2</span> Completed!
+                </div>
+            </div>
 
-            <form id="employeeForm" onsubmit="submitOnboarding(event)">
-                <!-- Applicant Info (Read-only) -->
-                <div class="mb-8 p-6 bg-blue-50 rounded-lg">
-                    <h3 class="font-bold text-gray-900 mb-4">Application Information</h3>
-                    <div id="applicantInfo" class="space-y-3 text-gray-700">
-                        <!-- Populated by JavaScript -->
+            <!-- STEP 1: CREDENTIALS AND POLICIES -->
+            <div id="stepPane1" class="step-pane">
+                <h2 class="text-xl font-extrabold text-slate-900 mb-4">Create Your Institutional Account</h2>
+                <div class="mb-6 p-4 bg-slate-50 border rounded-2xl">
+                    <div id="applicantInfo" class="space-y-2 text-slate-700 text-xs">
+                        <!-- Populated by JS -->
                     </div>
                 </div>
 
-                <!-- Employee Credentials -->
-                <h3 class="text-xl font-bold text-gray-900 mb-4 mt-8">Create Your Credentials</h3>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div class="form-group">
-                        <label>First Name *</label>
-                        <input type="text" id="firstName" required readonly placeholder="Auto-filled">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">First Name</label>
+                        <input type="text" id="firstName" class="w-full px-3 py-2 border rounded-xl bg-slate-100 font-medium text-slate-500" readonly>
                     </div>
-
-                    <div class="form-group">
-                        <label>Last Name *</label>
-                        <input type="text" id="lastName" required readonly placeholder="Auto-filled">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Last Name</label>
+                        <input type="text" id="lastName" class="w-full px-3 py-2 border rounded-xl bg-slate-100 font-medium text-slate-500" readonly>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Email Address *</label>
-                    <input type="email" id="emailAddress" required readonly placeholder="Auto-filled">
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address</label>
+                    <input type="email" id="emailAddress" class="w-full px-3 py-2 border rounded-xl bg-slate-100 font-medium text-slate-500" readonly>
                 </div>
 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div class="form-group">
-                        <label>Username (for login) *</label>
-                        <input type="text" id="username" required placeholder="e.g., john.doe" minlength="4">
-                        <p class="form-help">Must be at least 4 characters • Your unique identifier in SAGA-Core</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Username (for login) *</label>
+                        <input type="text" id="username" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 font-medium text-slate-800" placeholder="e.g. john.doe">
+                        <p class="text-[10px] text-slate-400 mt-1">At least 4 chars. Used for ESS and scanner identification.</p>
                     </div>
-
-                    <div class="form-group">
-                        <label>Password *</label>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Password *</label>
                         <div class="relative">
-                            <input type="password" id="password" required placeholder="Min 8 characters" minlength="8">
-                            <button type="button" onclick="togglePasswordVisibility()" class="absolute right-3 top-3 text-gray-500">
-                                <i class="fas fa-eye"></i>
+                            <input type="password" id="password" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 font-medium text-slate-800" placeholder="Min 8 characters">
+                            <button type="button" onclick="togglePasswordVisibility('password')" class="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600">
+                                <i class="fas fa-eye text-slate-400" id="togglePasswordIcon"></i>
                             </button>
                         </div>
-                        <p class="form-help">Must be at least 8 characters • Include uppercase, lowercase, and numbers</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Min 8 chars. Include letters (upper & lower) and numbers.</p>
                     </div>
                 </div>
 
-                <div class="form-group">
-                    <label>Confirm Password *</label>
-                    <input type="password" id="confirmPassword" required placeholder="Re-enter password">
+                <div class="mb-6">
+                    <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Confirm Password *</label>
+                    <input type="password" id="confirmPassword" class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-blue-500 font-medium text-slate-800" placeholder="Re-type password">
                 </div>
 
-                <!-- Agreements -->
-                <div class="mb-8 p-6 bg-gray-50 rounded-lg">
-                    <h3 class="font-bold text-gray-900 mb-4">Agreements & Policies</h3>
-                    
-                    <div class="space-y-4">
-                        <div class="flex items-start gap-3">
-                            <input type="checkbox" id="agreeTerms" required>
-                            <label for="agreeTerms" class="text-sm text-gray-700">
-                                I agree to the <span class="font-semibold">Terms of Service</span> and confirm that I have read the employee handbook.
-                            </label>
-                        </div>
+                <div class="mb-6 p-4 bg-slate-50 border rounded-2xl space-y-3">
+                    <h4 class="font-extrabold text-xs text-slate-900 uppercase tracking-wider mb-2">Agreements & Consent Declarations</h4>
+                    <label class="flex items-start gap-2.5 text-xs text-slate-600 font-semibold cursor-pointer">
+                        <input type="checkbox" id="agreeTerms" class="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                        <span>I hereby accept the <strong class="text-slate-800">Faculty Conduct Handbook</strong> and comply with institutional regulations.</span>
+                    </label>
+                    <label class="flex items-start gap-2.5 text-xs text-slate-600 font-semibold cursor-pointer">
+                        <input type="checkbox" id="agreeDataPrivacy" class="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                        <span>I consent to data processing for HR purposes under <strong class="text-slate-800">Data Privacy Act (RA 10173)</strong> compliance.</span>
+                    </label>
+                    <label class="flex items-start gap-2.5 text-xs text-slate-600 font-semibold cursor-pointer">
+                        <input type="checkbox" id="agreeCode" class="mt-0.5 rounded border-slate-300 text-blue-600 focus:ring-blue-500">
+                        <span>I verify that all information entered is true and accurate.</span>
+                    </label>
+                </div>
 
-                        <div class="flex items-start gap-3">
-                            <input type="checkbox" id="agreeDataPrivacy" required>
-                            <label for="agreeDataPrivacy" class="text-sm text-gray-700">
-                                I acknowledge the <span class="font-semibold">Data Privacy Act of 2012</span> compliance statement and consent to the processing of my personal data.
-                            </label>
-                        </div>
+                <div class="flex gap-3">
+                    <button type="button" onclick="goBack()" class="btn btn-outline flex-1 py-2 rounded-xl text-xs font-bold">
+                        <i class="fas fa-arrow-left"></i> Cancel
+                    </button>
+                    <button type="button" onclick="nextStep2()" class="btn btn-success flex-1 py-2 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-700 text-white flex items-center justify-center gap-1.5 shadow-sm border-none">
+                        Create Account & Complete <i class="fas fa-check"></i>
+                    </button>
+                </div>
+            </div>
 
-                        <div class="flex items-start gap-3">
-                            <input type="checkbox" id="agreeCode" required>
-                            <label for="agreeCode" class="text-sm text-gray-700">
-                                I agree to comply with the <span class="font-semibold">Code of Conduct</span> and institutional policies.
-                            </label>
+            <!-- STEP 2: DOCUMENT SUBMISSION LOCKER -->
+            <div id="stepPane2" class="step-pane hidden">
+                <div class="text-center py-6">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-2xl mx-auto shadow-md mb-4 border border-emerald-300">
+                        <i class="fas fa-check-double animate-bounce"></i>
+                    </div>
+                    <h2 class="text-2xl font-extrabold text-slate-900 mb-1">Onboarding Complete!</h2>
+                    <p class="text-slate-500 text-xs max-w-md mx-auto mb-6">Your institutional account has been created in SAGA-Core. Welcome to St. Aloysius Gonzaga Academy!</p>
+                </div>
+
+                <div class="bg-indigo-50 border border-indigo-100 p-5 rounded-2xl mb-6 text-xs text-slate-800 space-y-4">
+                    <h4 class="font-extrabold text-indigo-900 uppercase tracking-wider border-b border-indigo-200 pb-2">Profile & Credentials Summary</h4>
+                    <div class="grid grid-cols-2 gap-x-4 gap-y-3.5">
+                        <div>
+                            <span class="block text-[10px] text-indigo-500 font-bold uppercase">Full Name</span>
+                            <strong class="font-extrabold text-slate-900 text-sm" id="summaryFullName">---</strong>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] text-indigo-500 font-bold uppercase">Employee ID</span>
+                            <strong class="font-extrabold text-indigo-900 text-sm" id="summaryEmployeeId">---</strong>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] text-indigo-500 font-bold uppercase">Portal Username</span>
+                            <strong class="font-extrabold text-slate-900" id="summaryUsername">---</strong>
+                        </div>
+                        <div>
+                            <span class="block text-[10px] text-indigo-500 font-bold uppercase">Hired Position</span>
+                            <strong class="font-extrabold text-slate-900" id="summaryPosition">---</strong>
                         </div>
                     </div>
                 </div>
 
-                <div class="alert alert-info mb-8">
-                    <i class="fas fa-shield-alt"></i>
-                    <div>
-                        <p class="font-semibold mb-1">Security Note</p>
-                        <p class="text-sm">Your credentials are securely stored and encrypted. You will use these to log into the Employee Portal (ESS) for payslips, leave, timekeeping, and more.</p>
+                <div class="p-4 bg-slate-50 border rounded-2xl text-xs text-slate-600 mb-8 space-y-3.5">
+                    <h4 class="font-extrabold text-slate-800 uppercase tracking-wider flex items-center gap-1.5"><i class="fas fa-list-check text-blue-500"></i> Reminders</h4>
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">1</span>
+                        <p><strong class="text-slate-800">IoT-RFID Gate Card Binding:</strong> Visit the HR Office to sync your security access card. Once linked, you can use it at the main school gate sensor.</p>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-full bg-blue-100 text-blue-800 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5">2</span>
+                        <p><strong class="text-slate-800">Faculty Orientation:</strong> Attend the scheduled system walkthrough with the Department Chair to finalize your teaching syllabus.</p>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                        <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-[10px] shrink-0 mt-0.5"><i class="fas fa-check text-[8px]"></i></span>
+                        <p><strong class="text-slate-800">Documents:</strong> All required credentials (TOR, Diploma, PRC, NBI, etc.) have been verified and received by HR during your hiring process.</p>
                     </div>
                 </div>
 
                 <div class="flex gap-4">
-                    <button type="button" onclick="goBack()" class="btn btn-outline flex-1">
-                        <i class="fas fa-arrow-left"></i> Back
-                    </button>
-                    <button type="submit" class="btn btn-success flex-1">
-                        <i class="fas fa-check-circle"></i> Complete Onboarding
+                    <button type="button" onclick="completeOnboardingFinish()" class="btn btn-success flex-1 py-3 rounded-xl font-bold bg-emerald-600 hover:bg-emerald-700 text-white flex items-center justify-center gap-1.5 shadow-sm text-sm border-none">
+                        <i class="fas fa-sign-in-alt"></i> Go to Employee ESS Portal
                     </button>
                 </div>
+            </div>
 
-                <input type="hidden" id="applicantId">
-            </form>
+            <input type="hidden" id="applicantId">
         </div>
 
         <!-- Empty State -->
@@ -187,7 +226,7 @@
             <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
             <h3 class="text-xl font-bold text-gray-700 mb-2">No Hired Applicants</h3>
             <p class="text-gray-600 mb-4">There are no applicants ready for onboarding. Please go to the HR Portal to hire applicants first.</p>
-            <a href="hr-hiring.html" class="btn btn-primary">
+            <a href="dashboard.html" class="btn btn-primary">
                 <i class="fas fa-arrow-right"></i> Go to HR Portal
             </a>
         </div>
@@ -203,6 +242,20 @@
 
     <script src="app.js"></script>
     <script>
+        let currentEmployeeId = null;
+        let selectedJobTitle = "";
+        let selectedFullName = "";
+        let uploadedDocs = {
+            resume: true,
+            tor: false,
+            diploma: false,
+            prcLicense: false,
+            serviceRecord: false,
+            recommendations: false,
+            nbiClearance: false,
+            marriageContract: false
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             loadHiredApplicants();
         });
@@ -252,56 +305,71 @@
             document.getElementById('emailAddress').value = applicant.email;
             document.getElementById('applicantId').value = applicantId;
 
+            selectedFullName = applicant.name;
+
             // Populate applicant info
             const job = SAGA.getJobById(applicant.jobId);
+            selectedJobTitle = job ? job.title : 'Faculty Role';
             document.getElementById('applicantInfo').innerHTML = `
                 <div class="grid grid-cols-2 gap-4">
                     <div>
-                        <p class="text-xs text-gray-600 uppercase font-semibold">Name</p>
-                        <p class="font-bold">${applicant.name}</p>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold">Applicant Name</p>
+                        <p class="font-extrabold text-slate-800">${applicant.name}</p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-600 uppercase font-semibold">Position</p>
-                        <p class="font-bold">${job ? job.title : 'Unknown'}</p>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold">Target Position</p>
+                        <p class="font-extrabold text-slate-800">${selectedJobTitle}</p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-600 uppercase font-semibold">Email</p>
-                        <p class="font-bold text-sm">${applicant.email}</p>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold">Assigned Email</p>
+                        <p class="font-bold text-slate-700">${applicant.email}</p>
                     </div>
                     <div>
-                        <p class="text-xs text-gray-600 uppercase font-semibold">Applied Date</p>
-                        <p class="font-bold text-sm">${SAGA.formatDate(applicant.appliedDate)}</p>
+                        <p class="text-[10px] text-gray-500 uppercase font-bold">Interview Status</p>
+                        <p class="font-extrabold text-emerald-600 flex items-center gap-1"><i class="fas fa-check-circle"></i> ${applicant.interview?.status || 'Completed (Passed)'} [Score: ${applicant.interview?.score || 85}%]</p>
                     </div>
                 </div>
             `;
+
+            // Display resume name
+            document.getElementById('resumeFileNameDisplay').textContent = applicant.resumeFileName || 'Resume_Verified.pdf';
 
             // Show form
             document.getElementById('applicantSelector').classList.add('hidden');
             document.getElementById('onboardingForm').classList.remove('hidden');
             document.getElementById('emptyState').classList.add('hidden');
 
+            // Reset steps to Step 1
+            goToStep1();
+
             // Focus on username field
             setTimeout(() => document.getElementById('username').focus(), 100);
         }
 
-        function togglePasswordVisibility() {
-            const pwdField = document.getElementById('password');
-            const icon = event.target.closest('button').querySelector('i');
+        function togglePasswordVisibility(fieldId) {
+            const pwdField = document.getElementById(fieldId);
+            const icon = document.getElementById('togglePasswordIcon');
             
             if (pwdField.type === 'password') {
                 pwdField.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
+                icon.className = 'fas fa-eye-slash text-slate-400';
             } else {
                 pwdField.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
+                icon.className = 'fas fa-eye text-slate-400';
             }
         }
 
-        function submitOnboarding(event) {
-            event.preventDefault();
+        function goToStep1() {
+            // Panel toggles
+            document.getElementById('stepPane1').classList.remove('hidden');
+            document.getElementById('stepPane2').classList.add('hidden');
+            document.getElementById('stepPane3').classList.add('hidden');
 
+            // Indicator updates
+            updateIndicatorState(1);
+        }
+
+        function nextStep2() {
             const applicantId = document.getElementById('applicantId').value;
             const username = document.getElementById('username').value.trim();
             const password = document.getElementById('password').value;
@@ -342,29 +410,158 @@
                 return;
             }
 
-            // Create employee
-            const employee = SAGA.createEmployee(applicantId, username, password);
-
-            if (employee) {
-                // Auto-login session for presentation demo
-                const data = SAGA.getData();
-                data.currentUser = {
-                    id: employee.id,
-                    username: employee.username
-                };
-                SAGA.saveData(data);
-
-                SAGA.showCustomAlert(
-                    `Onboarding Complete & Account Activated!\n\nWelcome to St. Aloysius Gonzaga Academy, ${employee.name}!\nEmployee ID: ${employee.id}\nUsername: ${username}\n\nAutomating instant session login to Employee Self-Service (ESS) Portal for demo presentation...`,
-                    "Automatic Session Login"
-                );
-
-                setTimeout(() => {
-                    window.location.href = 'employee-ess.html';
-                }, 1200);
-            } else {
-                SAGA.showCustomAlert('Error initializing employee profile. Please verify fields and try again.', 'Onboarding Error');
+            // check if username is already taken by another employee
+            const existingEmp = SAGA.getEmployeeByUsername(username);
+            if (existingEmp && existingEmp.applicantId !== applicantId) {
+                alert('This username is already registered in SAGA-Core. Please choose another username.');
+                return;
             }
+
+            // Create employee if not already created
+            if (!currentEmployeeId) {
+                const employee = SAGA.createEmployee(applicantId, username, password);
+                if (employee) {
+                    currentEmployeeId = employee.id;
+                } else {
+                    alert('Error creating your account. Please try again.');
+                    return;
+                }
+            } else {
+                // If credentials changed, update them in database
+                const data = SAGA.getData();
+                if (data.employees[currentEmployeeId]) {
+                    data.employees[currentEmployeeId].username = username;
+                    data.employees[currentEmployeeId].password = password;
+                    SAGA.saveData(data);
+                }
+            }
+
+            // Set summaries
+            document.getElementById('summaryFullName').textContent = selectedFullName;
+            document.getElementById('summaryEmployeeId').textContent = currentEmployeeId;
+            document.getElementById('summaryUsername').textContent = username;
+            document.getElementById('summaryPosition').textContent = selectedJobTitle;
+ 
+            // Sync pre-submitted documents from application stage
+            const emp = SAGA.getEmployeeById(currentEmployeeId);
+            if (emp && emp.documents) {
+                const keys = ['tor', 'diploma', 'prcLicense', 'serviceRecord', 'recommendations', 'nbiClearance', 'marriageContract'];
+                keys.forEach(k => {
+                    if (emp.documents[k]) {
+                        uploadedDocs[k] = true;
+                        
+                        const filenameEl = document.getElementById(`filename-${k}`);
+                        if (filenameEl) {
+                            filenameEl.textContent = `Attached at Application Step`;
+                            filenameEl.className = "text-[10px] text-slate-500 italic font-semibold";
+                        }
+                        
+                        const badge = document.getElementById(`badge-${k}`);
+                        if (badge) {
+                            badge.className = "px-2.5 py-1 text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-full flex items-center gap-1";
+                            badge.innerHTML = `<i class="fas fa-check-circle"></i> Submitted`;
+                        }
+                        
+                        const iconDiv = document.getElementById(`docIcon-${k}`);
+                        if (iconDiv) {
+                            iconDiv.className = "w-9 h-9 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm border-emerald-300 shadow-sm border";
+                        }
+                    }
+                });
+            }
+
+            // Move panels
+            document.getElementById('stepPane1').classList.add('hidden');
+            document.getElementById('stepPane2').classList.remove('hidden');
+            document.getElementById('stepPane3').classList.add('hidden');
+ 
+            updateIndicatorState(2);
+        }
+
+        function handleMockDocUpload(inputEl, docKey) {
+            if (!inputEl.files || inputEl.files.length === 0) return;
+            const filename = inputEl.files[0].name;
+
+            // Update label
+            document.getElementById(`filename-${docKey}`).textContent = `Selected: ${filename} (Simulating upload...)`;
+
+            // Disable buttons temporarily
+            inputEl.disabled = true;
+
+            setTimeout(() => {
+                inputEl.disabled = false;
+                uploadedDocs[docKey] = true;
+
+                // Sync with SAGA Database
+                SAGA.updateEmployeeDocuments(currentEmployeeId, { [docKey]: true }, {
+                    fileName: filename,
+                    uploadedAt: new Date().toISOString(),
+                    docType: docKey
+                });
+
+                // Update styling
+                document.getElementById(`filename-${docKey}`).textContent = filename;
+                document.getElementById(`filename-${docKey}`).className = "text-[10px] text-slate-500 italic font-semibold";
+                
+                const badge = document.getElementById(`badge-${docKey}`);
+                badge.className = "px-2.5 py-1 text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-full flex items-center gap-1";
+                badge.innerHTML = `<i class="fas fa-check-circle"></i> Uploaded`;
+
+                const iconDiv = document.getElementById(`docIcon-${docKey}`);
+                iconDiv.className = "w-9 h-9 rounded-full bg-emerald-50 text-emerald-700 flex items-center justify-center text-sm border-emerald-300 shadow-sm border";
+
+                SAGA.showCustomAlert(`Document "${filename}" has been securely uploaded to your digital employee file locker.`, "File Uploaded");
+            }, 850);
+        }
+
+        function nextStep3() {
+            // Go to step 3
+            document.getElementById('stepPane1').classList.add('hidden');
+            document.getElementById('stepPane2').classList.add('hidden');
+            document.getElementById('stepPane3').classList.remove('hidden');
+
+            updateIndicatorState(3);
+        }
+
+        function updateIndicatorState(activeStep) {
+            for (let i = 1; i <= 3; i++) {
+                const el = document.getElementById(`stepIndicator${i}`);
+                const num = el.querySelector('span');
+
+                if (i === activeStep) {
+                    el.className = "flex items-center gap-2 text-blue-600 font-bold border-b-2 border-blue-600 pb-2";
+                    num.className = "w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold";
+                } else if (i < activeStep) {
+                    el.className = "flex items-center gap-2 text-emerald-600 font-bold pb-2";
+                    num.className = "w-6 h-6 rounded-full bg-emerald-500 text-white flex items-center justify-center text-xs font-bold";
+                    num.innerHTML = `<i class="fas fa-check"></i>`;
+                } else {
+                    el.className = "flex items-center gap-2 text-slate-400 font-semibold pb-2";
+                    num.className = "w-6 h-6 rounded-full bg-slate-200 text-slate-600 flex items-center justify-center text-xs font-bold";
+                    num.textContent = i;
+                }
+            }
+        }
+
+        function completeOnboardingFinish() {
+            if (!currentEmployeeId) return;
+
+            // Auto-login session for presentation demo
+            const data = SAGA.getData();
+            data.currentUser = {
+                id: currentEmployeeId,
+                username: document.getElementById('username').value.trim()
+            };
+            SAGA.saveData(data);
+
+            SAGA.showCustomAlert(
+                `Onboarding Credentials Generated & Document Checklist Processed!\n\nWelcome to Gonzaga Academy!\nEmployee ID: ${currentEmployeeId}\n\nRedirecting to Employee Self-Service portal...`,
+                "Onboarding Successful"
+            );
+
+            setTimeout(() => {
+                window.location.href = 'employee-ess.html';
+            }, 1500);
         }
 
         function goBack() {
@@ -372,6 +569,7 @@
             document.getElementById('applicantSelector').classList.remove('hidden');
             document.getElementById('applicantSelect').value = '';
             document.getElementById('employeeForm').reset();
+            currentEmployeeId = null;
         }
     </script>
 </body>

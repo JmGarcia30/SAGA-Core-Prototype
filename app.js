@@ -68,10 +68,21 @@ const SAGA = {
     "child psychology": 14
   },
 
-  // Initialize localStorage with mock data (only if not existing)
+  // Initialize localStorage with mock data (only if not existing or if too many applicants)
   init() {
-    if (!localStorage.getItem("saga_data")) {
+    const dataRaw = localStorage.getItem("saga_data");
+    const CURRENT_VERSION = 6;
+    if (!dataRaw) {
       this.resetData();
+    } else {
+      try {
+        const parsed = JSON.parse(dataRaw);
+        if (parsed && (parsed.applicants && parsed.applicants.length > 10 || parsed.dbVersion !== CURRENT_VERSION)) {
+          this.resetData();
+        }
+      } catch (e) {
+        this.resetData();
+      }
     }
   },
 
@@ -90,7 +101,7 @@ const SAGA = {
 
     const initialData = {
       applicants: [
-        // JOB POSITION 1: Elementary Grade School Teacher (5 applicants)
+        // JOB POSITION 1: Elementary Grade School Teacher (2 applicants)
         {
           id: "APP_1719662400001",
           name: "Maria Teresa Santos, LPT",
@@ -119,64 +130,7 @@ const SAGA = {
           appliedDate: twoWeeksAgo.toISOString(),
           hireDateApproved: oneWeekAgo.toISOString()
         },
-        {
-          id: "APP_1719662400003",
-          name: "Patricia May Flores, LPT",
-          email: "patricia.flores@gmail.com",
-          phone: "+63 920 111 4444",
-          resume: "BEEd Elementary Education graduate. LPT licensed with specialization in early childhood development, reading assessment, and interactive lesson planning.",
-          resumeFileName: "Patricia_Flores_BEEd.pdf",
-          jobId: 1,
-          status: "scored",
-          compatibility_score: 82,
-          extracted_skills: [{ skill: "teaching", weight: 18 }, { skill: "lpt", weight: 18 }, { skill: "assessment", weight: 12 }],
-          appliedDate: oneWeekAgo.toISOString(),
-          hireDateApproved: null
-        },
-        {
-          id: "APP_1719662400020",
-          name: "Sofia Isabel Mendoza, LPT",
-          email: "sofia.mendoza@yahoo.com",
-          phone: "+63 917 444 8888",
-          resume: "Elementary Educator with focus on reading literacy and SPED inclusive learning methods. 4 years teaching experience in private elementary institutions.",
-          resumeFileName: "Sofia_Mendoza_BEEd.pdf",
-          jobId: 1,
-          status: "scored",
-          compatibility_score: 78,
-          extracted_skills: [{ skill: "teaching", weight: 18 }, { skill: "lpt", weight: 18 }],
-          appliedDate: twoWeeksAgo.toISOString(),
-          hireDateApproved: null
-        },
-        {
-          id: "APP_1719662400021",
-          name: "Ramon Jose Gonzales, LPT",
-          email: "ramon.gonzales@gmail.com",
-          phone: "+63 928 333 1111",
-          resume: "Licensed Elementary Educator with passion for youth formation, values education, and extracurricular advisory.",
-          resumeFileName: "Ramon_Gonzales_CV.pdf",
-          jobId: 1,
-          status: "scored",
-          compatibility_score: 74,
-          extracted_skills: [{ skill: "teaching", weight: 18 }],
-          appliedDate: oneWeekAgo.toISOString(),
-          hireDateApproved: null
-        },
-        {
-          id: "APP_1719662400030",
-          name: "Camilla Rose Soriano",
-          email: "camilla.soriano@gmail.com",
-          phone: "+63 919 666 4444",
-          resume: "BEEd graduate applicant specializing in Grade 1-3 early reading foundations and creative arts integration.",
-          resumeFileName: "Camilla_Soriano_BEEd.pdf",
-          jobId: 1,
-          status: "applied",
-          compatibility_score: null,
-          extracted_skills: [],
-          appliedDate: now.toISOString(),
-          hireDateApproved: null
-        },
-
-        // JOB POSITION 2: Junior High School Science & Math Faculty (7 applicants)
+        // JOB POSITION 2: Junior High School Science & Math Faculty (1 applicant)
         {
           id: "APP_1719662400004",
           name: "Prof. Gabriel Mercado, LPT",
@@ -191,78 +145,7 @@ const SAGA = {
           appliedDate: twoWeeksAgo.toISOString(),
           hireDateApproved: null
         },
-        {
-          id: "APP_1719662400005",
-          name: "Teacher Rosa Santos",
-          email: "rosa.santos@school.edu.ph",
-          phone: "+63 919 456 7890",
-          resume: "BSEd Major in Science applicant for Junior High School. Proficient in laboratory instruction, biology, chemistry, and DepEd K-12 grading systems.",
-          resumeFileName: "Rosa_Santos_Science_Resume.pdf",
-          jobId: 2,
-          status: "scored",
-          compatibility_score: 88,
-          extracted_skills: [{ skill: "teaching", weight: 18 }, { skill: "science", weight: 14 }, { skill: "grading", weight: 10 }],
-          appliedDate: oneWeekAgo.toISOString(),
-          hireDateApproved: null
-        },
-        {
-          id: "APP_1719662400022",
-          name: "Dr. Carmela Aquino, MS",
-          email: "carmela.aquino@gmail.com",
-          phone: "+63 915 222 9999",
-          resume: "Master of Science in Chemistry. Experienced JHS Science laboratory manager and STEM investigatory project adviser with published papers.",
-          resumeFileName: "Dr_Carmela_Aquino_CV.pdf",
-          jobId: 2,
-          status: "scored",
-          compatibility_score: 94,
-          extracted_skills: [{ skill: "science", weight: 14 }, { skill: "research", weight: 13 }, { skill: "pedagogy", weight: 15 }],
-          appliedDate: threeWeeksAgo.toISOString(),
-          hireDateApproved: null
-        },
-        {
-          id: "APP_1719662400006",
-          name: "Clarisse Anne Villanueva, LPT",
-          email: "clarisse.villanueva@yahoo.com",
-          phone: "+63 922 333 8888",
-          resume: "BSEd General Science graduate. LPT licensed with focus on interactive science experiments, student assessment, and secondary education pedagogy.",
-          resumeFileName: "Clarisse_Villanueva_CV.pdf",
-          jobId: 2,
-          status: "scored",
-          compatibility_score: 79,
-          extracted_skills: [{ skill: "teaching", weight: 18 }, { skill: "lpt", weight: 18 }],
-          appliedDate: now.toISOString(),
-          hireDateApproved: null
-        },
-        {
-          id: "APP_1719662400023",
-          name: "Marco Luis Valenzuela",
-          email: "marco.valenzuela@gmail.com",
-          phone: "+63 918 777 3333",
-          resume: "BSEd Mathematics applicant proficient in statistics, geometry, and modern classroom technology integration.",
-          resumeFileName: "Marco_Valenzuela_Math.pdf",
-          jobId: 2,
-          status: "applied",
-          compatibility_score: 74,
-          extracted_skills: [{ skill: "mathematics", weight: 14 }],
-          appliedDate: now.toISOString(),
-          hireDateApproved: null
-        },
-        {
-          id: "APP_1719662400031",
-          name: "Vincent Paul Navarro, LPT",
-          email: "vincent.navarro@gmail.com",
-          phone: "+63 917 888 3333",
-          resume: "BSEd Physical Science instructor with expertise in robotics club mentoring and inter-school science quizzes.",
-          resumeFileName: "Vincent_Navarro_CV.pdf",
-          jobId: 2,
-          status: "scored",
-          compatibility_score: 83,
-          extracted_skills: [{ skill: "science", weight: 14 }, { skill: "lpt", weight: 18 }],
-          appliedDate: oneWeekAgo.toISOString(),
-          hireDateApproved: null
-        },
-
-        // JOB POSITION 3: Senior High School STEM & Computer Instructor (7 applicants)
+        // JOB POSITION 3: Senior High School STEM & Computer Instructor (2 applicants)
         {
           id: "APP_1719662400007",
           name: "Engr. Mark Anthony Reyes, MS",
@@ -291,64 +174,7 @@ const SAGA = {
           appliedDate: twoWeeksAgo.toISOString(),
           hireDateApproved: null
         },
-        {
-          id: "APP_1719662400024",
-          name: "Engr. Beatrice Solis, MIT",
-          email: "beatrice.solis@gmail.com",
-          phone: "+63 920 888 5555",
-          resume: "Master in Information Technology, BS Computer Science. Senior High School ICT instructor specializing in Java, Web Development, and Database Design.",
-          resumeFileName: "Engr_Beatrice_Solis_MIT.pdf",
-          jobId: 3,
-          status: "scored",
-          compatibility_score: 91,
-          extracted_skills: [{ skill: "stem", weight: 15 }, { skill: "python", weight: 12 }, { skill: "research", weight: 13 }],
-          appliedDate: twoWeeksAgo.toISOString(),
-          hireDateApproved: null
-        },
-        {
-          id: "APP_1719662400008",
-          name: "Engr. Arvin Patrick Cruz, MS",
-          email: "arvin.cruz@gmail.com",
-          phone: "+63 918 222 6666",
-          resume: "BS Electronics Engineering, MS Engineering Management. Physics and Pre-Calculus instructor for Senior High School STEM strand with industry research experience.",
-          resumeFileName: "Engr_Arvin_Cruz_STEM.pdf",
-          jobId: 3,
-          status: "scored",
-          compatibility_score: 87,
-          extracted_skills: [{ skill: "stem", weight: 15 }, { skill: "research", weight: 13 }],
-          appliedDate: oneWeekAgo.toISOString(),
-          hireDateApproved: null
-        },
-        {
-          id: "APP_1719662400025",
-          name: "Jonathan David Rivera",
-          email: "jonathan.rivera@yahoo.com",
-          phone: "+63 919 111 2222",
-          resume: "BS Computer Science graduate. Computer literacy and basic programming instructor applicant for Senior High School TVL/ICT track.",
-          resumeFileName: "Jonathan_Rivera_CS.pdf",
-          jobId: 3,
-          status: "applied",
-          compatibility_score: 76,
-          extracted_skills: [{ skill: "stem", weight: 15 }],
-          appliedDate: now.toISOString(),
-          hireDateApproved: null
-        },
-        {
-          id: "APP_1719662400032",
-          name: "Prof. Dominic Tan, MSCS",
-          email: "dominic.tan@gmail.com",
-          phone: "+63 917 999 4444",
-          resume: "MS Computer Science lecturer specializing in Python Data Science, Artificial Intelligence, and Mobile App Development.",
-          resumeFileName: "Dominic_Tan_MSCS.pdf",
-          jobId: 3,
-          status: "scored",
-          compatibility_score: 93,
-          extracted_skills: [{ skill: "stem", weight: 15 }, { skill: "python", weight: 12 }, { skill: "research", weight: 13 }],
-          appliedDate: twoWeeksAgo.toISOString(),
-          hireDateApproved: null
-        },
-
-        // JOB POSITION 4: Guidance Counselor & Student Wellness Officer (7 applicants)
+        // JOB POSITION 4: Guidance Counselor & Student Wellness Officer (2 applicants)
         {
           id: "APP_1719662400009",
           name: "Dr. Clarissa Loyola, RGC",
@@ -376,62 +202,6 @@ const SAGA = {
           extracted_skills: [{ skill: "guidance", weight: 14 }, { skill: "counseling", weight: 15 }],
           appliedDate: twoWeeksAgo.toISOString(),
           hireDateApproved: oneWeekAgo.toISOString()
-        },
-        {
-          id: "APP_1719662400010",
-          name: "Ma. Kristina Alonzo, RPm",
-          email: "kristina.alonzo@yahoo.com",
-          phone: "+63 921 999 3333",
-          resume: "MA in Psychology candidate, Registered Psychometrician (RPm). Experience in student mental health assessment, behavioral intervention plans, and career guidance counseling.",
-          resumeFileName: "Kristina_Alonzo_RPm.pdf",
-          jobId: 4,
-          status: "scored",
-          compatibility_score: 89,
-          extracted_skills: [{ skill: "counseling", weight: 15 }, { skill: "communication", weight: 14 }],
-          appliedDate: oneWeekAgo.toISOString(),
-          hireDateApproved: null
-        },
-        {
-          id: "APP_1719662400011",
-          name: "Prof. Kenneth Bautista, RGC",
-          email: "kenneth.bautista@gmail.com",
-          phone: "+63 917 666 2222",
-          resume: "Licensed Guidance Counselor with specialization in adolescent counseling, crisis intervention, and DepEd values formation programs.",
-          resumeFileName: "Kenneth_Bautista_RGC.pdf",
-          jobId: 4,
-          status: "scored",
-          compatibility_score: 84,
-          extracted_skills: [{ skill: "guidance", weight: 14 }, { skill: "counseling", weight: 15 }],
-          appliedDate: oneWeekAgo.toISOString(),
-          hireDateApproved: null
-        },
-        {
-          id: "APP_1719662400026",
-          name: "Andrea Camille Roxas, RPm",
-          email: "andrea.roxas@gmail.com",
-          phone: "+63 922 444 7777",
-          resume: "BS Psychology, Registered Psychometrician. Guidance advocate with background in student behavioral counseling and psychological testing.",
-          resumeFileName: "Andrea_Roxas_RPm.pdf",
-          jobId: 4,
-          status: "applied",
-          compatibility_score: 78,
-          extracted_skills: [{ skill: "counseling", weight: 15 }],
-          appliedDate: now.toISOString(),
-          hireDateApproved: null
-        },
-        {
-          id: "APP_1719662400033",
-          name: "Dr. Nathaniel Ocampo, RGC",
-          email: "nathaniel.ocampo@gmail.com",
-          phone: "+63 918 555 1111",
-          resume: "Senior Clinical Psychologist & Registered Guidance Counselor with 12 years institutional advisory experience.",
-          resumeFileName: "Dr_Nathaniel_Ocampo.pdf",
-          jobId: 4,
-          status: "scored",
-          compatibility_score: 95,
-          extracted_skills: [{ skill: "guidance", weight: 14 }, { skill: "counseling", weight: 15 }],
-          appliedDate: twoWeeksAgo.toISOString(),
-          hireDateApproved: null
         }
       ],
       employees: {
@@ -450,9 +220,28 @@ const SAGA = {
           facultySchedule: "MWF 7:30 AM - 4:30 PM",
           departmentRole: "Elementary Class Adviser",
           onboardedDate: oneWeekAgo.toISOString(),
+          orientationCompleted: true,
+          documents: {
+            resume: true,
+            tor: true,
+            diploma: true,
+            prcLicense: true,
+            serviceRecord: true,
+            recommendations: true,
+            nbiClearance: true,
+            marriageContract: true,
+            otherDocs: []
+          },
+          interview: {
+            status: "Passed Panel Interview",
+            score: 90,
+            date: "June 15, 2026",
+            comments: "Excellent presentation and communication skills.",
+            interviewer: "Search and Screening Board"
+          },
           leaveBalance: {
             vacation: 15,
-            sick: 10,
+            sick: 5,
             emergency: 5
           },
           performanceMetrics: {
@@ -482,11 +271,40 @@ const SAGA = {
           facultySchedule: "TTH 7:30 AM - 4:30 PM",
           departmentRole: "JHS Science Lead",
           onboardedDate: twoMonthsAgo.toISOString(),
+          orientationCompleted: true,
+          documents: {
+            resume: true,
+            tor: true,
+            diploma: true,
+            prcLicense: true,
+            serviceRecord: true,
+            recommendations: true,
+            nbiClearance: true,
+            marriageContract: true,
+            otherDocs: []
+          },
+          interview: {
+            status: "Passed Panel Interview",
+            score: 88,
+            date: "May 10, 2026",
+            comments: "Demonstrated strong knowledge of science pedagogy.",
+            interviewer: "Principal, Dept Chair"
+          },
           leaveBalance: {
             vacation: 12,
-            sick: 8,
+            sick: 5,
             emergency: 4
           },
+          conductLogs: [
+            {
+              id: "COND_PRESET1",
+              date: "2026-06-18",
+              offense: "Unexcused Tardiness / Attendance Issues",
+              sanction: "Written Warning",
+              details: "Accumulated three (3) unexcused tardiness violations in a single payroll period.",
+              loggedBy: "Principal's Office"
+            }
+          ],
           performanceMetrics: {
             rating: 4.6,
             lastReviewDate: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -514,9 +332,28 @@ const SAGA = {
           facultySchedule: "MWF 8:00 AM - 12:00 PM",
           departmentRole: "SHS STEM & ICT Instructor",
           onboardedDate: new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000).toISOString(),
+          orientationCompleted: true,
+          documents: {
+            resume: true,
+            tor: true,
+            diploma: true,
+            prcLicense: true,
+            serviceRecord: true,
+            recommendations: true,
+            nbiClearance: true,
+            marriageContract: true,
+            otherDocs: []
+          },
+          interview: {
+            status: "Passed Panel Interview",
+            score: 92,
+            date: "January 14, 2026",
+            comments: "Expert in Computer Science and STEM tracks.",
+            interviewer: "Dean of Academic Affairs"
+          },
           leaveBalance: {
             vacation: 10,
-            sick: 6,
+            sick: 5,
             emergency: 3
           },
           performanceMetrics: {
@@ -546,9 +383,28 @@ const SAGA = {
           facultySchedule: "Mon-Fri 8:00 AM - 5:00 PM",
           departmentRole: "Registered Guidance Counselor",
           onboardedDate: new Date(now.getTime() - 300 * 24 * 60 * 60 * 1000).toISOString(),
+          orientationCompleted: true,
+          documents: {
+            resume: true,
+            tor: true,
+            diploma: true,
+            prcLicense: true,
+            serviceRecord: true,
+            recommendations: true,
+            nbiClearance: true,
+            marriageContract: true,
+            otherDocs: []
+          },
+          interview: {
+            status: "Passed Panel Interview",
+            score: 95,
+            date: "September 8, 2025",
+            comments: "Highly qualified RGC with excellent counseling credentials.",
+            interviewer: "Board of Trustees Committee"
+          },
           leaveBalance: {
             vacation: 14,
-            sick: 9,
+            sick: 5,
             emergency: 5
           },
           performanceMetrics: {
@@ -648,7 +504,8 @@ const SAGA = {
       currentUser: {
         id: mockEmployeeId1,
         username: "juan.delacruz"
-      }
+      },
+      dbVersion: 6
     };
     localStorage.setItem("saga_data", JSON.stringify(initialData));
   },
@@ -668,7 +525,7 @@ const SAGA = {
   // APPLICANT MANAGEMENT
   // ============================================================================
 
-  addApplicant(name, email, phone, resume, jobId, fileName = "Resume.pdf") {
+  addApplicant(name, email, phone, resume, jobId, fileName = "Resume.pdf", documentsSubmitted = null) {
     const data = this.getData();
     const applicant = {
       id: "APP_" + Date.now(),
@@ -682,13 +539,24 @@ const SAGA = {
       compatibility_score: null,
       extracted_skills: [],
       appliedDate: new Date().toISOString(),
-      hireDateApproved: null
+      hireDateApproved: null,
+      isNew: true,
+      documentsSubmitted: documentsSubmitted || {
+        resume: true,
+        tor: false,
+        diploma: false,
+        prcLicense: false,
+        serviceRecord: false,
+        recommendations: false,
+        nbiClearance: false,
+        marriageContract: false
+      }
     };
     data.applicants.push(applicant);
     this.saveData(data);
 
-    // Auto-parse resume immediately so candidate is scored for HR portal
-    return this.parseAndScoreApplicant(applicant.id) || applicant;
+    // Resume is saved but NOT auto-scored. HR will manually trigger AI evaluation.
+    return applicant;
   },
 
   getApplicants() {
@@ -734,13 +602,22 @@ const SAGA = {
   },
 
   // Hire applicant
-  hireApplicant(applicantId) {
+  hireApplicant(applicantId, interviewDetails = {}) {
     const data = this.getData();
     const applicant = data.applicants.find(a => a.id === applicantId);
     if (!applicant) return null;
 
     applicant.status = "hired";
     applicant.hireDateApproved = new Date().toISOString();
+    
+    // Save details of interview in the applicant object
+    applicant.interview = {
+      status: interviewDetails.status || "Passed Panel Interview",
+      score: parseInt(interviewDetails.score) || 85,
+      date: interviewDetails.date || new Date().toLocaleDateString('en-PH'),
+      comments: interviewDetails.comments || "Strong demo teaching, recommended for immediate hire.",
+      interviewer: interviewDetails.interviewer || "Principal, Dept Chair, HR Representative"
+    };
 
     this.saveData(data);
     return applicant;
@@ -765,11 +642,30 @@ const SAGA = {
       username,
       password, // In production: use bcrypt
       jobId: applicant.jobId,
-      status: "active", // active, on_leave, suspended, pending_exit, separated
-      onboardedDate: new Date().toISOString(),
+      status: "onboarding", // starts in onboarding stage
+      onboardedDate: null,
+      orientationCompleted: false,
+      interview: applicant.interview || {
+        status: "Passed Panel Interview",
+        score: 85,
+        date: new Date().toLocaleDateString('en-PH'),
+        comments: "Passed initial screening and recruitment checks.",
+        interviewer: "Search & Selection Committee"
+      },
+      documents: {
+        resume: true,
+        tor: applicant.documentsSubmitted ? !!applicant.documentsSubmitted.tor : false,
+        diploma: applicant.documentsSubmitted ? !!applicant.documentsSubmitted.diploma : false,
+        prcLicense: applicant.documentsSubmitted ? !!applicant.documentsSubmitted.prcLicense : false,
+        serviceRecord: applicant.documentsSubmitted ? !!applicant.documentsSubmitted.serviceRecord : false,
+        recommendations: applicant.documentsSubmitted ? !!applicant.documentsSubmitted.recommendations : false,
+        nbiClearance: applicant.documentsSubmitted ? !!applicant.documentsSubmitted.nbiClearance : false,
+        marriageContract: applicant.documentsSubmitted ? !!applicant.documentsSubmitted.marriageContract : false,
+        otherDocs: [] // Stores additional uploaded file metadata
+      },
       leaveBalance: {
         vacation: 15,
-        sick: 10,
+        sick: 5,
         emergency: 5
       },
       performanceMetrics: {
@@ -790,6 +686,40 @@ const SAGA = {
 
     // Initialize attendance logs for employee
     data.attendanceLogs[employeeId] = [];
+
+    this.saveData(data);
+    return employee;
+  },
+
+  updateEmployeeDocuments(employeeId, docToggles, otherFile = null) {
+    const data = this.getData();
+    const employee = data.employees[employeeId];
+    if (!employee) return null;
+
+    if (!employee.documents) {
+      employee.documents = {
+        resume: true,
+        tor: false,
+        prcLicense: false,
+        nbiClearance: false,
+        psaCertificate: false,
+        medicalCertificate: false,
+        otherDocs: []
+      };
+    }
+
+    // Apply toggles
+    for (const key in docToggles) {
+      if (key in employee.documents) {
+        employee.documents[key] = docToggles[key];
+      }
+    }
+
+    // Add other file metadata if present
+    if (otherFile) {
+      if (!employee.documents.otherDocs) employee.documents.otherDocs = [];
+      employee.documents.otherDocs.push(otherFile);
+    }
 
     this.saveData(data);
     return employee;
@@ -821,8 +751,18 @@ const SAGA = {
 
     const days = Math.ceil((new Date(toDate) - new Date(fromDate)) / (1000 * 60 * 60 * 24)) + 1;
 
-    if (employee.leaveBalance[leaveType] < days) {
-      return { error: "Insufficient leave balance" };
+    let balance = employee.leaveBalance[leaveType];
+    if (balance === undefined) {
+      if (leaveType === 'maternity') balance = 105;
+      else if (leaveType === 'paternity') balance = 7;
+      else if (leaveType === 'soloParent') balance = 7;
+      else if (leaveType === 'bereavement') balance = 3;
+      else if (leaveType === 'study') balance = 730; // 2 years in days
+      else balance = 0;
+    }
+
+    if (balance < days) {
+      return { error: `Insufficient leave balance (Available: ${balance} days, Requested: ${days} days)` };
     }
 
     const leaveRequest = {
@@ -875,8 +815,18 @@ const SAGA = {
       } else if (role === "dean") {
         req.approvalHierarchy.hr.status = "Pending";
       } else if (role === "hr") {
-        if (employee && employee.leaveBalance[req.leaveType] >= req.days) {
-          employee.leaveBalance[req.leaveType] -= req.days;
+        if (employee) {
+          if (employee.leaveBalance[req.leaveType] === undefined) {
+            if (req.leaveType === 'maternity') employee.leaveBalance[req.leaveType] = 105;
+            else if (req.leaveType === 'paternity') employee.leaveBalance[req.leaveType] = 7;
+            else if (req.leaveType === 'soloParent') employee.leaveBalance[req.leaveType] = 7;
+            else if (req.leaveType === 'bereavement') employee.leaveBalance[req.leaveType] = 3;
+            else if (req.leaveType === 'study') employee.leaveBalance[req.leaveType] = 730;
+            else employee.leaveBalance[req.leaveType] = 0;
+          }
+          if (employee.leaveBalance[req.leaveType] >= req.days) {
+            employee.leaveBalance[req.leaveType] -= req.days;
+          }
         }
         req.status = "approved";
         req.approvedDate = new Date().toISOString();

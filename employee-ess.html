@@ -23,7 +23,7 @@
             </div>
             <div class="flex gap-6 items-center">
                 <a href="index.html" class="nav-link font-semibold">Careers & Faculty Openings</a>
-                <a href="hr-hiring.html" class="nav-link font-semibold">HR Master Portal</a>
+                <a href="dashboard.html" class="nav-link font-semibold">HR Master Portal</a>
                 <a href="employee-ess.html" class="nav-link active font-semibold">Employee Self-Service</a>
                 <button onclick="logout()" class="btn btn-outline btn-small">
                     <i class="fas fa-sign-out-alt"></i> Logout
@@ -79,6 +79,9 @@
 
         <!-- Main Content -->
         <div class="max-w-7xl mx-auto px-4 py-8">
+            <!-- Onboarding Status Banner Placeholder -->
+            <div id="onboardingBannerContainer"></div>
+
             <!-- Tab Navigation -->
             <div class="bg-white border-b border-gray-200 mb-8 sticky top-32 z-30">
                 <div class="flex overflow-x-auto gap-1">
@@ -96,6 +99,9 @@
                     </button>
                     <button onclick="switchTab('timekeeping')" class="tab-btn" data-tab="timekeeping">
                         <i class="fas fa-clock"></i> Timekeeping
+                    </button>
+                    <button onclick="switchTab('documents')" class="tab-btn" data-tab="documents">
+                        <i class="fas fa-folder-open"></i> My 201 Locker
                     </button>
                     <button onclick="switchTab('exit')" class="tab-btn" data-tab="exit">
                         <i class="fas fa-door-open"></i> Exit
@@ -297,28 +303,42 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div class="form-group">
                                     <label>Leave Type *</label>
-                                    <select id="leaveType" required>
+                                    <select id="leaveType" required onchange="onLeaveFieldChange()">
                                         <option value="">-- Select --</option>
                                         <option value="vacation">Vacation Leave</option>
                                         <option value="sick">Sick Leave</option>
                                         <option value="emergency">Emergency Leave</option>
+                                        <option value="maternity">Maternity Leave (SSS 105 Days)</option>
+                                        <option value="paternity">Paternity Leave (7 Days)</option>
+                                        <option value="soloParent">Solo Parent Leave (7 Days)</option>
+                                        <option value="bereavement">Bereavement Leave (3 Days)</option>
+                                        <option value="study">Study Leave (Max 2 Years, Unpaid)</option>
                                     </select>
                                 </div>
                                 <div class="form-group">
                                     <label>Number of Days *</label>
-                                    <input type="number" id="leaveDays" min="1" max="30" required>
+                                    <input type="number" id="leaveDays" min="1" max="365" required readonly class="bg-slate-100 cursor-not-allowed">
                                 </div>
                             </div>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                                 <div class="form-group">
                                     <label>From Date *</label>
-                                    <input type="date" id="leaveFromDate" required>
+                                    <input type="date" id="leaveFromDate" required onchange="onLeaveFieldChange()">
                                 </div>
                                 <div class="form-group">
                                     <label>To Date *</label>
-                                    <input type="date" id="leaveToDate" required>
+                                    <input type="date" id="leaveToDate" required onchange="onLeaveFieldChange()">
                                 </div>
+                            </div>
+
+                            <!-- Medical Certificate Attachment Form (Shown dynamically for sick leave >= 2 days) -->
+                            <div id="medCertAttachmentGroup" class="hidden form-group mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-2">
+                                <label class="block font-bold text-amber-950 text-xs uppercase tracking-wider flex items-center gap-1.5"><i class="fas fa-file-prescription text-amber-600"></i> Medical Certificate Required *</label>
+                                <p class="text-[10px] text-slate-500 leading-normal">
+                                    In accordance with Article VI: Benefits of the School Employee Manual, a Medical Certificate is required for sick leave lasting two (2) days or more.
+                                </p>
+                                <input type="file" id="medCertFile" class="text-xs w-full cursor-pointer bg-white border rounded-lg p-2 focus:outline-none focus:border-amber-400">
                             </div>
 
                             <div class="form-group mb-4">
@@ -475,6 +495,50 @@
                     </p>
                 </div>
             </div>
+
+            <!-- Tab: My 201 Locker -->
+            <div id="tab-documents" class="tab-content hidden space-y-6">
+                <div class="card p-6">
+                    <h2 class="section-title">My Digital 201 Locker & Documents</h2>
+                    <p class="text-xs text-gray-500 mb-6">View verification status of your institutional documents and submit missing clearances. Files verified by HR will show a green check mark.</p>
+
+                    <!-- Document list layout -->
+                    <div class="space-y-4" id="essDocumentListContainer">
+                        <!-- Populated by JS -->
+                    </div>
+
+                    <!-- Upload missing docs form -->
+                    <div class="bg-gray-50 p-6 rounded-lg mt-8 border border-slate-200">
+                        <h3 class="font-bold text-base text-gray-900 mb-4 flex items-center gap-1.5"><i class="fas fa-file-upload text-blue-500"></i> Submit Other Required Documents</h3>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="form-group">
+                                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Document Category *</label>
+                                <select id="essOtherDocType" class="w-full px-3.5 py-2 border rounded-xl bg-white text-xs">
+                                    <option value="cpd">CPD Seminar Certificate</option>
+                                    <option value="training">Training Certificate of Attendance</option>
+                                    <option value="graduate">Graduate Studies Credit Unit Certificate</option>
+                                    <option value="other">Other Supporting Credential</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="block text-xs font-bold text-gray-700 uppercase mb-1">Upload Document *</label>
+                                <div class="flex gap-2">
+                                    <label class="flex-1 px-4 py-2 border border-dashed border-indigo-400 bg-indigo-50/20 rounded-xl flex items-center justify-center font-bold text-xs text-indigo-700 cursor-pointer hover:bg-indigo-50 transition-all select-none">
+                                        <input type="file" id="essOtherDocFile" class="hidden" onchange="handleOtherDocUpload(this)">
+                                        <i class="fas fa-file-pdf mr-1.5 text-base"></i> Select PDF Certificate
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-4 hidden" id="otherDocLoading">
+                            <div class="flex items-center gap-2 text-xs font-bold text-indigo-600">
+                                <span class="spinner inline-block w-4 h-4 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></span>
+                                Simulating secure upload...
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -528,7 +592,7 @@
             const data = SAGA.getData();
             if (data.currentUser) {
                 currentEmployee = SAGA.getEmployeeById(data.currentUser.id);
-                if (currentEmployee && currentEmployee.status === 'active') {
+                if (currentEmployee && (currentEmployee.status === 'active' || currentEmployee.status === 'onboarding')) {
                     loginEmployee(currentEmployee);
                     return;
                 }
@@ -573,23 +637,59 @@
 
             const empInfo = document.getElementById('employeeInfo');
             if (empInfo) {
+                const onboardDateText = employee.onboardedDate ? `Faculty Since ${SAGA.formatDate(employee.onboardedDate)}` : 'Onboarding Stage';
                 empInfo.innerHTML = `
                     <span class="text-gray-700 font-medium">${SAGA.getJobById(employee.jobId)?.title || 'Employee'}</span>
                     <span class="mx-2 text-gray-400">•</span>
-                    <span class="text-gray-500 text-xs">Faculty Since ${SAGA.formatDate(employee.onboardedDate)}</span>
+                    <span class="text-gray-500 text-xs">${onboardDateText}</span>
                 `;
             }
             const empIdEl = document.getElementById('empId');
             if (empIdEl) empIdEl.textContent = employee.id;
 
+            // Handle onboarding banner
+            const bannerContainer = document.getElementById('onboardingBannerContainer');
+            const overviewStatusBadge = document.getElementById('statusBadge');
+            
+            if (employee.status === 'onboarding') {
+                if (overviewStatusBadge) {
+                    overviewStatusBadge.textContent = "ONBOARDING";
+                    overviewStatusBadge.className = "stat-number text-xs mt-2 px-2 py-1 bg-amber-100 border border-amber-300 text-amber-800 font-extrabold rounded-full inline-block animate-pulse";
+                }
+                
+                if (bannerContainer) {
+                    bannerContainer.innerHTML = `
+                        <div id="onboardingBanner" class="bg-amber-50 border-l-4 border-amber-500 p-4 mb-6 rounded-r-xl shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                            <div class="flex items-center gap-3">
+                                <i class="fas fa-exclamation-circle text-amber-500 text-xl shrink-0"></i>
+                                <div>
+                                    <p class="font-extrabold text-amber-950 text-xs sm:text-sm">Account Status: In Onboarding Pipeline</p>
+                                    <p class="text-[10px] sm:text-xs text-amber-900 leading-relaxed">Your profile is registered. Please submit your required document copies in the <strong>My 201 Locker</strong> tab, and visit HR to bind your RFID card.</p>
+                                </div>
+                            </div>
+                            <span class="text-[9px] font-extrabold bg-amber-200 text-amber-800 px-2.5 py-1 rounded-full uppercase tracking-wider animate-pulse shrink-0 self-start sm:self-auto">Pending Setup</span>
+                        </div>
+                    `;
+                }
+            } else {
+                if (overviewStatusBadge) {
+                    overviewStatusBadge.textContent = "ACTIVE";
+                    overviewStatusBadge.className = "stat-number text-xs mt-2 px-2 py-1 bg-emerald-100 border border-emerald-300 text-emerald-800 font-extrabold rounded-full inline-block";
+                }
+                if (bannerContainer) bannerContainer.innerHTML = '';
+            }
+
             updateLeaveBalance();
             loadAttendanceLogs();
             loadLeaveHistory();
+            loadESSDocumentList();
 
             // Attach live template auto-update listeners to form fields
             ['leaveType', 'leaveDays', 'leaveFromDate', 'leaveToDate', 'leaveReason'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) {
+                    el.removeEventListener('input', updateLiveFormalLeaveTemplate);
+                    el.removeEventListener('change', updateLiveFormalLeaveTemplate);
                     el.addEventListener('input', updateLiveFormalLeaveTemplate);
                     el.addEventListener('change', updateLiveFormalLeaveTemplate);
                 }
@@ -619,6 +719,143 @@
 
             // Scroll to top
             window.scrollTo(0, 200);
+        }
+
+        function loadESSDocumentList() {
+            if (!currentEmployee) return;
+
+            const container = document.getElementById('essDocumentListContainer');
+            if (!container) return;
+
+            const docs = currentEmployee.documents || {
+                resume: true,
+                tor: false,
+                diploma: false,
+                prcLicense: false,
+                serviceRecord: false,
+                recommendations: false,
+                nbiClearance: false,
+                marriageContract: false,
+                otherDocs: []
+            };
+
+            const docDefinitions = [
+                { key: 'resume', name: 'Curriculum Vitae / Resume', desc: 'Letter of Application & CV', icon: 'fa-file-alt' },
+                { key: 'tor', name: 'Transcript of Records (TOR)', desc: 'Official copy certified by registrar', icon: 'fa-graduation-cap' },
+                { key: 'diploma', name: 'Photocopy of Diploma', desc: 'Degree completion diploma copy', icon: 'fa-certificate' },
+                { key: 'prcLicense', name: 'PRC License / LET Board Certificate', desc: 'LPT Licensure registration', icon: 'fa-id-badge' },
+                { key: 'serviceRecord', name: 'Certification of Previous Employment', desc: 'Service record from past employers', icon: 'fa-briefcase' },
+                { key: 'recommendations', name: '3 Letters of Recommendation', desc: 'Attesting to moral character', icon: 'fa-envelope-open-text' },
+                { key: 'nbiClearance', name: 'NBI Clearance Certificate', desc: 'Valid criminal history record check', icon: 'fa-balance-scale' },
+                { key: 'marriageContract', name: 'Marriage Contract (if applicable)', desc: 'For married employees registry', icon: 'fa-ring' }
+            ];
+
+            let html = docDefinitions.map(def => {
+                const isUploaded = !!docs[def.key];
+                
+                return `
+                    <div class="p-3.5 bg-white border border-slate-200/70 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-xs hover:border-slate-300 transition-all">
+                        <div class="flex gap-3 items-center">
+                            <div class="w-9 h-9 rounded-full ${isUploaded ? 'bg-emerald-50 text-emerald-700 border-emerald-200' : 'bg-slate-50 text-slate-400 border-slate-200'} flex items-center justify-center text-sm border shadow-sm shrink-0">
+                                <i class="fas ${def.icon}"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-extrabold text-slate-800">${def.name}</h4>
+                                <p class="text-[10px] text-slate-400">${def.desc}</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 justify-end">
+                            ${isUploaded ? `
+                                <span class="px-2.5 py-1 text-[10px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 rounded-full flex items-center gap-1"><i class="fas fa-check-circle"></i> Verified / Submitted</span>
+                            ` : `
+                                <div class="flex items-center gap-2">
+                                    <label class="px-3 py-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200/50 text-indigo-700 rounded-xl font-bold cursor-pointer transition-all flex items-center gap-1.5 text-[10px]">
+                                        <input type="file" class="hidden" onchange="handleMockESSDocUpload(this, '${def.key}')">
+                                        <i class="fas fa-upload"></i> Upload PDF
+                                    </label>
+                                    <span class="px-2.5 py-1 text-[10px] font-extrabold bg-rose-100 text-rose-800 border border-rose-200 rounded-full flex items-center gap-1"><i class="fas fa-times-circle"></i> Missing</span>
+                                </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Render other files if any
+            const otherDocs = docs.otherDocs || [];
+            if (otherDocs.length > 0) {
+                html += `
+                    <div class="border-t pt-4 mt-6">
+                        <h4 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider mb-3">Other Submitted Credentials</h4>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            ${otherDocs.map(o => `
+                                <div class="p-3 bg-slate-50 border border-slate-200/60 rounded-xl flex items-center justify-between text-xs">
+                                    <div class="flex gap-2.5 items-center truncate">
+                                        <i class="fas fa-certificate text-indigo-500 text-sm"></i>
+                                        <div class="truncate">
+                                            <p class="font-bold text-slate-800 truncate">${o.fileName}</p>
+                                            <p class="text-[9px] text-slate-400 uppercase font-bold">${o.docType.toUpperCase()}</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[9px] font-bold text-slate-400 shrink-0">${new Date(o.uploadedAt).toLocaleDateString()}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function handleMockESSDocUpload(inputEl, docKey) {
+            if (!inputEl.files || inputEl.files.length === 0) return;
+            const filename = inputEl.files[0].name;
+
+            inputEl.disabled = true;
+            setTimeout(() => {
+                inputEl.disabled = false;
+                
+                // Save to DB
+                SAGA.updateEmployeeDocuments(currentEmployee.id, { [docKey]: true }, {
+                    fileName: filename,
+                    uploadedAt: new Date().toISOString(),
+                    docType: docKey
+                });
+
+                // Reload employee object
+                currentEmployee = SAGA.getEmployeeById(currentEmployee.id);
+                loadESSDocumentList();
+                SAGA.showCustomAlert(`Your document "${filename}" was successfully uploaded and logged. HR will verify it shortly.`, "Upload Success");
+            }, 600);
+        }
+
+        function handleOtherDocUpload(inputEl) {
+            if (!inputEl.files || inputEl.files.length === 0) return;
+            const filename = inputEl.files[0].name;
+            const docType = document.getElementById('essOtherDocType').value;
+
+            const loader = document.getElementById('otherDocLoading');
+            if (loader) loader.classList.remove('hidden');
+            inputEl.disabled = true;
+
+            setTimeout(() => {
+                if (loader) loader.classList.add('hidden');
+                inputEl.disabled = false;
+                
+                // Add to other docs in DB
+                SAGA.updateEmployeeDocuments(currentEmployee.id, {}, {
+                    fileName: filename,
+                    uploadedAt: new Date().toISOString(),
+                    docType: docType
+                });
+
+                // Reload employee object
+                currentEmployee = SAGA.getEmployeeById(currentEmployee.id);
+                loadESSDocumentList();
+                inputEl.value = '';
+                SAGA.showCustomAlert(`Other credential "${filename}" uploaded successfully.`, "Certificate Logged");
+            }, 800);
         }
 
         function recordTimeEntry(type) {
@@ -715,6 +952,21 @@
                 return;
             }
 
+            // Calculate duration days
+            const start = new Date(fromDate);
+            const end = new Date(toDate);
+            const diffTime = Math.abs(end - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+            // Enforce Sick Leave Medical Certificate validation (Article VI)
+            if (leaveType === 'sick' && diffDays >= 2) {
+                const fileInput = document.getElementById('medCertFile');
+                if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                    alert('❌ SAGA Policy Exception: In accordance with Article VI of the School Employee Manual, a Medical Certificate is required for sick leave lasting two (2) days or more. Please attach your medical clearance document.');
+                    return;
+                }
+            }
+
             const result = SAGA.submitLeaveRequest(
                 currentEmployee.id,
                 leaveType,
@@ -730,11 +982,44 @@
 
             alert(`✅ Leave Application Sent directly to HR Master System!\n\nDuration: ${result.days} day(s)\nStatus: Recorded & Pending Review in HR Dashboard\n\nYour application has been received by HR and the Principal's Office.`);
             document.getElementById('leaveForm').reset();
+            if (document.getElementById('medCertAttachmentGroup')) {
+                document.getElementById('medCertAttachmentGroup').classList.add('hidden');
+            }
             
             // Refresh employee data
             currentEmployee = SAGA.getEmployeeById(currentEmployee.id);
             updateLeaveBalance();
             loadLeaveHistory();
+        }
+
+        function onLeaveFieldChange() {
+            const type = document.getElementById('leaveType').value;
+            const fromVal = document.getElementById('leaveFromDate').value;
+            const toVal = document.getElementById('leaveToDate').value;
+            const attachmentGroup = document.getElementById('medCertAttachmentGroup');
+            const inputDays = document.getElementById('leaveDays');
+
+            if (!fromVal || !toVal) {
+                if (attachmentGroup) attachmentGroup.classList.add('hidden');
+                return;
+            }
+
+            const start = new Date(fromVal);
+            const end = new Date(toVal);
+            const diffTime = Math.abs(end - start);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+            if (inputDays) {
+                inputDays.value = isNaN(diffDays) ? 1 : diffDays;
+            }
+
+            if (type === 'sick' && diffDays >= 2) {
+                if (attachmentGroup) attachmentGroup.classList.remove('hidden');
+            } else {
+                if (attachmentGroup) attachmentGroup.classList.add('hidden');
+            }
+
+            updateLiveFormalLeaveTemplate();
         }
 
         // Templated Leave Letter Generator Functions
