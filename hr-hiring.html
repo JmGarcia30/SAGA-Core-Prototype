@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -19,10 +20,12 @@
             gap: 0.5rem;
             cursor: pointer;
         }
+
         .hr-tab-btn:hover {
             color: #2563eb;
             background-color: #f3f4f6;
         }
+
         .hr-tab-btn.active {
             color: #2563eb;
             border-bottom-color: #2563eb;
@@ -30,17 +33,22 @@
         }
     </style>
 </head>
+
 <body class="bg-gray-50">
     <!-- Navigation -->
     <nav class="navbar sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <div class="nav-brand">
-                <div class="bg-white p-1 rounded-xl shadow-md border-2 border-amber-400 flex items-center justify-center">
-                    <img src="assets/school_logo.png" alt="St. Aloysius Gonzaga Academy Logo" class="w-9 h-9 object-contain">
+                <div
+                    class="bg-white p-1 rounded-xl shadow-md border-2 border-amber-400 flex items-center justify-center">
+                    <img src="assets/school_logo.png" alt="St. Aloysius Gonzaga Academy Logo"
+                        class="w-9 h-9 object-contain">
                 </div>
                 <div>
-                    <span class="block text-lg font-bold tracking-wide text-white">St. Aloysius Gonzaga Academy Inc.</span>
-                    <span class="block text-[11px] font-semibold text-amber-400 tracking-wider uppercase">Institutional HRIS Portal • Est. 2015</span>
+                    <span class="block text-lg font-bold tracking-wide text-white">St. Aloysius Gonzaga Academy
+                        Inc.</span>
+                    <span class="block text-[11px] font-semibold text-amber-400 tracking-wider uppercase">Institutional
+                        HRIS Portal • Est. 2015</span>
                 </div>
             </div>
             <div class="flex gap-6 items-center">
@@ -56,21 +64,26 @@
         <div class="max-w-7xl mx-auto px-4 pt-4 pb-2">
             <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-3">
                 <div class="flex items-center gap-4">
-                    <div class="bg-slate-900 p-2 rounded-2xl shadow-lg border-2 border-amber-400 flex items-center justify-center">
-                        <img src="assets/school_logo.png" alt="St. Aloysius Gonzaga Academy Shield" class="w-12 h-12 object-contain">
+                    <div
+                        class="bg-slate-900 p-2 rounded-2xl shadow-lg border-2 border-amber-400 flex items-center justify-center">
+                        <img src="assets/school_logo.png" alt="St. Aloysius Gonzaga Academy Shield"
+                            class="w-12 h-12 object-contain">
                     </div>
                     <div>
                         <h1 class="text-2xl md:text-3xl font-extrabold text-slate-900 flex items-center gap-2">
                             HRIS Master Dashboard
                         </h1>
                         <p class="text-xs md:text-sm text-slate-600 mt-0.5 font-medium">
-                            St. Aloysius Gonzaga Academy Inc. • <span class="text-amber-600 font-bold">Spiritual Formation • Academic Excellence • Genuine Compassion</span>
+                            St. Aloysius Gonzaga Academy Inc. • <span class="text-amber-600 font-bold">Spiritual
+                                Formation • Academic Excellence • Genuine Compassion</span>
                         </p>
                     </div>
                 </div>
                 <div class="flex items-center gap-2">
-                    <span class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-300">
-                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> DepEd & Labor Code Compliant
+                    <span
+                        class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold border border-emerald-300">
+                        <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> DepEd & Labor Code
+                        Compliant
                     </span>
                 </div>
             </div>
@@ -170,25 +183,29 @@
                     <h3 class="text-lg font-bold text-gray-900 mb-2 flex items-center gap-2">
                         <i class="fas fa-tasks text-indigo-500"></i> HR Operations Status
                     </h3>
-                    
+
                     <div class="p-4 bg-gray-50 rounded-lg border border-gray-100 space-y-3">
                         <div class="flex justify-between items-center text-sm">
-                            <span class="text-gray-600"><i class="fas fa-user-clock mr-2 text-yellow-500"></i>Pending Offboardings</span>
+                            <span class="text-gray-600"><i class="fas fa-user-clock mr-2 text-yellow-500"></i>Pending
+                                Offboardings</span>
                             <span class="font-bold text-gray-900" id="hris-pending-exits-count">0</span>
                         </div>
                         <div class="flex justify-between items-center text-sm">
-                            <span class="text-gray-600"><i class="fas fa-user-plus mr-2 text-blue-500"></i>Total Job Applicants</span>
+                            <span class="text-gray-600"><i class="fas fa-user-plus mr-2 text-blue-500"></i>Total Job
+                                Applicants</span>
                             <span class="font-bold text-gray-900" id="hris-total-applicants-count">0</span>
                         </div>
                         <div class="flex justify-between items-center text-sm">
-                            <span class="text-gray-600"><i class="fas fa-file-contract mr-2 text-green-500"></i>Statutory Deductions</span>
-                            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold">SSS / PhilHealth Active</span>
+                            <span class="text-gray-600"><i
+                                    class="fas fa-file-contract mr-2 text-green-500"></i>Statutory Deductions</span>
+                            <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded font-bold">SSS /
+                                PhilHealth Active</span>
                         </div>
                     </div>
 
                     <div class="pt-2">
                         <a href="hr-exit.html" class="btn btn-outline btn-block btn-small text-center block">
-                            <i class="fas fa-sign-out-alt"></i> Manage HR Exit & Clearances
+                            <i class="fas fa-sign-out-alt"></i> Manage HR Contracts & Offboardings
                         </a>
                     </div>
                 </div>
@@ -203,9 +220,11 @@
                 <div class="flex flex-1 flex-col sm:flex-row gap-3 w-full">
                     <div class="relative flex-1">
                         <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                        <input type="text" id="dirSearch" placeholder="Search employee name or username..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="dirSearch" placeholder="Search employee name or username..."
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
-                    <select id="dirDeptFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="dirDeptFilter"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">All Departments</option>
                     </select>
                 </div>
@@ -262,7 +281,8 @@
                                 <span class="text-sm font-bold text-gray-900" id="funnel-scored">0</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-3">
-                                <div class="bg-yellow-500 h-3 rounded-full" id="funnel-scored-bar" style="width: 0%;"></div>
+                                <div class="bg-yellow-500 h-3 rounded-full" id="funnel-scored-bar" style="width: 0%;">
+                                </div>
                             </div>
                         </div>
                         <div>
@@ -271,7 +291,8 @@
                                 <span class="text-sm font-bold text-gray-900" id="funnel-hired">0</span>
                             </div>
                             <div class="w-full bg-gray-200 rounded-full h-3">
-                                <div class="bg-green-500 h-3 rounded-full" id="funnel-hired-bar" style="width: 0%;"></div>
+                                <div class="bg-green-500 h-3 rounded-full" id="funnel-hired-bar" style="width: 0%;">
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -314,20 +335,23 @@
             <!-- Controls -->
             <div class="card p-6 mb-8 bg-white flex flex-col md:flex-row gap-4 items-center justify-between">
                 <div class="flex flex-wrap gap-3">
-                    <select id="filterJob" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-sm">
+                    <select id="filterJob"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-medium text-sm">
                         <option value="">All Teaching Positions</option>
                         <option value="1">Elementary Grade School Teacher</option>
                         <option value="2">JHS Science & Math Faculty</option>
                         <option value="3">SHS STEM & Computer Instructor</option>
                         <option value="4">Guidance Counselor & Student Wellness</option>
                     </select>
-                    <select id="filterStatus" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <select id="filterStatus"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                         <option value="">All Statuses</option>
                         <option value="applied">New Applications</option>
                         <option value="scored">Scored</option>
                         <option value="hired">Hired</option>
                     </select>
-                    <select id="sortBy" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+                    <select id="sortBy"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
                         <option value="score-desc">Highest Score First (Ranking)</option>
                         <option value="score-asc">Lowest Score First</option>
                         <option value="recent">Most Recent Application</option>
@@ -347,7 +371,8 @@
             <div id="emptyState" class="card p-12 text-center bg-white hidden">
                 <i class="fas fa-inbox text-6xl text-gray-300 mb-4"></i>
                 <h3 class="text-xl font-bold text-gray-700 mb-2">No Applicants Yet</h3>
-                <p class="text-gray-600">When applicants submit applications on the Careers page, they will appear here.</p>
+                <p class="text-gray-600">When applicants submit applications on the Careers page, they will appear here.
+                </p>
                 <a href="index.html" class="btn btn-primary mt-4">
                     <i class="fas fa-arrow-right"></i> Go to Careers Page
                 </a>
@@ -362,22 +387,26 @@
                 <div class="flex flex-1 flex-col sm:flex-row gap-3 w-full">
                     <div class="relative flex-1">
                         <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
-                        <input type="text" id="leaveSearch" placeholder="Search teacher or employee name..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <input type="text" id="leaveSearch" placeholder="Search teacher or employee name..."
+                            class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                     </div>
-                    <select id="leaveTypeFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="leaveTypeFilter"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">All Leave Types</option>
                         <option value="vacation">Vacation Leave</option>
                         <option value="sick">Sick Leave</option>
                         <option value="emergency">Emergency Leave</option>
                     </select>
-                    <select id="attendanceTypeFilter" class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    <select id="attendanceTypeFilter"
+                        class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">All Timekeeping Logs</option>
                         <option value="in">Clock In Only</option>
                         <option value="out">Clock Out Only</option>
                     </select>
                 </div>
                 <div class="flex gap-2 w-full sm:w-auto">
-                    <button onclick="simulateRFIDTap()" class="bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold px-3 py-2 rounded-lg transition-all flex items-center whitespace-nowrap shadow-sm border border-amber-400">
+                    <button onclick="simulateRFIDTap()"
+                        class="bg-indigo-900 hover:bg-indigo-800 text-white text-xs font-bold px-3 py-2 rounded-lg transition-all flex items-center whitespace-nowrap shadow-sm border border-amber-400">
                         <i class="fas fa-microchip text-amber-400 mr-1.5"></i> Tap IoT-RFID Terminal
                     </button>
                     <button onclick="simulatePendingLeaveDemo()" class="btn btn-outline text-xs whitespace-nowrap">
@@ -461,7 +490,8 @@
     <div id="hrPayslipModal" class="modal-overlay">
         <div class="modal max-w-lg">
             <div class="modal-header">
-                <h2 class="modal-title"><i class="fas fa-file-invoice-dollar text-green-600 mr-2"></i> Employee Payslip Breakdown</h2>
+                <h2 class="modal-title"><i class="fas fa-file-invoice-dollar text-green-600 mr-2"></i> Employee Payslip
+                    Breakdown</h2>
                 <button onclick="closeHRPayslipModal()" class="modal-close">&times;</button>
             </div>
             <div class="modal-body">
@@ -475,9 +505,11 @@
         <div class="modal max-w-2xl">
             <div class="modal-header bg-gray-900 text-white rounded-t-lg px-6 py-4 flex justify-between items-center">
                 <h2 class="modal-title text-white text-lg font-bold flex items-center gap-2">
-                    <i class="fas fa-file-pdf text-red-500 text-xl"></i> <span id="pdfModalTitle">Applicant Resume</span>
+                    <i class="fas fa-file-pdf text-red-500 text-xl"></i> <span id="pdfModalTitle">Applicant
+                        Resume</span>
                 </h2>
-                <button onclick="closePDFResumeModal()" class="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
+                <button onclick="closePDFResumeModal()"
+                    class="text-gray-400 hover:text-white text-2xl font-bold">&times;</button>
             </div>
             <div class="modal-body p-6 bg-gray-100">
                 <div id="pdfResumeContent" class="space-y-4"></div>
@@ -489,7 +521,8 @@
     <div id="employeePerformanceModal" class="modal-overlay">
         <div class="modal max-w-lg">
             <div class="modal-header">
-                <h2 class="modal-title"><i class="fas fa-award text-yellow-500 mr-2"></i> Faculty Performance Appraisal Report</h2>
+                <h2 class="modal-title"><i class="fas fa-award text-yellow-500 mr-2"></i> Faculty Performance Appraisal
+                    Report</h2>
                 <button onclick="closePerformanceModal()" class="modal-close">&times;</button>
             </div>
             <div class="modal-body">
@@ -516,7 +549,7 @@
             loadApplicants();
             loadDirectory();
             loadLeaveAndTimekeeping();
-            
+
             document.getElementById('filterJob').addEventListener('change', filterAndSort);
             document.getElementById('filterStatus').addEventListener('change', filterAndSort);
             document.getElementById('sortBy').addEventListener('change', filterAndSort);
@@ -595,7 +628,7 @@
             const employees = SAGA.getAllEmployees();
             const depts = SAGA.getEmployeesByDepartment();
             const deptFilter = document.getElementById('dirDeptFilter');
-            
+
             // Populate department dropdown if empty
             if (deptFilter.options.length <= 1) {
                 depts.forEach(d => {
@@ -642,7 +675,7 @@
                             <div class="flex items-start justify-between mb-4">
                                 <div class="flex items-center gap-3">
                                     <div class="w-12 h-12 rounded-full bg-blue-100 text-blue-600 font-bold text-lg flex items-center justify-center border border-blue-200">
-                                        ${emp.name.split(' ').map(n=>n[0]).join('')}
+                                        ${emp.name.split(' ').map(n => n[0]).join('')}
                                     </div>
                                     <div>
                                         <h3 class="font-bold text-gray-900 line-clamp-1">${emp.name}</h3>
@@ -731,7 +764,7 @@
                     <div class="p-4 bg-white rounded-lg border border-gray-200 space-y-2">
                         <h4 class="font-bold text-sm text-gray-800">Faculty Evaluation Highlights</h4>
                         <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div class="bg-amber-500 h-2.5 rounded-full" style="width: ${(rating/5.0)*100}%"></div>
+                            <div class="bg-amber-500 h-2.5 rounded-full" style="width: ${(rating / 5.0) * 100}%"></div>
                         </div>
                         <p class="text-xs text-gray-600 italic">"Consistently demonstrates excellent pedagogy, punctual DepEd grading submissions, and active engagement with student academic counseling."</p>
                     </div>
@@ -971,7 +1004,7 @@
             const emps = SAGA.getAllEmployees();
             if (emps.length === 0) return;
             const emp = emps[Math.floor(Math.random() * emps.length)];
-            
+
             SAGA.submitLeaveRequest(
                 emp.id,
                 'vacation',
@@ -1168,11 +1201,11 @@
             emptyState.classList.add('hidden');
             container.innerHTML = applicants.map((app, index) => {
                 const job = SAGA.getJobById(app.jobId);
-                const scoreClass = app.compatibility_score ? 
+                const scoreClass = app.compatibility_score ?
                     (app.compatibility_score >= 70 ? 'score-high' : app.compatibility_score >= 50 ? 'score-medium' : 'score-low')
                     : '';
 
-                const rankBadge = (app.compatibility_score) ? 
+                const rankBadge = (app.compatibility_score) ?
                     `<span class="px-2.5 py-1 rounded-full text-xs font-extrabold ${index === 0 ? 'bg-amber-400 text-slate-950 border border-amber-500 shadow-md' : index === 1 ? 'bg-slate-200 text-slate-800 border border-slate-300' : index === 2 ? 'bg-amber-100 text-amber-900 border border-amber-300' : 'bg-slate-100 text-slate-700 border border-slate-200'}"><i class="fas ${index === 0 ? 'fa-crown' : index === 1 ? 'fa-medal' : 'fa-award'} mr-1"></i>Rank #${index + 1} ${index === 0 ? 'Top Match' : 'Candidate'}</span>` : '';
 
                 return `
@@ -1254,15 +1287,15 @@
                     <div>
                         <p class="text-sm font-semibold text-gray-700 mb-3">Extracted Skills (${applicant.extracted_skills.length}):</p>
                         <div class="space-y-2">
-                            ${applicant.extracted_skills.length > 0 ? 
-                                applicant.extracted_skills.map(s => `
+                            ${applicant.extracted_skills.length > 0 ?
+                    applicant.extracted_skills.map(s => `
                                     <div class="flex justify-between items-center bg-blue-50 p-3 rounded">
                                         <span class="font-medium text-gray-700">${s.skill}</span>
                                         <span class="text-sm font-bold text-blue-600">+${s.weight} pts</span>
                                     </div>
                                 `).join('')
-                                : '<p class="text-gray-500 text-sm">No specific skills detected in resume.</p>'
-                            }
+                    : '<p class="text-gray-500 text-sm">No specific skills detected in resume.</p>'
+                }
                         </div>
                     </div>
                 </div>
@@ -1424,4 +1457,5 @@
         });
     </script>
 </body>
+
 </html>

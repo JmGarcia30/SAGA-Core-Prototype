@@ -295,6 +295,14 @@ const SAGA = {
             sick: 5,
             emergency: 4
           },
+          contractIntent: {
+            academicYear: "2026-2027",
+            intent: "extend",
+            subjects: "Grade 10 Science, AP Science",
+            remarks: "I would like to focus more on lab activities.",
+            submittedDate: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+            status: "Pending Review"
+          },
           conductLogs: [
             {
               id: "COND_PRESET1",
@@ -915,14 +923,38 @@ const SAGA = {
   // EXIT & OFFBOARDING
   // ============================================================================
 
-  initiateExit(employeeId, reason) {
+  submitContractIntent(employeeId, intentDetails) {
+    const data = this.getData();
+    const employee = data.employees[employeeId];
+    if (!employee) return null;
+
+    employee.contractIntent = {
+      ...intentDetails,
+      submittedDate: new Date().toISOString(),
+      status: "Pending Review"
+    };
+
+    this.saveData(data);
+    return employee;
+  },
+
+  initiateExit(employeeId, reason, exitDate = null, exitComments = null) {
     const data = this.getData();
     const employee = data.employees[employeeId];
     if (!employee) return null;
 
     employee.status = "pending_exit";
     employee.exitReason = reason;
+    employee.exitDate = exitDate;
+    employee.exitComments = exitComments;
     employee.exitInitiatedDate = new Date().toISOString();
+    employee.clearanceChecklist = {
+      academic: false,
+      library: false,
+      property: false,
+      finance: false,
+      hr: false
+    };
 
     this.saveData(data);
     return employee;

@@ -61,11 +61,11 @@ function loadSession() {
     document.getElementById('dropdownFullName').textContent = activeUser.fullName;
     document.getElementById('dropdownRoleLabel').textContent = activeUser.role;
     document.getElementById('sidebarRoleText').textContent = activeUser.role;
-    document.getElementById('userSessionSwitcher').value = activeUser.role === 'HR Administrator' ? 'HR Administrator' : 
-                                                           activeUser.role === 'HR Staff' ? 'HR Staff' :
-                                                           activeUser.role === 'Dean' ? 'Dean' :
-                                                           activeUser.role === 'Department Chair' ? 'Department Chair' : 
-                                                           (activeUser.employeeId === 'EMP_1624896000001' ? 'Faculty-Ana' : 'Faculty');
+    document.getElementById('userSessionSwitcher').value = activeUser.role === 'HR Administrator' ? 'HR Administrator' :
+        activeUser.role === 'HR Staff' ? 'HR Staff' :
+            activeUser.role === 'Dean' ? 'Dean' :
+                activeUser.role === 'Department Chair' ? 'Department Chair' :
+                    (activeUser.employeeId === 'EMP_1624896000001' ? 'Faculty-Ana' : 'Faculty');
 
     // Set Avatar text initials
     const initials = activeUser.fullName.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
@@ -127,9 +127,9 @@ function switchSessionRole() {
         loginTime: new Date().toISOString()
     };
     localStorage.setItem('saga_session', JSON.stringify(session));
-    
+
     logSystemAuditTrail(`Switched institutional session focus context to [${sessionRole}].`);
-    
+
     // Refresh page
     window.location.reload();
 }
@@ -182,7 +182,8 @@ function switchNavTab(tabName) {
         'ess-attendance': 'My Time Logs',
         'ess-payroll': 'My Payslips',
         'ess-leave': 'Request Leave credit',
-        'ess-documents': 'My 201 Folders'
+        'ess-documents': 'My 201 Folders',
+        'ess-exit': 'Contracts & Offboarding Management'
     };
     document.getElementById('breadcrumbSection').textContent = breadcrumbMap[tabName] || 'Overview';
 
@@ -210,7 +211,7 @@ function toggleTheme() {
     activeTheme = isDark ? 'dark' : 'light';
     localStorage.setItem('saga_theme', activeTheme);
     document.getElementById('themeToggleIcon').className = isDark ? 'fas fa-sun text-yellow-400' : 'fas fa-moon';
-    
+
     // Redraw active charts
     if (currentTab === 'overview' || currentTab === 'analytics') {
         initializeCharts();
@@ -316,6 +317,9 @@ function renderViewData(tabName) {
             break;
         case 'ess-documents':
             renderESSDocuments();
+            break;
+        case 'ess-exit':
+            renderESSExit();
             break;
     }
 }
@@ -583,7 +587,7 @@ function handleCreateJob(e) {
 
     const data = SAGA.getData();
     const newId = data.applicants.length > 0 ? Math.max(...SAGA.jobs.map(j => j.id)) + 1 : 1;
-    
+
     const newJob = {
         id: newId,
         title,
@@ -595,9 +599,9 @@ function handleCreateJob(e) {
 
     SAGA.jobs.push(newJob);
     logSystemAuditTrail(`Created new faculty recruitment campaign: [${title}].`);
-    
+
     SAGA.showCustomAlert(`Job posting for "${title}" successfully compiled and published.`, "Campaign Published");
-    
+
     closeCreateJobModal();
     renderRecruitmentJobs();
 }
@@ -671,7 +675,7 @@ function renderApplicantsList() {
         const rank = index + 1;
         const score = app.compatibility_score;
         const scoreDisplay = score !== null && score !== undefined ? `${score}%` : '<span class="italic text-slate-400">Pending</span>';
-        
+
         let scoreClass = 'bg-slate-100 text-slate-700';
         if (score >= 85) scoreClass = 'bg-emerald-100 text-emerald-900 border border-emerald-300 font-extrabold';
         else if (score >= 70) scoreClass = 'bg-amber-100 text-amber-900 border border-amber-300';
@@ -713,10 +717,10 @@ function renderApplicantsList() {
     if (filtered.length > 0 && !selectedApplicantId) {
         selectApplicantForAI(filtered[0].id);
     }
-}function selectApplicantForAI(id) {
+} function selectApplicantForAI(id) {
     selectedApplicantId = id;
     const app = SAGA.getApplicantById(id);
-    
+
     // Clear "isNew" unread flag once HR selects them to review
     if (app && app.isNew) {
         const db = SAGA.getData();
@@ -775,7 +779,7 @@ function renderApplicantsList() {
     }
 
     const score = app.compatibility_score || 85;
-    
+
     // Strengths / Weaknesses logic based on score
     let strengths = ['DepEd K-12 Curriculum Familiarity', 'Excellent Classroom Presence', 'Values Formation Alignment'];
     let weaknesses = ['Limited experience in LMS tools', 'Research mentoring background'];
@@ -870,10 +874,10 @@ function renderApplicantsList() {
             <div class="space-y-1.5">
                 <p class="text-[10px] text-slate-400 font-bold uppercase">Extracted Competencies</p>
                 <div class="flex flex-wrap gap-1">
-                    ${app.extracted_skills && app.extracted_skills.length > 0 
-                        ? app.extracted_skills.map(s => `<span class="px-2 py-0.5 bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-bold rounded-lg uppercase tracking-wider">${s.skill}</span>`).join('')
-                        : `<span class="text-[10px] text-slate-400 italic">No competencies parsed yet</span>`
-                    }
+                    ${app.extracted_skills && app.extracted_skills.length > 0
+            ? app.extracted_skills.map(s => `<span class="px-2 py-0.5 bg-indigo-50 border border-indigo-200 text-indigo-700 text-[10px] font-bold rounded-lg uppercase tracking-wider">${s.skill}</span>`).join('')
+            : `<span class="text-[10px] text-slate-400 italic">No competencies parsed yet</span>`
+        }
                 </div>
             </div>
 
@@ -882,11 +886,11 @@ function renderApplicantsList() {
                 <div class="flex justify-between items-center pb-2 border-b border-blue-150">
                     <h4 class="text-[10px] text-blue-900 font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="fas fa-folder-open text-blue-600"></i> Documents Received (Art. V)</h4>
                     <span class="text-[9px] bg-blue-100 text-blue-900 font-extrabold px-1.5 py-0.5 rounded-full">${(() => {
-                        const docs = app.documentsSubmitted || {};
-                        const keys = ['resume','tor','diploma','prcLicense','recommendations','nbiClearance'];
-                        const done = keys.filter(k => docs[k]).length;
-                        return Math.round((done / keys.length) * 100);
-                    })()}%</span>
+            const docs = app.documentsSubmitted || {};
+            const keys = ['resume', 'tor', 'diploma', 'prcLicense', 'recommendations', 'nbiClearance'];
+            const done = keys.filter(k => docs[k]).length;
+            return Math.round((done / keys.length) * 100);
+        })()}%</span>
                 </div>
                 <p class="text-[9px] text-slate-400 italic">Check off as the applicant physically submits each document to HR:</p>
                 <div class="space-y-1.5 pt-1 text-[10px] font-semibold text-slate-700">
@@ -1031,7 +1035,7 @@ function toggleHiringMilestone(appId, milestoneKey) {
     }
 
     app.milestones[milestoneKey] = !app.milestones[milestoneKey];
-    
+
     // Auto-update orientationCompleted helper if step 7 checked
     if (milestoneKey === 'policyOrientation') {
         const emp = Object.values(db.employees).find(e => e.applicantId === appId);
@@ -1145,7 +1149,7 @@ function openResumePreviewModal(appId) {
                 <button onclick="closeResumePreviewModal()" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 border-none bg-transparent text-xl cursor-pointer font-bold">&times;</button>
                 
                 <div class="flex items-center gap-3 pb-4 border-b">
-                    <div class="w-10 h-10 rounded-full bg-slate-900 text-amber-400 font-extrabold flex items-center justify-center text-sm shadow-sm">${app.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}</div>
+                    <div class="w-10 h-10 rounded-full bg-slate-900 text-amber-400 font-extrabold flex items-center justify-center text-sm shadow-sm">${app.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}</div>
                     <div>
                         <h4 class="font-extrabold text-sm text-slate-900 leading-tight">${app.name}</h4>
                         <p class="text-[10px] text-slate-400 font-semibold mt-0.5">Application Document (Targeting: ${jobTitle})</p>
@@ -1194,7 +1198,7 @@ function closeResumePreviewModal() {
 function bulkScoreApplicants() {
     const data = SAGA.getData();
     let unscored = data.applicants.filter(a => a.status === 'applied');
-    
+
     if (unscored.length === 0) {
         SAGA.showCustomAlert("All candidate resumes are already parsed and scored.", "AI Engine Status");
         return;
@@ -1223,7 +1227,7 @@ function initiateHiringProcess(appId) {
         if (confirm) {
             const enteredScore = prompt("Enter final Board Panel Interview Score (70-100):", "90") || "90";
             const enteredComments = prompt("Enter Board Panel Evaluator Comments:", "Excellent teaching demonstration, strong pedagogical foundations and class control.") || "Excellent teaching demonstration, strong pedagogical foundations and class control.";
-            
+
             // Lock in interview scores on applicant record
             SAGA.hireApplicant(appId, {
                 score: parseInt(enteredScore),
@@ -1249,10 +1253,10 @@ function initiateHiringProcess(appId) {
 
 function showConversionModal(employee) {
     document.getElementById('convEmpId').textContent = employee.id;
-    document.getElementById('convEmpNum').textContent = `2026-000${Math.floor(Math.random()*90 + 10)}`;
+    document.getElementById('convEmpNum').textContent = `2026-000${Math.floor(Math.random() * 90 + 10)}`;
     document.getElementById('convRfid').textContent = employee.rfidCardId || 'ASSIGN SCAN';
     document.getElementById('convPortalAcc').textContent = employee.username;
-    
+
     // RFID Scan target tracker
     currentRFIDTargetId = employee.id;
 
@@ -1277,7 +1281,7 @@ function showConversionModal(employee) {
 
 function closeConversionModal() {
     document.getElementById('conversionModal').classList.remove('active');
-    
+
     // Redirect direct to onboarding list to complete RFID scans
     switchNavTab('onboarding');
 }
@@ -1298,7 +1302,7 @@ function renderEmployeesFilters() {
         if (job) depts.add(job.department);
     });
 
-    filter.innerHTML = '<option value="">All Departments</option>' + 
+    filter.innerHTML = '<option value="">All Departments</option>' +
         Array.from(depts).map(d => `<option value="${d}">${d}</option>`).join('');
 
     filter.value = curVal;
@@ -1308,7 +1312,7 @@ function toggleDirLayout(layout) {
     directoryLayout = layout;
     document.getElementById('btnDirGrid').className = layout === 'grid' ? 'px-2 py-1 bg-amber-100 text-amber-900 rounded font-bold transition-all' : 'px-2 py-1 text-slate-400 rounded transition-all';
     document.getElementById('btnDirTable').className = layout === 'table' ? 'px-2 py-1 bg-amber-100 text-amber-900 rounded font-bold transition-all' : 'px-2 py-1 text-slate-400 rounded transition-all';
-    
+
     renderEmployeeDirectory();
 }
 
@@ -1345,7 +1349,7 @@ function renderEmployeeDirectory() {
         gridContainer.innerHTML = filtered.map(emp => {
             const job = SAGA.getJobById(emp.jobId);
             const initials = emp.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
-            
+
             let statusBadge = 'bg-emerald-100 text-emerald-800 border-emerald-300';
             if (emp.status === 'onboarding') statusBadge = 'bg-blue-100 text-blue-800 border-blue-300';
             else if (emp.status === 'pending_exit') statusBadge = 'bg-orange-100 text-orange-800 border-orange-300';
@@ -1440,7 +1444,7 @@ function openProfileDetailModal(id) {
             <div class="space-y-4 text-xs font-semibold">
                 <div class="p-4 bg-slate-50 border rounded-2xl text-center space-y-2 relative">
                     <div class="w-16 h-16 rounded-full bg-slate-900 text-amber-400 font-extrabold text-base flex items-center justify-center border-2 border-amber-400 mx-auto shadow-sm">
-                        ${emp.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase()}
+                        ${emp.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase()}
                     </div>
                     <div>
                         <h4 class="font-extrabold text-sm text-slate-900">${emp.name}</h4>
@@ -1888,33 +1892,33 @@ function bindRFIDScanTarget(empId, empName) {
     document.getElementById('rfidScanForm').style.display = 'block';
     document.getElementById('rfidStaffName').value = empName;
     document.getElementById('rfidStaffId').value = empId;
-    
+
     currentRFIDTargetId = empId;
 
     // Pulse animation
     const stateEl = document.getElementById('rfidScanState');
     stateEl.textContent = 'Hardware Awaiting Scan';
     stateEl.className = 'text-xs font-bold uppercase tracking-wider text-amber-500 animate-pulse';
-    
+
     document.getElementById('rfidScanTarget').textContent = `Target profile: ${empName}`;
     document.getElementById('scannerLaserEffect').classList.remove('hidden');
-    
+
     document.getElementById('rfidEnrollmentPanel').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
 function simulateRFIDCardTap() {
     if (!currentRFIDTargetId) return;
-    
+
     const emp = SAGA.getEmployeeById(currentRFIDTargetId);
     if (!emp) return;
 
-    const mockHEX = 'RFID-' + Math.floor(Math.random()*90000 + 10000) + 'X';
+    const mockHEX = 'RFID-' + Math.floor(Math.random() * 90000 + 10000) + 'X';
 
     // Link RFID Card in SAGA database
     const data = SAGA.getData();
     if (data.employees[currentRFIDTargetId]) {
         data.employees[currentRFIDTargetId].rfidCardId = mockHEX;
-        
+
         // Log event
         const log = {
             type: 'in',
@@ -1923,7 +1927,7 @@ function simulateRFIDCardTap() {
         };
         if (!data.attendanceLogs[currentRFIDTargetId]) data.attendanceLogs[currentRFIDTargetId] = [];
         data.attendanceLogs[currentRFIDTargetId].push(log);
-        
+
         SAGA.saveData(data);
     }
 
@@ -1987,7 +1991,7 @@ function renderAttendanceTab() {
             const job = SAGA.getJobById(emp.jobId);
             if (job) depts.add(job.department);
         });
-        filter.innerHTML = '<option value="">All Departments</option>' + 
+        filter.innerHTML = '<option value="">All Departments</option>' +
             Array.from(depts).map(d => `<option value="${d}">${d}</option>`).join('');
     }
 
@@ -2017,7 +2021,7 @@ function renderAttendanceTab() {
 
     tbody.innerHTML = logs.map(log => {
         const emp = SAGA.getEmployeeById(log.employeeId);
-        
+
         let badgeClass = 'bg-blue-100 text-blue-900 border-blue-300 font-extrabold';
         if (log.type === 'out') badgeClass = 'bg-slate-100 text-slate-900 border-slate-300 font-extrabold';
 
@@ -2025,7 +2029,7 @@ function renderAttendanceTab() {
         const timeStr = SAGA.formatTime(log.timestamp);
         let statusText = 'On-Time clock compliance';
         let statusColor = 'text-emerald-600';
-        
+
         if (log.type === 'in') {
             const dateObj = new Date(log.timestamp);
             if (dateObj.getHours() > 7 || (dateObj.getHours() === 7 && dateObj.getMinutes() > 30)) {
@@ -2091,12 +2095,12 @@ function setSimDirection(dir) {
 function triggerRFIDSwipeAction() {
     const empId = document.getElementById('simEmployeeSelect').value;
     const emp = SAGA.getEmployeeById(empId);
-    
+
     if (!emp) return;
 
     // Submit RFID swipe transaction log
     SAGA.recordTimeEntry(empId, simRFIDDirection);
-    
+
     logSystemAuditTrail(`Received IoT-RFID scan event for [${emp.name}]: CLOCK ${simRFIDDirection.toUpperCase()}.`);
 
     closeRFIDSimulatorModal();
@@ -2286,7 +2290,7 @@ function closeCOEModal() {
 function renderLeavesQueue() {
     const requests = SAGA.getAllLeaveRequests();
     const container = document.getElementById('leaveQueueContainer');
-    
+
     // Count pending
     const pendingCount = requests.filter(r => r.status === 'pending').length;
     document.getElementById('leavesQueueStatusText').textContent = `${pendingCount} Pending leave requests`;
@@ -2391,22 +2395,33 @@ function processLeaveFilingApproval(reqId, role, decision) {
 // ============================================================================
 // 9. EXIT & OFFBOARDING
 // ============================================================================
-let activeExitTab = 'queue';
+let activeExitTab = 'renewals';
 
 function switchExitTab(tab) {
     activeExitTab = tab;
-    document.getElementById('btnExitQueue').className = tab === 'queue' ? 'px-3.5 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold rounded-xl transition-all' : 'px-3.5 py-1.5 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-xl transition-all';
-    document.getElementById('btnExitSeparated').className = tab === 'separated' ? 'px-3.5 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold rounded-xl transition-all' : 'px-3.5 py-1.5 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-xl transition-all';
 
-    document.getElementById('exitQueueView').style.display = tab === 'queue' ? 'block' : 'none';
-    document.getElementById('exitSeparatedView').style.display = tab === 'separated' ? 'block' : 'none';
+    const btnQ = document.getElementById('btnExitQueue');
+    const btnS = document.getElementById('btnExitSeparated');
+    const btnR = document.getElementById('btnExitRenewals');
+
+    if (btnQ) btnQ.className = tab === 'queue' ? 'px-3.5 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold rounded-xl transition-all' : 'px-3.5 py-1.5 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-xl transition-all';
+    if (btnS) btnS.className = tab === 'separated' ? 'px-3.5 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold rounded-xl transition-all' : 'px-3.5 py-1.5 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-xl transition-all';
+    if (btnR) btnR.className = tab === 'renewals' ? 'px-3.5 py-1.5 bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold rounded-xl transition-all' : 'px-3.5 py-1.5 text-slate-500 hover:text-slate-700 text-xs font-bold rounded-xl transition-all';
+
+    const vQ = document.getElementById('exitQueueView');
+    const vS = document.getElementById('exitSeparatedView');
+    const vR = document.getElementById('exitRenewalsView');
+
+    if (vQ) vQ.style.display = tab === 'queue' ? 'block' : 'none';
+    if (vS) vS.style.display = tab === 'separated' ? 'block' : 'none';
+    if (vR) vR.style.display = tab === 'renewals' ? 'block' : 'none';
 
     renderExitTab();
 }
 
 function renderExitTab() {
     const data = SAGA.getData();
-    
+
     if (activeExitTab === 'queue') {
         const queue = SAGA.getPendingExits();
         const container = document.getElementById('exitQueueContainer');
@@ -2428,6 +2443,8 @@ function renderExitTab() {
                 </div>
             </div>
         `).join('');
+    } else if (activeExitTab === 'renewals') {
+        renderExitRenewals();
     } else {
         const archived = SAGA.getArchivedEmployees();
         const tbody = document.getElementById('exitSeparatedTableBody');
@@ -2489,7 +2506,7 @@ function generateCertificateOfEmployment(name, start, end) {
                 </p>
 
                 <p class="indent-8 text-justify">
-                    Their service coverage spanned from the initial hiring onboarding date of <strong class="text-slate-900">${new Date(start).toLocaleDateString('en-PH', {year:'numeric',month:'long',day:'numeric'})}</strong> until their separation clearance sign-off date on <strong class="text-slate-900">${new Date(end).toLocaleDateString('en-PH', {year:'numeric',month:'long',day:'numeric'})}</strong>.
+                    Their service coverage spanned from the initial hiring onboarding date of <strong class="text-slate-900">${new Date(start).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}</strong> until their separation clearance sign-off date on <strong class="text-slate-900">${new Date(end).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' })}</strong>.
                 </p>
 
                 <p class="indent-8 text-justify">
@@ -2543,7 +2560,7 @@ function renderDocumentsTab() {
 }
 
 function trigger201Upload() {
-    const mockFile = 'SAGA_Faculty_TOR_Upload_' + Math.floor(Math.random()*900 + 100) + '.pdf';
+    const mockFile = 'SAGA_Faculty_TOR_Upload_' + Math.floor(Math.random() * 900 + 100) + '.pdf';
     SAGA.showCustomAlert(`Mock File Uploaded Successfully: ${mockFile}\n\nDocument parsed and cached in Digital 201 Vault.`, "File Upload Complete").then(() => {
         logSystemAuditTrail(`Uploaded compliance document: [${mockFile}].`);
         renderDocumentsTab();
@@ -2582,7 +2599,7 @@ function checkCredentialMonitoringAlerts() {
     }
 
     countBadge.textContent = alerts.length;
-    
+
     notifPanelList.innerHTML = alerts.map(a => {
         let textClass = 'text-slate-800';
         let bgClass = 'bg-slate-50';
@@ -2727,13 +2744,13 @@ function initializeAnalyticsCharts() {
 function generateMockReportData() {
     const cat = document.getElementById('reportCategorySelect').value;
     const data = SAGA.getData();
-    
+
     const titleText = document.getElementById('reportTitleText');
     const tableHead = document.getElementById('reportTableHead');
     const tableBody = document.getElementById('reportTableBody');
     const dateText = document.getElementById('reportGeneratedTime');
 
-    dateText.textContent = new Date().toLocaleDateString('en-PH', {year:'numeric',month:'long',day:'numeric'});
+    dateText.textContent = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
 
     if (cat === 'employee') {
         titleText.textContent = 'Staff Roster & Faculty Profile Register';
@@ -2862,7 +2879,7 @@ function renderESSDashboard() {
     // Default ESS profile focus
     const currentEmpId = activeUser.employeeId || 'EMP_1624896000000';
     const emp = SAGA.getEmployeeById(currentEmpId);
-    
+
     if (!emp) return;
 
     document.getElementById('essWelcomeText').textContent = `Welcome Back, ${emp.name}`;
@@ -2917,7 +2934,7 @@ function renderESSAttendanceLogs() {
     tbody.innerHTML = Object.values(grouped).reverse().map(g => {
         const inTime = g.in ? SAGA.formatTime(g.in) : '--:--';
         const outTime = g.out ? SAGA.formatTime(g.out) : '--:--';
-        
+
         let hrs = 'N/A';
         if (g.in && g.out) {
             hrs = ((new Date(g.out) - new Date(g.in)) / (1000 * 60 * 60)).toFixed(1) + ' hrs';
@@ -2981,7 +2998,7 @@ function handleESSLeaveSubmit(e) {
     const from = document.getElementById('leaveFromDate').value;
     const to = document.getElementById('leaveToDate').value;
     const reason = document.getElementById('leaveReason').value;
-    
+
     const file = document.getElementById('leaveAttachment').files[0];
     const fileName = file ? file.name : null;
 
@@ -3042,7 +3059,7 @@ function renderESSDocuments() {
 
     let html = docDefinitions.map(def => {
         const isUploaded = !!docs[def.key];
-        
+
         return `
             <div class="card p-4 bg-white border border-slate-200/80 flex items-center justify-between gap-3 text-xs shadow-xs hover:border-amber-450 hover:shadow-sm transition-all">
                 <div class="flex items-center gap-2.5 min-w-0">
@@ -3142,7 +3159,7 @@ function handleGlobalSearch() {
 // ============================================================================
 function openOrgChartModal() {
     const container = document.getElementById('orgChartContainer');
-    
+
     // Renders visual box layout
     container.innerHTML = `
         <div class="space-y-6">
@@ -3290,7 +3307,7 @@ function switchLeaveTabView(tabName) {
 
 function renderLeaveCalendarGrid() {
     const grid = document.getElementById('leaveCalendarMonthGrid');
-    
+
     // July 2026 Monthly Leaves and Events calendar
     // July 1 is a Wednesday. July 2026 has 31 days.
     // Days in July calendar: start with empty boxes for Sun, Mon, Tue (3 days of padding)
@@ -3329,7 +3346,7 @@ function renderLeaveCalendarGrid() {
                 </div>
             `).join('');
         }
-        
+
         // Highlight active day (e.g. July 5, 2026 based on timestamp)
         const isToday = day === 5;
         const todayClass = isToday ? 'border-2 border-amber-400 shadow-sm bg-amber-50/20' : 'border-slate-100 dark:border-slate-800';
@@ -3443,4 +3460,907 @@ function renderScheduleCalendar(context) {
     });
 
     gridBody.innerHTML = html;
+}
+
+
+
+// ============================================================================
+// 20. ESS EXIT & CLEARANCE
+// ============================================================================
+function getActiveESSEmployee() {
+    const currentEmpId = activeUser.employeeId || 'EMP_1624896000000';
+    return SAGA.getEmployeeById(currentEmpId);
+}
+
+function renderESSExit() {
+    switchExitSubTab('intent');
+    renderContractIntentSubTab();
+    renderClearanceSubTab();
+}
+
+function initiateExit(event) {
+    let currentEmployee = getActiveESSEmployee();
+    event.preventDefault();
+
+    const reason = document.getElementById('exitReason').value;
+    const exitDate = document.getElementById('exitDate').value;
+    const comments = document.getElementById('exitComments').value;
+
+    if (!reason || !exitDate) {
+        alert('Please fill in all required fields');
+        return;
+    }
+
+    if (!confirm('Are you sure you want to initiate the exit process? This action is permanent and cannot be undone.')) {
+        return;
+    }
+
+    const employee = SAGA.initiateExit(currentEmployee.id, reason, exitDate, comments);
+
+    alert(`✅ Exit Request Submitted!\n\nYour clearance request has been sent to HR for processing.\n\nExpected last date: ${exitDate}\n\nYou will receive updates on your clearance status.`);
+
+
+    renderClearanceSubTab();
+}
+
+function switchExitSubTab(tabName) {
+    document.getElementById('exitSubTab-intent').classList.add('hidden');
+    document.getElementById('exitSubTab-clearance').classList.add('hidden');
+
+    document.getElementById('btnExitSubTab-intent').classList.remove('text-blue-600', 'border-blue-600');
+    document.getElementById('btnExitSubTab-intent').classList.add('text-gray-500', 'border-transparent', 'hover:text-gray-700');
+
+    document.getElementById('btnExitSubTab-clearance').classList.remove('text-blue-600', 'border-blue-600');
+    document.getElementById('btnExitSubTab-clearance').classList.add('text-gray-500', 'border-transparent', 'hover:text-gray-700');
+
+    document.getElementById(`exitSubTab-${tabName}`).classList.remove('hidden');
+    const activeBtn = document.getElementById(`btnExitSubTab-${tabName}`);
+    activeBtn.classList.remove('text-gray-500', 'border-transparent', 'hover:text-gray-700');
+    activeBtn.classList.add('text-blue-600', 'border-blue-600');
+
+    // Icon coloring updates
+    const intentIcon = document.querySelector('#btnExitSubTab-intent i');
+    const clearanceIcon = document.querySelector('#btnExitSubTab-clearance i');
+    if (tabName === 'intent') {
+        intentIcon.className = 'fas fa-file-signature text-base text-blue-500';
+        clearanceIcon.className = 'fas fa-user-slash text-base text-gray-400';
+    } else {
+        intentIcon.className = 'fas fa-file-signature text-base text-gray-400';
+        clearanceIcon.className = 'fas fa-user-slash text-base text-blue-500';
+    }
+}
+
+function submitContractIntentForm(event) {
+    let currentEmployee = getActiveESSEmployee();
+    if (event) event.preventDefault();
+    const academicYear = document.getElementById('intentAY').value;
+    const intent = document.getElementById('intentChoice').value;
+    const preferences = document.getElementById('intentDept').value;
+    const subjects = document.getElementById('intentSubjects').value;
+    const remarks = document.getElementById('intentRemarks').value;
+
+    if (!academicYear || !intent) {
+        alert('Please fill out all required fields.');
+        return;
+    }
+
+    const intentDetails = {
+        academicYear,
+        intent,
+        preferences,
+        subjects,
+        remarks
+    };
+
+    const emp = SAGA.submitContractIntent(currentEmployee.id, intentDetails);
+    if (emp) {
+        alert('✅ Contract Extension Intent submitted successfully!\nYour preference has been registered for administrative review.');
+
+        renderContractIntentSubTab();
+
+    }
+}
+
+function renderContractIntentSubTab() {
+    let currentEmployee = getActiveESSEmployee();
+    const container = document.getElementById('intentFormContainer');
+    if (!container) return;
+
+    if (currentEmployee.contractIntent) {
+        const intent = currentEmployee.contractIntent;
+        let intentText = '';
+        let intentClass = '';
+
+        if (intent.intent === 'extend') {
+            intentText = 'Extend Contract & Continue Next Academic Year';
+            intentClass = 'text-emerald-700 bg-emerald-50 border-emerald-200';
+        } else {
+            intentText = 'Undecided (Request loading conference/meeting)';
+            intentClass = 'text-amber-700 bg-amber-50 border-amber-200';
+        }
+
+        container.innerHTML = `
+                    <div class="flex items-center gap-3 p-4 rounded-xl border mb-6 ${intentClass}">
+                        <i class="fas fa-check-circle text-2xl"></i>
+                        <div>
+                            <h4 class="font-extrabold text-sm">Contract Renewal Intent Submitted</h4>
+                            <p class="text-xs opacity-90">Your renewal preferences have been saved and routed to administration.</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-4 text-xs font-semibold text-slate-700">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl">
+                                <span class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1">Proposed Academic Year</span>
+                                <span class="text-slate-800 font-extrabold">${intent.academicYear}</span>
+                            </div>
+                            <div class="p-3 bg-white border border-slate-200 rounded-xl">
+                                <span class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1">Intent Status</span>
+                                <span class="text-slate-800 font-extrabold">${intentText}</span>
+                            </div>
+                        </div>
+
+                        <div class="p-3 bg-white border border-slate-200 rounded-xl">
+                            <span class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1">Preferred Department / Assignment</span>
+                            <span class="text-slate-800 font-extrabold">${intent.preferences || 'None specified'}</span>
+                        </div>
+
+                        <div class="p-3 bg-white border border-slate-200 rounded-xl">
+                            <span class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1">Proposed Subjects & Load Preferences</span>
+                            <p class="text-slate-700 font-medium leading-relaxed whitespace-pre-wrap mt-1">${intent.subjects || 'None specified'}</p>
+                        </div>
+
+                        <div class="p-3 bg-white border border-slate-200 rounded-xl">
+                            <span class="block text-[10px] text-slate-400 uppercase tracking-wider mb-1">Justification & Additional Comments</span>
+                            <p class="text-slate-700 font-medium leading-relaxed whitespace-pre-wrap mt-1">${intent.remarks || 'None specified'}</p>
+                        </div>
+
+                        <div class="pt-4 border-t flex items-center justify-between">
+                            <span class="text-[10px] text-slate-400">Submitted on ${SAGA.formatDate(intent.submittedDate)}</span>
+                            <span class="px-2.5 py-1 text-[10px] font-extrabold bg-blue-100 text-blue-800 border border-blue-300 rounded-full">Status: ${intent.status}</span>
+                        </div>
+                    </div>
+                `;
+    } else {
+        container.innerHTML = `
+                    <form id="contractIntentForm" onsubmit="submitContractIntentForm(event)" class="space-y-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div class="form-group mb-0">
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Proposed Academic Year *</label>
+                                <select id="intentAY" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-amber-500">
+                                    <option value="AY 2026-2027">AY 2026-2027 (Next Year)</option>
+                                    <option value="AY 2027-2028">AY 2027-2028</option>
+                                </select>
+                            </div>
+                            <div class="form-group mb-0">
+                                <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Contract Intent *</label>
+                                <select id="intentChoice" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-amber-500">
+                                    <option value="">-- Select Option --</option>
+                                    <option value="extend">Extend contract and continue next Academic Year</option>
+                                    <option value="undecided">Undecided (Request loading conference / admin meeting)</option>
+                                    
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Preferred Department / Assignment Area</label>
+                            <input type="text" id="intentDept" placeholder="e.g. Science Department, Grade School Advising" class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500">
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Proposed Subject Loads & Class Preferences</label>
+                            <textarea id="intentSubjects" rows="3" placeholder="List down courses/subjects or tasks you prefer to teach/handle..." class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500"></textarea>
+                        </div>
+
+                        <div class="form-group mb-0">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Justification & Performance Comments</label>
+                            <textarea id="intentRemarks" rows="3" placeholder="Provide any comments or justification for contract extension..." class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500"></textarea>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button type="button" onclick="document.getElementById('contractIntentForm').reset()" class="w-1/3 py-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-xs font-bold rounded-xl transition shadow-sm">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-primary flex-1 py-3 text-xs justify-center font-bold">
+                                <i class="fas fa-paper-plane mr-1.5"></i> Submit Contract Renewal Intent
+                            </button>
+                        </div>
+                    </form>
+                `;
+    }
+}
+
+function renderClearanceSubTab() {
+    let currentEmployee = getActiveESSEmployee();
+    const container = document.getElementById('clearanceSubTabContainer');
+    if (!container) return;
+
+    if (currentEmployee.status === 'active' || currentEmployee.status === 'onboarding') {
+        container.innerHTML = `
+                    <div class="alert alert-warning mb-6">
+                        <i class="fas fa-exclamation-triangle text-amber-600"></i>
+                        <div>
+                            <p class="font-semibold mb-1 text-slate-800 text-xs">Initiate Exit Clearance / Resignation</p>
+                            <p class="text-[11px] text-slate-600">Once initiated, your portal access status will update to "Pending Exit" and your offboarding checklists will be generated automatically. This cannot be undone.</p>
+                        </div>
+                    </div>
+
+                    <form id="exitForm" onsubmit="initiateExit(event)" class="space-y-4">
+                        <div class="form-group">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Reason for Separation *</label>
+                            <select id="exitReason" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs bg-white focus:ring-2 focus:ring-amber-500">
+                                <option value="">-- Select --</option>
+                                <option value="voluntary_resignation">Voluntary Resignation</option>
+                                <option value="end_contract">End of Contract</option>
+                                <option value="retirement">Retirement</option>
+                                <option value="relocation">Relocation</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Last Available Date (Tentative) *</label>
+                            <input type="date" id="exitDate" required class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Additional Separation Comments</label>
+                            <textarea id="exitComments" rows="3" placeholder="Please share any additional information or feedback regarding your offboarding..." class="w-full px-3.5 py-2.5 border border-slate-300 rounded-xl text-xs focus:ring-2 focus:ring-amber-500"></textarea>
+                        </div>
+
+                        <div class="flex gap-4 pt-2">
+                            <button type="button" onclick="switchTab('overview')" class="btn btn-outline flex-1 py-3 text-xs justify-center font-bold">
+                                <i class="fas fa-arrow-left"></i> Cancel
+                            </button>
+                            <button type="submit" class="btn btn-danger flex-1 py-3 text-xs justify-center font-bold bg-rose-600 hover:bg-rose-700 text-white border-none">
+                                <i class="fas fa-door-open"></i> Initiate Exit Process
+                            </button>
+                        </div>
+                    </form>
+                `;
+    } else if (currentEmployee.status === 'pending_exit') {
+        const checklist = currentEmployee.clearanceChecklist || { academic: false, library: false, property: false, finance: false, hr: false };
+        const exitInterview = currentEmployee.exitInterview;
+
+        let clearedCount = 0;
+        if (checklist.academic) clearedCount++;
+        if (checklist.library) clearedCount++;
+        if (checklist.property) clearedCount++;
+        if (checklist.finance) clearedCount++;
+        if (checklist.hr) clearedCount++;
+        const percentage = Math.round((clearedCount / 5) * 100);
+
+        const desks = [
+            { key: 'academic', name: 'Academic Turnover', desc: 'Syllabus, grades, and student marks submitted to Chair', icon: 'fa-graduation-cap' },
+            { key: 'library', name: 'Library Desk Clearance', desc: 'Borrowed books, instructional kits, and audio-visual assets returned', icon: 'fa-book-reader' },
+            { key: 'property', name: 'Property & Asset turnover', desc: 'School laptop, hardware devices, workspace keys, and active physical files', icon: 'fa-laptop' },
+            { key: 'finance', name: 'Accounting settlements', desc: 'Settlement of salaries, salary loans, cash advances, and finance liabilities', icon: 'fa-coins' },
+            { key: 'hr', name: 'HR Audit & Exit Interview', desc: 'Completion of digital exit survey and clearance compliance audit', icon: 'fa-file-signature' }
+        ];
+
+        const checklistHTML = desks.map(desk => {
+            const isCleared = !!checklist[desk.key];
+            return `
+                        <div class="p-3 bg-white border border-slate-200/80 rounded-xl flex items-center justify-between text-xs hover:shadow-xs transition">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full ${isCleared ? 'bg-emerald-50 text-emerald-600 border-emerald-200' : 'bg-amber-50 text-amber-600 border-amber-200'} flex items-center justify-center text-sm border shrink-0">
+                                    <i class="fas ${desk.icon}"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-bold text-slate-800">${desk.name}</h4>
+                                    <p class="text-[10px] text-slate-400 font-medium">${desk.desc}</p>
+                                </div>
+                            </div>
+                            <span class="px-2.5 py-1 text-[10px] font-extrabold rounded-full border ${isCleared ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-800 border-amber-300'}">
+                                ${isCleared ? '<i class="fas fa-check-circle mr-1"></i> Cleared' : '<i class="fas fa-hourglass-half mr-1"></i> Pending'}
+                            </span>
+                        </div>
+                    `;
+        }).join('');
+
+        let exitInterviewHTML = '';
+        if (exitInterview) {
+            exitInterviewHTML = `
+                        <div class="bg-emerald-50/50 border border-emerald-200/60 p-5 rounded-2xl space-y-3">
+                            <div class="flex items-center gap-2 text-emerald-800 font-extrabold text-xs">
+                                <i class="fas fa-check-circle text-base"></i>
+                                <span>DIGITAL EXIT INTERVIEW COMPLETED</span>
+                            </div>
+                            <p class="text-[11px] text-slate-500">Thank you for sharing your experience. Your answers have been locked and submitted directly to the HR director.</p>
+                            <div class="grid grid-cols-1 sm:grid-cols-4 gap-4 text-xs font-semibold pt-2">
+                                <div class="sm:col-span-1 p-3 bg-white border border-slate-200 rounded-xl">
+                                    <span class="block text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">Experience Rating</span>
+                                    <div class="flex gap-0.5 text-yellow-400 mt-1">
+                                        ${Array(exitInterview.rating).fill('<i class="fas fa-star text-xs"></i>').join('')}
+                                        ${Array(5 - exitInterview.rating).fill('<i class="far fa-star text-xs text-slate-300"></i>').join('')}
+                                    </div>
+                                </div>
+                                <div class="sm:col-span-3 p-3 bg-white border border-slate-200 rounded-xl">
+                                    <span class="block text-[9px] text-slate-400 uppercase tracking-wider mb-0.5">Feedback & Suggestions</span>
+                                    <p class="text-slate-700 font-medium leading-relaxed whitespace-pre-wrap mt-0.5">${exitInterview.notes}</p>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+        } else {
+            exitInterviewHTML = `
+                        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                            <div class="border-b pb-2 flex items-center justify-between">
+                                <div>
+                                    <h3 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                                        <i class="fas fa-comments text-amber-500"></i> Digital Exit Interview Survey
+                                    </h3>
+                                    <p class="text-[10px] text-slate-400 mt-0.5 font-medium">Please share your experience to complete the clearance requirement.</p>
+                                </div>
+                                <span class="bg-amber-100 text-amber-800 text-[9px] font-extrabold px-2 py-0.5 rounded-full uppercase tracking-wider">Required</span>
+                            </div>
+
+                            <form id="exitSurveyForm" onsubmit="submitExitSurvey(event)" class="space-y-4 text-xs font-semibold text-slate-700">
+                                <div>
+                                    <label class="block mb-1">1. Overall Tenure & School Experience Rating *</label>
+                                    <select id="surveyRating" required class="w-full px-3 py-2 border rounded-xl bg-white text-xs">
+                                        <option value="5">5 - Highly Satisfied</option>
+                                        <option value="4">4 - Satisfied</option>
+                                        <option value="3">3 - Neutral / Satisfactory</option>
+                                        <option value="2">2 - Dissatisfied</option>
+                                        <option value="1">1 - Highly Dissatisfied</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block mb-1">2. What is your primary reason for leaving? *</label>
+                                    <textarea id="surveyReason" rows="2" required placeholder="Please outline the main factors leading to your separation..." class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-amber-500 text-xs font-medium"></textarea>
+                                </div>
+                                <div>
+                                    <label class="block mb-1">3. Do you have any recommendations or feedback for school management? *</label>
+                                    <textarea id="surveyFeedback" rows="2" required placeholder="Suggestions regarding loading, research support, salary structures, administration, etc..." class="w-full px-3 py-2 border rounded-xl focus:ring-2 focus:ring-amber-500 text-xs font-medium"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-full py-2.5 justify-center font-bold">
+                                    <i class="fas fa-paper-plane mr-1.5"></i> Submit Exit Survey Feedback
+                                </button>
+                            </form>
+                        </div>
+                    `;
+        }
+
+        const docsHTML = `
+                    <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                        <div>
+                            <h3 class="font-extrabold text-xs text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                                <i class="fas fa-file-pdf text-blue-500"></i> Automated Exit Documents
+                            </h3>
+                            <p class="text-[10px] text-slate-400 mt-0.5 font-medium">Instantly generate and download verified draft documentation compiled from your active profile record.</p>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                            <button onclick="previewExitDoc('coe')" class="p-3 bg-white border border-slate-200 rounded-xl hover:border-blue-400 hover:shadow-xs transition text-center flex flex-col items-center justify-center gap-2">
+                                <i class="fas fa-certificate text-2xl text-blue-600"></i>
+                                <span class="font-extrabold text-xs text-slate-800">Certificate of Employment</span>
+                                <span class="text-[9px] text-slate-400 font-medium">Standardized COE</span>
+                            </button>
+                            <button onclick="previewExitDoc('coc')" class="p-3 bg-white border border-slate-200 rounded-xl hover:border-emerald-400 hover:shadow-xs transition text-center flex flex-col items-center justify-center gap-2">
+                                <i class="fas fa-file-invoice text-2xl text-emerald-600"></i>
+                                <span class="font-extrabold text-xs text-slate-800">Clearance Certificate</span>
+                                <span class="text-[9px] text-slate-400 font-medium">Official clearance state</span>
+                            </button>
+                            <button onclick="previewExitDoc('financial')" class="p-3 bg-white border border-slate-200 rounded-xl hover:border-amber-400 hover:shadow-xs transition text-center flex flex-col items-center justify-center gap-2">
+                                <i class="fas fa-money-bill-wave text-2xl text-amber-600"></i>
+                                <span class="font-extrabold text-xs text-slate-800">Financial Certificate</span>
+                                <span class="text-[9px] text-slate-400 font-medium">Final payout estimate</span>
+                            </button>
+                        </div>
+                    </div>
+                `;
+
+        container.innerHTML = `
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-2 space-y-4">
+                            <div class="p-5 bg-gradient-to-br from-indigo-50 to-blue-50 border border-indigo-100 rounded-2xl flex items-center justify-between shadow-xs">
+                                <div>
+                                    <h3 class="font-extrabold text-sm text-indigo-950">Clearance Completion Status</h3>
+                                    <p class="text-[11px] text-indigo-800 mt-0.5">Your separation forms are actively routing for signatures.</p>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-2xl font-black text-indigo-900">${percentage}%</span>
+                                    <span class="block text-[9px] font-extrabold bg-indigo-200 text-indigo-800 px-2 py-0.5 rounded-full uppercase mt-1 tracking-wider">${clearedCount} / 5 desks</span>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2">
+                                <h4 class="font-extrabold text-[10px] text-slate-400 uppercase tracking-wider">Required Clearance Desks</h4>
+                                ${checklistHTML}
+                            </div>
+                        </div>
+
+                        <div class="space-y-4">
+                            <div class="p-4 bg-white border border-slate-200 rounded-2xl text-xs space-y-3 shadow-xs">
+                                <h4 class="font-extrabold text-slate-800 border-b pb-1.5 uppercase text-[10px] tracking-wider"><i class="fas fa-info-circle text-slate-400"></i> Offboarding Details</h4>
+                                <div class="space-y-2 font-semibold">
+                                    <div>
+                                        <span class="block text-[9px] text-slate-400 uppercase">Reason for Exit</span>
+                                        <span class="text-slate-850 capitalize">${(currentEmployee.exitReason || 'Resignation').replace(/_/g, ' ')}</span>
+                                    </div>
+                                    <div>
+                                        <span class="block text-[9px] text-slate-400 uppercase">Initiated Date</span>
+                                        <span class="text-slate-850">${SAGA.formatDate(currentEmployee.exitInitiatedDate)}</span>
+                                    </div>
+                                    <div>
+                                        <span class="block text-[9px] text-slate-400 uppercase">Target Separation Date</span>
+                                        <span class="text-slate-850">${currentEmployee.exitDate ? new Date(currentEmployee.exitDate).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A'}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Exit Interview Section -->
+                    ${exitInterviewHTML}
+
+                    <!-- Automated Document Section -->
+                    ${docsHTML}
+                `;
+    }
+}
+
+function submitExitSurvey(event) {
+    let currentEmployee = getActiveESSEmployee();
+    if (event) event.preventDefault();
+    const rating = document.getElementById('surveyRating').value;
+    const reason = document.getElementById('surveyReason').value.trim();
+    const feedback = document.getElementById('surveyFeedback').value.trim();
+
+    if (!reason || !feedback) {
+        alert('Please fill out all required fields.');
+        return;
+    }
+
+    const data = SAGA.getData();
+    const employee = data.employees[currentEmployee.id];
+    if (employee) {
+        employee.exitInterview = {
+            rating: parseInt(rating),
+            notes: `Reason: ${reason}\nFeedback: ${feedback}`,
+            completedDate: new Date().toISOString()
+        };
+        if (!employee.clearanceChecklist) {
+            employee.clearanceChecklist = { academic: false, library: false, property: false, finance: false, hr: false };
+        }
+        employee.clearanceChecklist.hr = true;
+
+        SAGA.saveData(data);
+
+        alert('✅ Digital Exit Interview submitted successfully!\nThank you for your valuable feedback.');
+        renderClearanceSubTab();
+    }
+}
+
+function getCOETemplate(employee) {
+    const job = SAGA.getJobById(employee.jobId);
+    const today = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
+    const startDate = employee.onboardedDate ? new Date(employee.onboardedDate).toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' }) : 'N/A';
+
+    return `
+                <div class="watermark-container relative" style="font-family: 'Times New Roman', Times, serif; padding: 20px; position: relative;">
+                    <div style="position: absolute; top: 35%; left: 10%; right: 10%; transform: rotate(-30deg); font-size: 60px; color: rgba(220,20,60,0.08); font-weight: bold; text-align: center; pointer-events: none; select: none; z-index: 10;">DRAFT PREVIEW</div>
+                    <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 30px;">
+                        <h2 style="font-size: 20px; font-weight: bold; margin: 0;">ST. ALOYSIUS GONZAGA ACADEMY INC.</h2>
+                        <p style="font-size: 11px; color: #555; margin: 5px 0;">St. Aloysius Gonzaga St., Greenhills, San Juan City, Metro Manila</p>
+                        <p style="font-size: 12px; font-weight: bold; margin: 5px 0; letter-spacing: 1px;">HUMAN RESOURCES DEPARTMENT</p>
+                    </div>
+                    
+                    <h3 style="text-align: center; font-size: 16px; font-weight: bold; margin: 40px 0; text-decoration: underline;">CERTIFICATE OF EMPLOYMENT</h3>
+                    
+                    <p style="margin: 30px 0;">TO WHOM IT MAY CONCERN:</p>
+                    
+                    <p style="text-align: justify; text-indent: 50px; line-height: 2; margin-bottom: 20px;">
+                        This is to certify that <strong>${employee.name}</strong> was employed with St. Aloysius Gonzaga Academy Inc. as a <strong>${job ? job.title : 'Faculty Member'}</strong> in the <strong>${job ? job.department : 'Academic Division'}</strong> from <strong>${startDate}</strong> to <strong>${today}</strong>.
+                    </p>
+                    
+                    <p style="text-align: justify; text-indent: 50px; line-height: 2; margin-bottom: 40px;">
+                        This certificate is being issued upon the request of the above-named employee for reference, clearance, and other legal purposes it may serve.
+                    </p>
+                    
+                    <div style="margin-top: 60px; display: flex; justify-content: space-between;">
+                        <div>
+                            <p style="margin: 0; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 5px; display: inline-block;">HR Director & Audit Lead</p>
+                            <p style="margin: 5px 0; font-size: 12px; color: #555;">Human Resources Department</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="margin: 0; font-size: 11px; color: #888;">Document ID: COE-DRAFT-${employee.id}</p>
+                            <p style="margin: 5px 0; font-size: 11px; color: #888;">Date Generated: ${today}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+}
+
+function getCOCTemplate(employee) {
+    const job = SAGA.getJobById(employee.jobId);
+    const today = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
+    const checklist = employee.clearanceChecklist || { academic: false, library: false, property: false, finance: false, hr: false };
+
+    return `
+                <div class="watermark-container relative" style="font-family: 'Times New Roman', Times, serif; padding: 20px; position: relative;">
+                    <div style="position: absolute; top: 35%; left: 10%; right: 10%; transform: rotate(-30deg); font-size: 60px; color: rgba(220,20,60,0.08); font-weight: bold; text-align: center; pointer-events: none; select: none; z-index: 10;">DRAFT PREVIEW</div>
+                    <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 30px;">
+                        <h2 style="font-size: 20px; font-weight: bold; margin: 0;">ST. ALOYSIUS GONZAGA ACADEMY INC.</h2>
+                        <p style="font-size: 11px; color: #555; margin: 5px 0;">St. Aloysius Gonzaga St., Greenhills, San Juan City, Metro Manila</p>
+                        <p style="font-size: 12px; font-weight: bold; margin: 5px 0; letter-spacing: 1px;">INSTITUTIONAL CLEARANCE SYSTEM</p>
+                    </div>
+                    
+                    <h3 style="text-align: center; font-size: 16px; font-weight: bold; margin: 30px 0; text-decoration: underline;">CERTIFICATE OF CLEARANCE</h3>
+                    
+                    <p style="margin: 20px 0;">This is to certify that <strong>${employee.name}</strong>, holding the position of <strong>${job ? job.title : 'Faculty Member'}</strong>, is currently undergoing institutional offboarding. The clearance progress from various departments is recorded as follows:</p>
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin: 30px 0; font-size: 13px;">
+                        <thead>
+                            <tr style="background-color: #f2f2f2;">
+                                <th style="border: 1px solid #ddd; padding: 10px; text-align: left; border-bottom: 2px solid #aaa;">Clearing Department</th>
+                                <th style="border: 1px solid #ddd; padding: 10px; text-align: left; border-bottom: 2px solid #aaa;">Clearance Requirement</th>
+                                <th style="border: 1px solid #ddd; padding: 10px; text-align: center; width: 120px; border-bottom: 2px solid #aaa;">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Academic turnover</td>
+                                <td style="border: 1px solid #ddd; padding: 10px;">Submission of student grades, modules, syllabi, & teacher manuals</td>
+                                <td style="border: 1px solid #ddd; padding: 10px; text-align: center; font-weight: bold; color: ${checklist.academic ? 'green' : 'orange'};">${checklist.academic ? 'CLEARED' : 'PENDING'}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Library Desk</td>
+                                <td style="border: 1px solid #ddd; padding: 10px;">Return of textbooks, resource guides, digital kits, & media library tools</td>
+                                <td style="border: 1px solid #ddd; padding: 10px; text-align: center; font-weight: bold; color: ${checklist.library ? 'green' : 'orange'};">${checklist.library ? 'CLEARED' : 'PENDING'}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Property & Asset turnover</td>
+                                <td style="border: 1px solid #ddd; padding: 10px;">Return of school laptops, peripherals, workspace keys, and cabinets</td>
+                                <td style="border: 1px solid #ddd; padding: 10px; text-align: center; font-weight: bold; color: ${checklist.property ? 'green' : 'orange'};">${checklist.property ? 'CLEARED' : 'PENDING'}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">Accounting settlements</td>
+                                <td style="border: 1px solid #ddd; padding: 10px;">Audit of salaries, loan balances, advances, and liability settlements</td>
+                                <td style="border: 1px solid #ddd; padding: 10px; text-align: center; font-weight: bold; color: ${checklist.finance ? 'green' : 'orange'};">${checklist.finance ? 'CLEARED' : 'PENDING'}</td>
+                            </tr>
+                            <tr>
+                                <td style="border: 1px solid #ddd; padding: 10px; font-weight: bold;">HR Audit & Exit Survey</td>
+                                <td style="border: 1px solid #ddd; padding: 10px;">Exit Interview submission and final clearance certificate auditing</td>
+                                <td style="border: 1px solid #ddd; padding: 10px; text-align: center; font-weight: bold; color: ${checklist.hr ? 'green' : 'orange'};">${checklist.hr ? 'CLEARED' : 'PENDING'}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    
+                    <p style="text-align: justify; line-height: 1.8; margin-top: 30px;">
+                        This clearance verification represents the live database status at the school registry. A finalized, hard-copy Clearance Certificate with institutional dry seals will be issued by the Principal's Office upon successful completion of all desks.
+                    </p>
+                    
+                    <div style="margin-top: 50px; display: flex; justify-content: space-between;">
+                        <div>
+                            <p style="margin: 0; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 5px; display: inline-block;">Registrar & Clearance Officer</p>
+                            <p style="margin: 5px 0; font-size: 12px; color: #555;">St. Aloysius Gonzaga Academy Inc.</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="margin: 0; font-size: 11px; color: #888;">Document ID: CLR-DRAFT-${employee.id}</p>
+                            <p style="margin: 5px 0; font-size: 11px; color: #888;">Date Updated: ${today}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+}
+
+function getFinancialTemplate(employee) {
+    const job = SAGA.getJobById(employee.jobId);
+    const today = new Date().toLocaleDateString('en-PH', { year: 'numeric', month: 'long', day: 'numeric' });
+
+    const baseSalary = employee.salaryInfo?.baseSalary || 30000;
+    const dailyRate = Math.round(baseSalary / 22);
+    const unusedLeaveDays = employee.leaveBalance?.vacation || 0;
+    const leaveEncashment = unusedLeaveDays * dailyRate;
+
+    const sss = Math.round(baseSalary * 0.045);
+    const philhealth = Math.round(baseSalary * 0.025);
+    const pagibig = Math.round(baseSalary * 0.02);
+    const tax = Math.round(baseSalary * 0.10);
+    const totalStatutory = sss + philhealth + pagibig + tax;
+
+    const finalPayoutEstimate = baseSalary + leaveEncashment - totalStatutory;
+
+    return `
+                <div class="watermark-container relative" style="font-family: 'Times New Roman', Times, serif; padding: 20px; position: relative;">
+                    <div style="position: absolute; top: 35%; left: 10%; right: 10%; transform: rotate(-30deg); font-size: 60px; color: rgba(220,20,60,0.08); font-weight: bold; text-align: center; pointer-events: none; select: none; z-index: 10;">DRAFT PREVIEW</div>
+                    <div style="text-align: center; border-bottom: 2px solid #000; padding-bottom: 10px; margin-bottom: 30px;">
+                        <h2 style="font-size: 20px; font-weight: bold; margin: 0;">ST. ALOYSIUS GONZAGA ACADEMY INC.</h2>
+                        <p style="font-size: 11px; color: #555; margin: 5px 0;">St. Aloysius Gonzaga St., Greenhills, San Juan City, Metro Manila</p>
+                        <p style="font-size: 12px; font-weight: bold; margin: 5px 0; letter-spacing: 1px;">ACCOUNTING & FINANCE DIVISION</p>
+                    </div>
+                    
+                    <h3 style="text-align: center; font-size: 16px; font-weight: bold; margin: 30px 0; text-decoration: underline;">ESTIMATED FINAL PAYROLL & SEPARATION SHEET</h3>
+                    
+                    <div style="margin: 20px 0; font-size: 13px;">
+                        <p><strong>Employee Name:</strong> ${employee.name}</p>
+                        <p><strong>Position Title:</strong> ${job ? job.title : 'Faculty Member'}</p>
+                        <p><strong>Department:</strong> ${job ? job.department : 'Academic Division'}</p>
+                        <p><strong>Pay Grade Structure:</strong> ${employee.rateStructure || 'Full-Time Monthly Salary'}</p>
+                    </div>
+                    
+                    <hr style="border: 0; border-top: 1px solid #ddd; margin: 20px 0;">
+                    
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px;">
+                        <thead>
+                            <tr style="background-color: #f9f9f9; border-bottom: 2px solid #ddd;">
+                                <th style="padding: 10px; text-align: left; font-weight: bold; border-bottom: 2px solid #aaa;">Compensation / Earnings Description</th>
+                                <th style="padding: 10px; text-align: right; font-weight: bold; width: 150px; border-bottom: 2px solid #aaa;">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee;">Monthly Base Basic Salary</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right;">₱${baseSalary.toLocaleString()}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee;">Unused Vacation Leave Credit Encashment (${unusedLeaveDays} days @ ₱${dailyRate}/day)</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; color: green;">+ ₱${leaveEncashment.toLocaleString()}</td>
+                            </tr>
+                            <tr style="background-color: #fdfdfd; font-weight: bold;">
+                                <td style="padding: 10px; border-bottom: 1px solid #ddd;">Total Gross Earnings</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right;">₱${(baseSalary + leaveEncashment).toLocaleString()}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <table style="width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 13px;">
+                        <thead>
+                            <tr style="background-color: #f9f9f9; border-bottom: 2px solid #ddd;">
+                                <th style="padding: 10px; text-align: left; font-weight: bold; border-bottom: 2px solid #aaa;">Statutory & Internal Deductions</th>
+                                <th style="padding: 10px; text-align: right; font-weight: bold; width: 150px; border-bottom: 2px solid #aaa;">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee;">SSS Contribution (Statutory)</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; color: red;">- ₱${sss.toLocaleString()}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee;">PhilHealth Contribution (Statutory)</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; color: red;">- ₱${philhealth.toLocaleString()}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee;">Pag-IBIG Fund Contribution (Statutory)</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; color: red;">- ₱${pagibig.toLocaleString()}</td>
+                            </tr>
+                            <tr>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee;">Withholding Income Tax Estimate</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #eee; text-align: right; color: red;">- ₱${tax.toLocaleString()}</td>
+                            </tr>
+                            <tr style="background-color: #fdfdfd; font-weight: bold;">
+                                <td style="padding: 10px; border-bottom: 1px solid #ddd;">Total Deductions</td>
+                                <td style="padding: 10px; border-bottom: 1px solid #ddd; text-align: right; color: red;">- ₱${totalStatutory.toLocaleString()}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <hr style="border: 0; border-top: 2px solid #333; margin: 20px 0;">
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; font-size: 15px; font-weight: bold; background-color: #f5f5f5; padding: 15px; border-radius: 8px;">
+                        <span>PROJECTED NET SEPARATION PAYOUT ESTIMATE:</span>
+                        <span style="font-size: 20px; color: #1e3a8a;">₱${finalPayoutEstimate.toLocaleString()}</span>
+                    </div>
+                    
+                    <p style="font-size: 11px; color: #666; text-align: justify; line-height: 1.5; margin-top: 25px;">
+                        <strong>Notice:</strong> This document is a preliminary financial audit run automatically for offboarding planning. The final check disbursement is contingent on complete clearing from all academic, library, property, and HR departments.
+                    </p>
+                    
+                    <div style="margin-top: 40px; display: flex; justify-content: space-between;">
+                        <div>
+                            <p style="margin: 0; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 5px; display: inline-block;">Chief Cashier & Finance Head</p>
+                            <p style="margin: 5px 0; font-size: 12px; color: #555;">Accounting Department</p>
+                        </div>
+                        <div style="text-align: right;">
+                            <p style="margin: 0; font-size: 11px; color: #888;">Document ID: FIN-DRAFT-${employee.id}</p>
+                            <p style="margin: 5px 0; font-size: 11px; color: #888;">Calculated on: ${today}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+}
+
+function previewExitDoc(type) {
+    let currentEmployee = getActiveESSEmployee();
+    const modal = document.getElementById('exitDocModal');
+    const titleEl = document.getElementById('exitDocModalTitle');
+    const textArea = document.getElementById('exitDocTextArea');
+    if (!modal || !textArea) return;
+
+    let htmlContent = '';
+    let title = '';
+
+    if (type === 'coe') {
+        title = 'Draft Certificate of Employment (COE)';
+        htmlContent = getCOETemplate(currentEmployee);
+    } else if (type === 'coc') {
+        title = 'Draft Clearance Certificate (COC)';
+        htmlContent = getCOCTemplate(currentEmployee);
+    } else if (type === 'financial') {
+        title = 'Draft Institutional Financial Certificate';
+        htmlContent = getFinancialTemplate(currentEmployee);
+    }
+
+    titleEl.innerHTML = `<i class="fas fa-file-pdf text-amber-500 mr-2"></i> ${title}`;
+    textArea.innerHTML = htmlContent;
+    modal.classList.add('active');
+}
+
+function closeExitDocModal() {
+    document.getElementById('exitDocModal')?.classList.remove('active');
+}
+
+function printExitDoc() {
+    const content = document.getElementById('exitDocTextArea').innerHTML;
+    const myWindow = window.open('', 'PRINT', 'height=600,width=800');
+    myWindow.document.write('<html><head><title>Print Document</title>');
+    myWindow.document.write('</head><body style="margin:40px; font-family:serif;">');
+    myWindow.document.write(content);
+    myWindow.document.write('</body></html>');
+    myWindow.document.close();
+    let currentEmployee = getActiveESSEmployee();
+    const modal = document.getElementById('exitDocModal');
+    const titleEl = document.getElementById('exitDocModalTitle');
+    const textArea = document.getElementById('exitDocTextArea');
+    if (!modal || !textArea) return;
+
+    let htmlContent = '';
+    let title = '';
+
+    if (type === 'coe') {
+        title = 'Draft Certificate of Employment (COE)';
+        htmlContent = getCOETemplate(currentEmployee);
+    } else if (type === 'coc') {
+        title = 'Draft Clearance Certificate (COC)';
+        htmlContent = getCOCTemplate(currentEmployee);
+    } else if (type === 'financial') {
+        title = 'Draft Institutional Financial Certificate';
+        htmlContent = getFinancialTemplate(currentEmployee);
+    }
+
+    titleEl.innerHTML = `<i class="fas fa-file-pdf text-amber-500 mr-2"></i> ${title}`;
+    textArea.innerHTML = htmlContent;
+    modal.classList.add('active');
+}
+
+function closeExitDocModal() {
+    document.getElementById('exitDocModal')?.classList.remove('active');
+}
+
+function printExitDoc() {
+    const content = document.getElementById('exitDocTextArea').innerHTML;
+    const myWindow = window.open('', 'PRINT', 'height=600,width=800');
+    myWindow.document.write('<html><head><title>Print Document</title>');
+    myWindow.document.write('</head><body style="margin:40px; font-family:serif;">');
+    myWindow.document.write(content);
+    myWindow.document.write('</body></html>');
+    myWindow.document.close();
+    myWindow.focus();
+    setTimeout(() => {
+        myWindow.print();
+        myWindow.close();
+    }, 250);
+}
+
+function renderExitRenewals() {
+    const data = SAGA.getData();
+    const tbody = document.getElementById('exitRenewalTableBody');
+    if (!tbody) return;
+
+    let employeesWithIntents = [];
+    Object.values(data.employees).forEach(emp => {
+        if (emp.contractIntent) {
+            employeesWithIntents.push(emp);
+        }
+    });
+
+    // Sort by most recent
+    employeesWithIntents.sort((a, b) => new Date(b.contractIntent.submittedDate) - new Date(a.contractIntent.submittedDate));
+
+    if (employeesWithIntents.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400 italic">No contract renewal intents submitted yet.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = employeesWithIntents.map(emp => {
+        const intent = emp.contractIntent;
+        let badgeClass = '';
+        let intentLabel = '';
+
+        if (intent.intent === 'extend') {
+            badgeClass = 'bg-emerald-100 text-emerald-800 border-emerald-200';
+            intentLabel = 'Extend Contract';
+        } else {
+            badgeClass = 'bg-amber-100 text-amber-800 border-amber-200';
+            intentLabel = 'Undecided';
+        }
+
+        const job = SAGA.getJobById(emp.jobId);
+        const dept = job ? job.department : 'Faculty';
+
+        return `
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-4 py-3 font-bold text-slate-900">${emp.name}</td>
+                <td class="px-4 py-3 font-semibold text-slate-700">${intent.academicYear}</td>
+                <td class="px-4 py-3">
+                    <span class="px-2.5 py-1 text-[10px] font-extrabold rounded-full border ${badgeClass}">${intentLabel}</span>
+                </td>
+                <td class="px-4 py-3 font-semibold text-slate-700">${SAGA.formatDate(intent.submittedDate)}</td>
+                <td class="px-4 py-3 text-right">
+                    <div class="flex justify-end gap-2">
+                        <button onclick="viewContractIntentDetails('${emp.id}')" class="px-2.5 py-1.5 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-[10px] rounded-xl font-bold shadow-sm transition"><i class="fas fa-eye mr-1"></i> Details</button>
+                        ${intent.status !== 'Approved' ? `<button onclick="approveContractRenewal('${emp.id}')" class="px-2.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] rounded-xl font-bold shadow-sm transition"><i class="fas fa-check mr-1"></i> Approve</button>` : `<span class="px-2.5 py-1.5 text-slate-400 text-[10px] font-bold"><i class="fas fa-check-double mr-1"></i> Approved</span>`}
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function viewContractIntentDetails(empId) {
+    const data = SAGA.getData();
+    const emp = data.employees[empId];
+    if (!emp || !emp.contractIntent) return;
+
+    const intent = emp.contractIntent;
+    
+    // Create custom modal for viewing details
+    const modal = document.createElement('div');
+    modal.className = "fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4";
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl w-full max-w-md shadow-2xl overflow-hidden transform transition-all">
+            <div class="p-6">
+                <div class="flex justify-between items-start mb-5">
+                    <div>
+                        <h3 class="font-black text-xl text-slate-900">Contract Renewal Intent</h3>
+                        <p class="text-sm font-semibold text-slate-500">${emp.name}</p>
+                    </div>
+                    <button onclick="this.closest('.fixed').remove()" class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 hover:text-slate-700 transition">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="space-y-4 text-sm">
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Intent</p>
+                        <p class="font-semibold text-slate-800">${intent.intent === 'extend' ? 'Extend Contract' : 'Undecided'}</p>
+                    </div>
+                    
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Proposed Academic Year</p>
+                        <p class="font-semibold text-slate-800">${intent.academicYear}</p>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Preferred Subjects / Loads</p>
+                        <p class="font-semibold text-slate-800 whitespace-pre-wrap">${intent.subjects || 'None specified'}</p>
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                        <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">Additional Remarks</p>
+                        <p class="font-semibold text-slate-800 whitespace-pre-wrap">${intent.remarks || 'None specified'}</p>
+                    </div>
+                </div>
+
+                <div class="mt-6 flex gap-3">
+                    <button onclick="this.closest('.fixed').remove()" class="flex-1 px-4 py-3 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 text-sm font-bold rounded-xl transition">Close</button>
+                    ${intent.status !== 'Approved' ? `<button onclick="this.closest('.fixed').remove(); approveContractRenewal('${emp.id}');" class="flex-1 px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-bold rounded-xl transition shadow-sm shadow-indigo-200">Approve Renewal</button>` : ''}
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+}
+
+function approveContractRenewal(empId) {
+    const data = SAGA.getData();
+    if (data.employees[empId] && data.employees[empId].contractIntent) {
+        data.employees[empId].contractIntent.status = 'Approved';
+        SAGA.saveData(data);
+        SAGA.showCustomAlert(`Contract renewal for ${data.employees[empId].name} has been approved.`, "Renewal Approved");
+        renderExitRenewals();
+    }
 }
