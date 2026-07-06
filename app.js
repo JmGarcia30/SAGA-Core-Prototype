@@ -71,7 +71,7 @@ const SAGA = {
   // Initialize localStorage with mock data (only if not existing or if too many applicants)
   init() {
     const dataRaw = localStorage.getItem("saga_data");
-    const CURRENT_VERSION = 6;
+    const CURRENT_VERSION = 7;
     if (!dataRaw) {
       this.resetData();
     } else {
@@ -498,10 +498,14 @@ const SAGA = {
       ],
       attendanceLogs: {
         [mockEmployeeId1]: [
-          { type: "in", timestamp: new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString(), date: now.toLocaleDateString() },
-          { type: "out", timestamp: new Date(now.getTime() - 1 * 60 * 60 * 1000).toISOString(), date: now.toLocaleDateString() },
-          { type: "in", timestamp: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000 - 8 * 60 * 60 * 1000).toISOString(), date: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toLocaleDateString() },
-          { type: "out", timestamp: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000 + 9 * 60 * 60 * 1000).toISOString(), date: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toLocaleDateString() }
+          { type: "in", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 7, 15).toISOString(), date: new Date().toLocaleDateString() },
+          { type: "out", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 16, 30).toISOString(), date: new Date().toLocaleDateString() },
+          { type: "in", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 7, 55).toISOString(), date: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toLocaleDateString() },
+          { type: "out", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 16, 30).toISOString(), date: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toLocaleDateString() },
+          { type: "in", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2, 8, 10).toISOString(), date: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toLocaleDateString() },
+          { type: "out", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2, 16, 30).toISOString(), date: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toLocaleDateString() },
+          { type: "in", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 3, 7, 45).toISOString(), date: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toLocaleDateString() },
+          { type: "out", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 3, 16, 30).toISOString(), date: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toLocaleDateString() }
         ],
         [mockEmployeeId2]: [
           { type: "in", timestamp: new Date(now.getTime() - 3 * 60 * 60 * 1000).toISOString(), date: now.toLocaleDateString() },
@@ -513,8 +517,61 @@ const SAGA = {
         id: mockEmployeeId1,
         username: "juan.delacruz"
       },
-      dbVersion: 6
+      dbVersion: 7
     };
+
+    // Initialize empty arrays for new structures and warning memos
+    Object.values(initialData.employees).forEach(emp => {
+      emp.memos = [];
+      emp.otRequests = [];
+      emp.timeAdjustmentRequests = [];
+    });
+
+    // Seed mock warning memo for Juan Dela Cruz
+    initialData.employees[mockEmployeeId1].memos = [
+      {
+        id: "MEMO_1",
+        title: "Notice to Explain: Consecutive Late Clock-Ins",
+        date: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
+        content: "Dear Teacher Juan,\n\nOur attendance records indicate that you have clocked in late 3 times during this payroll cycle. As per Section 4.2 of the Faculty Handbook, continuous tardiness affects class schedules and student contact hours.\n\nPlease provide a written explanation within 48 hours.\n\nSincerely,\nHR Department",
+        acknowledged: false
+      }
+    ];
+
+    // Seed mock overtime requests
+    initialData.employees[mockEmployeeId1].otRequests = [
+      {
+        id: "OT_SEED_1",
+        date: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 4).toISOString().split('T')[0],
+        hours: "2",
+        reason: "Grading final exams and exam clearance reviews",
+        submittedDate: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000).toISOString(),
+        status: "approved",
+        approvedBy: "Principal Clara"
+      },
+      {
+        id: "OT_SEED_2",
+        date: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).toISOString().split('T')[0],
+        hours: "3.5",
+        reason: "Advising computer science capstone projects after class hours",
+        submittedDate: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+        status: "pending"
+      }
+    ];
+
+    // Seed mock time adjustment requests
+    initialData.employees[mockEmployeeId1].timeAdjustmentRequests = [
+      {
+        id: "ADJ_SEED_1",
+        date: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 3).toISOString().split('T')[0],
+        originalTime: "07:45 AM",
+        requestedTime: "07:25 AM",
+        reason: "LRT line malfunction and massive train delays (valid transportation advisory)",
+        submittedDate: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+        status: "pending"
+      }
+    ];
+
     localStorage.setItem("saga_data", JSON.stringify(initialData));
   },
 
@@ -671,6 +728,9 @@ const SAGA = {
         marriageContract: applicant.documentsSubmitted ? !!applicant.documentsSubmitted.marriageContract : false,
         otherDocs: [] // Stores additional uploaded file metadata
       },
+      memos: [],
+      otRequests: [],
+      timeAdjustmentRequests: [],
       leaveBalance: {
         vacation: 15,
         sick: 5,
@@ -900,6 +960,7 @@ const SAGA = {
     const timestamp = new Date().toISOString();
     const entry = {
       type,
+      direction: type,
       timestamp,
       date: new Date(timestamp).toLocaleDateString()
     };
@@ -1040,6 +1101,7 @@ const SAGA = {
     const employee = this.getEmployeeById(employeeId);
     if (!employee) return null;
 
+    const data = this.getData();
     const grossSalary = employee.salaryInfo.baseSalary;
     const sss = Math.round(grossSalary * 0.045); // 4.5%
     const philhealth = Math.round(grossSalary * 0.025); // 2.5%
@@ -1051,24 +1113,49 @@ const SAGA = {
     const hourlyRate = Math.round(dailyRate / 8);
     const minRate = hourlyRate / 60;
 
-    // Attendance metrics (mocked per employee or defaulted for prototype)
-    const latesCount = employee.attendanceMetrics?.latesCount ?? 2;
-    const lateMinutes = employee.attendanceMetrics?.lateMinutes ?? 45;
+    // Dynamically calculate lates count and minutes from actual logs
+    let latesCount = 0;
+    let lateMinutes = 0;
+    
+    const logs = data.attendanceLogs[employeeId] || [];
+    logs.forEach(log => {
+      if (log.type === "in") {
+        const dateObj = new Date(log.timestamp);
+        const hours = dateObj.getHours();
+        const minutes = dateObj.getMinutes();
+        
+        // Late if after 7:30 AM
+        if (hours > 7 || (hours === 7 && minutes > 30)) {
+          latesCount++;
+          const mins = (hours * 60 + minutes) - (7 * 60 + 30);
+          lateMinutes += mins;
+        }
+      }
+    });
+
     const lateDeduction = Math.round(lateMinutes * minRate);
 
+    // Calculate absences
     const absencesCount = employee.attendanceMetrics?.absencesCount ?? 0;
     const absenceDeduction = Math.round(absencesCount * dailyRate);
 
+    // Dynamically calculate approved OT
+    const approvedOtRequests = (employee.otRequests || []).filter(r => r.status === "approved");
+    const approvedOtHours = approvedOtRequests.reduce((sum, r) => sum + parseFloat(r.hours || 0), 0);
+    const otPay = Math.round(approvedOtHours * hourlyRate * 1.25);
+
     const totalDeductions = sss + philhealth + pagibig + tax + lateDeduction + absenceDeduction;
-    const netPay = grossSalary - totalDeductions;
+    const netPay = (grossSalary + otPay) - totalDeductions;
 
     return {
       payslipId: "PAYSLIP_" + Date.now(),
       employeeName: employee.name,
       employeeId: employee.id,
-      payPeriod: "Monthly",
+      payPeriod: "July 1-15, 2026",
       paymentDate: employee.salaryInfo.lastPaymentDate,
       grossSalary,
+      otPay,
+      approvedOtHours,
       deductions: {
         sss,
         philhealth,
@@ -1255,6 +1342,205 @@ const SAGA = {
       okBtn.onclick = () => { cleanup(); resolve(true); };
       cancelBtn.onclick = () => { cleanup(); resolve(false); };
     });
+  },
+
+  submitOTRequest(employeeId, otDetails) {
+    const data = this.getData();
+    const employee = data.employees[employeeId];
+    if (!employee) return null;
+    if (!employee.otRequests) employee.otRequests = [];
+    
+    const request = {
+      id: "OT_" + Date.now(),
+      ...otDetails,
+      submittedDate: new Date().toISOString(),
+      status: "pending"
+    };
+    employee.otRequests.push(request);
+    this.saveData(data);
+    return employee;
+  },
+
+  approveOTRequest(employeeId, otId, approverName) {
+    const data = this.getData();
+    const employee = data.employees[employeeId];
+    if (!employee) return null;
+    const req = employee.otRequests.find(r => r.id === otId);
+    if (!req) return null;
+    req.status = "approved";
+    req.approvedBy = approverName;
+    req.approvedDate = new Date().toISOString();
+    this.saveData(data);
+    return employee;
+  },
+
+  rejectOTRequest(employeeId, otId, approverName) {
+    const data = this.getData();
+    const employee = data.employees[employeeId];
+    if (!employee) return null;
+    const req = employee.otRequests.find(r => r.id === otId);
+    if (!req) return null;
+    req.status = "rejected";
+    req.approvedBy = approverName;
+    req.approvedDate = new Date().toISOString();
+    this.saveData(data);
+    return employee;
+  },
+
+  submitTimeAdjustment(employeeId, adjDetails) {
+    const data = this.getData();
+    const employee = data.employees[employeeId];
+    if (!employee) return null;
+    if (!employee.timeAdjustmentRequests) employee.timeAdjustmentRequests = [];
+    
+    const request = {
+      id: "ADJ_" + Date.now(),
+      ...adjDetails,
+      submittedDate: new Date().toISOString(),
+      status: "pending"
+    };
+    employee.timeAdjustmentRequests.push(request);
+    this.saveData(data);
+    return employee;
+  },
+
+  approveTimeAdjustment(employeeId, adjId, approverName) {
+    const data = this.getData();
+    const employee = data.employees[employeeId];
+    if (!employee) return null;
+    const req = employee.timeAdjustmentRequests.find(r => r.id === adjId);
+    if (!req) return null;
+    req.status = "approved";
+    req.approvedBy = approverName;
+    req.approvedDate = new Date().toISOString();
+
+    // Adjust attendance log
+    const dateStr = req.date;
+    const requestedTime = req.requestedTime;
+    
+    const [time, modifier] = requestedTime.split(' ');
+    let [hours, minutes] = time.split(':');
+    hours = parseInt(hours);
+    minutes = parseInt(minutes);
+    if (modifier === 'PM' && hours < 12) hours += 12;
+    if (modifier === 'AM' && hours === 12) hours = 0;
+
+    const logDate = new Date(dateStr);
+    logDate.setHours(hours, minutes, 0, 0);
+
+    if (!data.attendanceLogs[employeeId]) data.attendanceLogs[employeeId] = [];
+    
+    const targetDateStr = new Date(dateStr).toLocaleDateString();
+    let inLog = data.attendanceLogs[employeeId].find(l => l.date === targetDateStr && l.type === 'in');
+    if (inLog) {
+      inLog.timestamp = logDate.toISOString();
+    } else {
+      data.attendanceLogs[employeeId].push({
+        type: "in",
+        timestamp: logDate.toISOString(),
+        date: targetDateStr
+      });
+    }
+
+    this.saveData(data);
+    return employee;
+  },
+
+  rejectTimeAdjustment(employeeId, adjId, approverName) {
+    const data = this.getData();
+    const employee = data.employees[employeeId];
+    if (!employee) return null;
+    const req = employee.timeAdjustmentRequests.find(r => r.id === adjId);
+    if (!req) return null;
+    req.status = "rejected";
+    req.approvedBy = approverName;
+    req.approvedDate = new Date().toISOString();
+    this.saveData(data);
+    return employee;
+  },
+
+  issueWarningMemo(employeeId, memoDetails) {
+    const data = this.getData();
+    const employee = data.employees[employeeId];
+    if (!employee) return null;
+    if (!employee.memos) employee.memos = [];
+
+    const memo = {
+      id: "MEMO_" + Date.now(),
+      ...memoDetails,
+      date: new Date().toISOString(),
+      acknowledged: false
+    };
+    employee.memos.push(memo);
+    this.saveData(data);
+    return employee;
+  },
+
+  acknowledgeMemo(employeeId, memoId) {
+    const data = this.getData();
+    const employee = data.employees[employeeId];
+    if (!employee) return null;
+    const memo = employee.memos.find(m => m.id === memoId);
+    if (memo) {
+      memo.acknowledged = true;
+      memo.acknowledgedDate = new Date().toISOString();
+    }
+    this.saveData(data);
+    return employee;
+  },
+
+  saveAttendanceOverride(employeeId, dateStr, status, timeIn = "", timeOut = "") {
+    const data = this.getData();
+    const targetDateStr = new Date(dateStr).toLocaleDateString();
+    
+    if (!data.attendanceLogs[employeeId]) {
+      data.attendanceLogs[employeeId] = [];
+    }
+
+    // Filter out existing logs for this date
+    data.attendanceLogs[employeeId] = data.attendanceLogs[employeeId].filter(l => l.date !== targetDateStr);
+
+    if (status === 'present' || status === 'late') {
+      const hoursIn = status === 'present' ? 7 : 8;
+      const minsIn = status === 'present' ? 15 : 15;
+      
+      const logDateIn = new Date(dateStr);
+      logDateIn.setHours(hoursIn, minsIn, 0, 0);
+
+      data.attendanceLogs[employeeId].push({
+        type: "in",
+        direction: "in",
+        status: status,
+        timestamp: logDateIn.toISOString(),
+        date: targetDateStr
+      });
+
+      const logDateOut = new Date(dateStr);
+      logDateOut.setHours(16, 30, 0, 0);
+      data.attendanceLogs[employeeId].push({
+        type: "out",
+        direction: "out",
+        timestamp: logDateOut.toISOString(),
+        date: targetDateStr
+      });
+    } else if (status === 'leave') {
+      if (!data.leaveRequests) data.leaveRequests = [];
+      const leaveId = "LEAVE_" + Date.now();
+      data.leaveRequests.push({
+        id: leaveId,
+        employeeId,
+        leaveType: "vacation",
+        fromDate: dateStr,
+        toDate: dateStr,
+        days: 1,
+        reason: "HR Overridden Attendance Leave Block",
+        status: "approved",
+        submittedDate: new Date().toISOString()
+      });
+    }
+
+    this.saveData(data);
+    return true;
   }
 };
 

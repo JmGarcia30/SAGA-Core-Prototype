@@ -8,6 +8,40 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #essPayslipModal, #essPayslipPrintArea, #essPayslipPrintArea * {
+                visibility: visible;
+            }
+            #essPayslipModal {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: auto;
+                background: white !important;
+                display: block !important;
+                box-shadow: none !important;
+                border: none !important;
+            }
+            #essPayslipPrintArea {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                border: none !important;
+                box-shadow: none !important;
+                padding: 0 !important;
+                margin: 0 !important;
+            }
+            .modal-header, .modal-footer, footer, nav {
+                display: none !important;
+            }
+        }
+    </style>
 </head>
 
 <body class="bg-gray-50">
@@ -93,7 +127,7 @@
 
             <!-- Tab Navigation -->
             <div class="bg-white border-b border-gray-200 mb-8 sticky top-32 z-30">
-                <div class="flex overflow-x-auto gap-1">
+                <div class="flex flex-wrap gap-1">
                     <button onclick="switchTab('overview')" class="tab-btn active" data-tab="overview">
                         <i class="fas fa-chart-bar"></i> Overview
                     </button>
@@ -112,6 +146,9 @@
                     <button onclick="switchTab('documents')" class="tab-btn" data-tab="documents">
                         <i class="fas fa-folder-open"></i> My 201 Locker
                     </button>
+                    <button onclick="switchTab('policies')" class="tab-btn" data-tab="policies">
+                        <i class="fas fa-book-open"></i> Employee Policies
+                    </button>
                     <button onclick="switchTab('exit')" class="tab-btn" data-tab="exit">
                         <i class="fas fa-file-contract"></i> Contracts & Offboarding
                     </button>
@@ -125,9 +162,16 @@
                         <div class="stat-label">Current Status</div>
                         <div id="statusBadge" class="stat-number text-sm mt-2 badge badge-active">ACTIVE</div>
                     </div>
-                    <div class="stat-card">
-                        <div class="stat-number" id="leaveBalance">20</div>
-                        <div class="stat-label">Leave Days Available</div>
+                    <div class="stat-card flex flex-col justify-between">
+                        <div>
+                            <div class="stat-number" id="leaveBalance">20</div>
+                            <div class="stat-label">Leave Days Available</div>
+                        </div>
+                        <div class="text-[10px] text-gray-500 mt-2 border-t pt-1.5 flex justify-between gap-1 font-semibold">
+                            <span>VL: <span class="text-blue-600 font-extrabold" id="briefLeave-vac">15</span></span>
+                            <span>SL: <span class="text-orange-600 font-extrabold" id="briefLeave-sick">5</span></span>
+                            <span>EL: <span class="text-rose-600 font-extrabold" id="briefLeave-emerg">5</span></span>
+                        </div>
                     </div>
                     <div class="stat-card">
                         <div class="stat-number">4.2</div>
@@ -139,25 +183,65 @@
                     </div>
                 </div>
 
-                <div class="card p-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <button onclick="switchTab('payroll')" class="card p-4 text-center hover:shadow-lg transition">
-                            <i class="fas fa-file-invoice text-3xl text-green-600 mb-2"></i>
-                            <p class="font-semibold text-gray-900">View Payslip</p>
-                            <p class="text-xs text-gray-600">Download latest payslip</p>
-                        </button>
-                        <button onclick="switchTab('leave')" class="card p-4 text-center hover:shadow-lg transition">
-                            <i class="fas fa-calendar-alt text-3xl text-blue-600 mb-2"></i>
-                            <p class="font-semibold text-gray-900">Apply for Leave</p>
-                            <p class="text-xs text-gray-600">Submit leave request</p>
-                        </button>
-                        <button onclick="switchTab('timekeeping')"
-                            class="card p-4 text-center hover:shadow-lg transition">
-                            <i class="fas fa-sign-out-alt text-3xl text-purple-600 mb-2"></i>
-                            <p class="font-semibold text-gray-900">Time In/Out</p>
-                            <p class="text-xs text-gray-600">RFID Timekeeping</p>
-                        </button>
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Dashboard Inbox & Notices -->
+                    <div class="lg:col-span-2 card p-6">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                            <i class="fas fa-inbox text-blue-500"></i> My Inbox & Institutional Notices
+                        </h3>
+                        <div id="essInboxList" class="space-y-4">
+                            <!-- Populated dynamically by JS -->
+                            <p class="text-xs text-gray-400 italic">No warnings or letters issued.</p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="card p-6 flex flex-col">
+                        <h3 class="text-lg font-bold text-gray-900 mb-4">Quick Actions</h3>
+                        <div class="grid grid-cols-1 gap-4 flex-1">
+                            <button onclick="switchTab('payroll')" class="p-4 border rounded-xl hover:shadow transition flex items-center gap-3 text-left bg-white">
+                                <i class="fas fa-file-invoice-dollar text-2xl text-green-600"></i>
+                                <div>
+                                    <p class="font-extrabold text-sm text-gray-900 leading-tight">View Payslip</p>
+                                    <p class="text-[10px] text-gray-500">Print or view latest pay advice</p>
+                                </div>
+                            </button>
+                            <button onclick="switchTab('leave')" class="p-4 border rounded-xl hover:shadow transition flex items-center gap-3 text-left bg-white">
+                                <i class="fas fa-calendar-alt text-2xl text-blue-600"></i>
+                                <div>
+                                    <p class="font-extrabold text-sm text-gray-900 leading-tight">Apply for Leave</p>
+                                    <p class="text-[10px] text-gray-500">File leave requests</p>
+                                </div>
+                            </button>
+                            <button onclick="switchTab('timekeeping')" class="p-4 border rounded-xl hover:shadow transition flex items-center gap-3 text-left bg-white">
+                                <i class="fas fa-clock text-2xl text-purple-600"></i>
+                                <div>
+                                    <p class="font-extrabold text-sm text-gray-900 leading-tight">Timekeeping & OT</p>
+                                    <p class="text-[10px] text-gray-500">IoT-RFID logs & Overtime</p>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Attendance Calendar -->
+                <div class="bg-white p-6 border rounded-2xl mt-6 shadow-sm">
+                    <h3 class="font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
+                        <i class="fas fa-calendar-alt text-indigo-500"></i> My Attendance & Status Calendar
+                    </h3>
+                    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 text-xs font-semibold gap-2">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-emerald-50 border border-emerald-300 block"></span> Present</span>
+                            <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-yellow-50 border border-yellow-300 block"></span> Late</span>
+                            <span class="flex items-center gap-1.5"><span class="w-3.5 h-3.5 rounded bg-rose-50 border border-rose-250 block"></span> Absent / Leave</span>
+                        </div>
+                        <div class="text-slate-500">Calendar Month: <span class="font-extrabold text-slate-800" id="essCalendarMonthLabel">July 2026</span></div>
+                    </div>
+                    <div class="grid grid-cols-7 gap-2 text-center text-xs font-bold text-slate-500 mb-2">
+                        <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                    </div>
+                    <div class="grid grid-cols-7 gap-2" id="essCalendarGrid">
+                        <!-- Calendar cells generated by JS -->
                     </div>
                 </div>
             </div>
@@ -222,48 +306,28 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <div class="bg-gradient-to-br from-green-50 to-emerald-50 p-6 rounded-lg">
                             <p class="text-sm text-gray-600 font-semibold mb-1">Gross Salary</p>
-                            <p class="text-4xl font-bold text-green-600">₱35,000</p>
+                            <p class="text-4xl font-bold text-green-600" id="essPayroll-gross">₱35,000</p>
                             <p class="text-xs text-gray-600 mt-2">Monthly Base</p>
                         </div>
                         <div class="bg-gradient-to-br from-red-50 to-orange-50 p-6 rounded-lg">
                             <p class="text-sm text-gray-600 font-semibold mb-1">Total Deductions</p>
-                            <p class="text-4xl font-bold text-red-600">₱5,985</p>
+                            <p class="text-4xl font-bold text-red-600" id="essPayroll-deductions">₱5,985</p>
                             <p class="text-xs text-gray-600 mt-2">SSS, PhilHealth, Tax, etc.</p>
                         </div>
                         <div class="bg-gradient-to-br from-blue-50 to-indigo-50 p-6 rounded-lg">
                             <p class="text-sm text-gray-600 font-semibold mb-1">Net Pay</p>
-                            <p class="text-4xl font-bold text-blue-600">₱29,015</p>
+                            <p class="text-4xl font-bold text-blue-600" id="essPayroll-net">₱29,015</p>
                             <p class="text-xs text-gray-600 mt-2">Take-home</p>
                         </div>
                     </div>
 
                     <h3 class="font-bold text-lg text-gray-900 mb-4">Recent Payslips</h3>
-                    <div class="space-y-3">
-                        <div
-                            class="bg-gray-50 p-4 rounded-lg flex justify-between items-center hover:shadow-md transition">
-                            <div>
-                                <p class="font-semibold text-gray-900">June 2026 Payslip</p>
-                                <p class="text-sm text-gray-600">Net Pay: ₱29,015</p>
-                            </div>
-                            <button onclick="downloadPayslip('june-2026')" class="btn btn-primary btn-small">
-                                <i class="fas fa-download"></i> Download
-                            </button>
-                        </div>
-                        <div
-                            class="bg-gray-50 p-4 rounded-lg flex justify-between items-center hover:shadow-md transition">
-                            <div>
-                                <p class="font-semibold text-gray-900">May 2026 Payslip</p>
-                                <p class="text-sm text-gray-600">Net Pay: ₱29,015</p>
-                            </div>
-                            <button onclick="downloadPayslip('may-2026')" class="btn btn-primary btn-small">
-                                <i class="fas fa-download"></i> Download
-                            </button>
-                        </div>
+                    <div class="space-y-3" id="essPayslipListContainer">
+                        <!-- Populated by JS -->
                     </div>
 
                     <p class="text-sm text-gray-600 mt-6">
-                        <i class="fas fa-lock mr-2"></i> All payslips are encrypted and compliant with data privacy
-                        regulations.
+                        <i class="fas fa-lock mr-2"></i> All payslips are encrypted and compliant with data privacy regulations.
                     </p>
                 </div>
             </div>
@@ -350,70 +414,45 @@
                                 </div>
                             </div>
 
-                            <!-- Medical Certificate Attachment Form (Shown dynamically for sick leave >= 2 days) -->
-                            <div id="medCertAttachmentGroup"
-                                class="hidden form-group mb-4 p-4 bg-amber-50 border border-amber-200 rounded-xl space-y-2">
-                                <label
-                                    class="block font-bold text-amber-950 text-xs uppercase tracking-wider flex items-center gap-1.5"><i
-                                        class="fas fa-file-prescription text-amber-600"></i> Medical Certificate
-                                    Required *</label>
-                                <p class="text-[10px] text-slate-500 leading-normal">
-                                    In accordance with Article VI: Benefits of the School Employee Manual, a Medical
-                                    Certificate is required for sick leave lasting two (2) days or more.
-                                </p>
-                                <input type="file" id="medCertFile"
-                                    class="text-xs w-full cursor-pointer bg-white border rounded-lg p-2 focus:outline-none focus:border-amber-400">
+                            <div class="form-group">
+                                <label>Formal Narrative Reason & Cover Arrangement *</label>
+                                <textarea id="leaveReason" rows="4" required oninput="onLeaveFieldChange()"
+                                    placeholder="Please provide details of your request and indicate who will assume your teaching duties during your absence..."></textarea>
                             </div>
 
-                            <div class="form-group mb-4">
-                                <label class="block font-semibold text-gray-700 mb-1 flex justify-between items-center">
-                                    <span>Reason for Leave *</span>
-                                    <span class="text-xs text-blue-600 font-normal"><i
-                                            class="fas fa-magic mr-1"></i>Pre-generated formal options available
-                                        below</span>
-                                </label>
-                                <select id="presetFormalReason" onchange="applyPresetReason()"
-                                    class="w-full p-2.5 mb-2 border border-blue-200 rounded-lg text-sm bg-blue-50 text-blue-900 font-semibold focus:outline-none focus:ring-2 focus:ring-blue-500">
-                                    <option value="">Select a Formal Pre-Generated Reason to auto-fill...</option>
-                                    <option
-                                        value="Attending to urgent personal family welfare matters and domestic obligations in accordance with institutional leave provisions.">
-                                        Personal & Family Welfare: Urgent personal family matters & domestic
-                                        obligations.</option>
-                                    <option
-                                        value="Required medical consultation, health recoupment, and prescribed rest under medical advisory.">
-                                        Medical & Health Recoupment: Medical consultation & prescribed rest.</option>
-                                    <option
-                                        value="Participation in official educational seminars, DepEd K-12 teacher training workshops, and professional development courses.">
-                                        Professional Development: DepEd seminars & teacher training workshops.</option>
-                                    <option
-                                        value="Addressing an unexpected critical family emergency requiring immediate physical presence and domestic coordination.">
-                                        Emergency Family Obligation: Unexpected family emergency & coordination.
-                                    </option>
-                                    <option
-                                        value="Fulfilling academic requirements, graduate studies examinations, and research defense commitments.">
-                                        Academic & Higher Studies: Graduate school exams & research defense.</option>
-                                </select>
-                                <textarea id="leaveReason" rows="3" required
-                                    placeholder="Select a pre-generated formal reason above or edit/type your custom reason here..."
-                                    class="w-full p-3 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+                            <!-- File upload for medical cert if sick leave -->
+                            <div class="form-group hidden bg-rose-50/20 border border-dashed border-rose-250 p-4 rounded-xl mb-4" id="medCertAttachmentGroup">
+                                <label class="block font-bold text-xs uppercase tracking-wider text-rose-800 mb-1 flex items-center gap-1.5"><i class="fas fa-file-medical"></i> Medical Certificate Attachment Required *</label>
+                                <p class="text-[10px] text-rose-700 mb-3">SAGA Faculty manual Article VI: Sick leave requests for 2 or more days require a licensed physician medical clearance certificate.</p>
+                                <input type="file" id="medCertFile" class="text-xs text-slate-500 file:mr-4 file:py-1.5 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-rose-100 file:text-rose-800 hover:file:bg-rose-200">
                             </div>
 
-                            <div class="flex flex-wrap gap-3">
-                                <button type="submit" class="btn btn-success flex-1">
-                                    <i class="fas fa-check-circle"></i> Submit Request to HR
-                                </button>
-                                <button type="button" onclick="generateLeaveDocTemplate()"
-                                    class="btn btn-outline flex-1">
-                                    <i class="fas fa-file-signature text-blue-600"></i> Generate & Route Formal Letter
-                                </button>
-                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">
+                                <i class="fas fa-paper-plane"></i> File Formal Leave Request
+                            </button>
                         </form>
                     </div>
 
                     <!-- Leave History -->
-                    <h3 class="font-bold text-lg text-gray-900 mb-4">Leave Request History</h3>
-                    <div id="leaveHistoryContainer" class="space-y-3">
-                        <p class="text-gray-600">No leave requests yet.</p>
+                    <h3 class="font-bold text-lg text-gray-900 mb-4">Your Filed Leave Requests</h3>
+                    <div class="table-responsive">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Leave ID</th>
+                                    <th>Leave Type</th>
+                                    <th>Duration</th>
+                                    <th>Period</th>
+                                    <th>Reason / Covering Staff</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaveHistoryTableBody">
+                                <tr>
+                                    <td colspan="6" class="text-center text-gray-500 py-4">No leave requests filed.</td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
@@ -422,7 +461,7 @@
             <div id="tab-timekeeping" class="tab-content hidden space-y-6">
                 <div class="card p-6">
                     <h2 class="section-title">
-                        <i class="fas fa-id-card"></i> IoT-RFID Timekeeping & Attendance
+                        <i class="fas fa-clock text-purple-600"></i> IoT-RFID Timekeeping & Attendance
                     </h2>
 
                     <!-- Time In/Out Buttons -->
@@ -447,17 +486,62 @@
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
                         <div class="bg-blue-50 p-6 rounded-lg">
                             <p class="text-sm text-gray-600 font-semibold mb-2">Days Worked (This Month)</p>
-                            <p class="text-3xl font-bold text-blue-600">18</p>
+                            <p class="text-3xl font-bold text-blue-600" id="essStats-daysWorked">0</p>
                         </div>
                         <div class="bg-yellow-50 p-6 rounded-lg">
                             <p class="text-sm text-gray-600 font-semibold mb-2">Lates (This Month)</p>
-                            <p class="text-3xl font-bold text-yellow-600">2</p>
+                            <p class="text-3xl font-bold text-yellow-600" id="essStats-lates">0</p>
                         </div>
                         <div class="bg-red-50 p-6 rounded-lg">
                             <p class="text-sm text-gray-600 font-semibold mb-2">Absences (This Month)</p>
-                            <p class="text-3xl font-bold text-red-600">0</p>
+                            <p class="text-3xl font-bold text-red-600" id="essStats-absences">0</p>
                         </div>
                     </div>
+
+                    <!-- Attendance logs are linked dynamically to the main Overview Dashboard calendar grid. -->
+
+                    <!-- Overtime & Time Adjustment filings -->
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                        <!-- OT Form Card -->
+                        <div class="card p-6 border rounded-2xl bg-gray-50">
+                            <h3 class="font-bold text-sm text-slate-900 mb-3 flex items-center gap-1.5"><i class="fas fa-history text-emerald-600"></i> Overtime (OT) Application</h3>
+                            <form id="otApplicationForm" onsubmit="submitOTForm(event)" class="text-xs font-semibold text-slate-700 space-y-3">
+                                <div>
+                                    <label class="block mb-1">OT Date *</label>
+                                    <input type="date" id="otDate" required class="w-full p-2 border rounded-xl bg-white text-slate-800 focus:ring-2 focus:ring-amber-500">
+                                </div>
+                                <div>
+                                    <label class="block mb-1">OT Hours Requested *</label>
+                                    <input type="number" step="0.5" min="0.5" max="8" id="otHours" required placeholder="e.g. 2.0" class="w-full p-2 border rounded-xl bg-white text-slate-800 focus:ring-2 focus:ring-amber-500">
+                                </div>
+                                <div>
+                                    <label class="block mb-1">Reason / Task Description *</label>
+                                    <textarea id="otReason" rows="2" placeholder="Describe grading, research, or advising activities..." required class="w-full p-2 border rounded-xl bg-white text-slate-800 focus:ring-2 focus:ring-amber-500"></textarea>
+                                </div>
+                                <button type="submit" class="w-full py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow-sm transition-all border-none cursor-pointer"><i class="fas fa-paper-plane mr-1.5"></i> File Overtime</button>
+                            </form>
+                        </div>
+
+                        <!-- Time Adjustment Card -->
+                        <div class="card p-6 border rounded-2xl bg-gray-50">
+                            <h3 class="font-bold text-sm text-slate-900 mb-3 flex items-center gap-1.5"><i class="fas fa-tools text-amber-500"></i> Late Time Adjustment Request</h3>
+                            <form id="timeAdjustmentForm" onsubmit="submitAdjustmentForm(event)" class="text-xs font-semibold text-slate-700 space-y-3">
+                                <div>
+                                    <label class="block mb-1">Late Attendance Date *</label>
+                                    <input type="date" id="adjDate" required class="w-full p-2 border rounded-xl bg-white text-slate-800 focus:ring-2 focus:ring-amber-500">
+                                </div>
+                                <div>
+                                    <label class="block mb-1">Requested Time In *</label>
+                                    <input type="text" id="adjTime" placeholder="e.g. 07:25 AM" required class="w-full p-2 border rounded-xl bg-white text-slate-800 focus:ring-2 focus:ring-amber-500">
+                                </div>
+                                <div>
+                                    <label class="block mb-1">Valid Reason for Adjustment *</label>
+                                    <textarea id="adjReason" rows="2" placeholder="State reason (e.g. LRT malfunction delays, storm travel)..." required class="w-full p-2 border rounded-xl bg-white text-slate-800 focus:ring-2 focus:ring-amber-500"></textarea>
+                                </div>
+                                <button type="submit" class="w-full py-2 bg-amber-500 hover:bg-amber-600 text-slate-950 rounded-xl font-extrabold shadow-sm transition-all border-none cursor-pointer"><i class="fas fa-paper-plane mr-1.5"></i> Submit Adjustment</button>
+                             </form>
+                         </div>
+                     </div>
 
                     <!-- Recent Attendance Logs -->
                     <h3 class="font-bold text-lg text-gray-900 mb-4">Recent Attendance Logs (Last 10 Days)</h3>
@@ -474,17 +558,60 @@
                             </thead>
                             <tbody id="attendanceTableBody">
                                 <tr>
-                                    <td colspan="5" class="text-center text-gray-500 py-4">No records yet. Start
-                                        recording time entries.</td>
+                                    <td colspan="5" class="text-center text-gray-500 py-4">No records yet.</td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
 
                     <p class="text-sm text-gray-600 mt-6">
-                        <i class="fas fa-shield-alt mr-2"></i> All time entries are tamper-resistant and stored securely
-                        per company policy.
+                        <i class="fas fa-shield-alt mr-2"></i> All time entries are tamper-resistant and stored securely per company policy.
                     </p>
+                </div>
+            </div>
+
+            <!-- Tab: Employee Policies -->
+            <div id="tab-policies" class="tab-content hidden space-y-6">
+                <div class="card p-6">
+                    <h2 class="section-title flex items-center gap-2"><i class="fas fa-book-open text-indigo-500"></i> St. Aloysius Gonzaga Academy Faculty Policies</h2>
+                    <p class="text-xs text-gray-500 mb-6">Review the institutional rules, leave allowances, benefits, and conduct codes governing all employees.</p>
+
+                    <div class="space-y-6 text-xs text-slate-700 leading-relaxed font-semibold">
+                        <!-- Policy Block 1: Leave -->
+                        <div class="p-5 border border-slate-200/80 rounded-2xl bg-slate-50 space-y-2 shadow-xs">
+                            <h3 class="font-extrabold text-sm text-slate-900 flex items-center gap-1.5"><i class="fas fa-calendar-check text-blue-500"></i> 1. Leave Filing Policies</h3>
+                            <p>St. Aloysius Gonzaga Academy supports employee wellness and professional advancement with the following policies:</p>
+                            <ul class="list-disc pl-5 space-y-1.5 mt-1.5">
+                                <li><strong>Vacation Leave (VL):</strong> Full-time academic faculty receive fifteen (15) VL credits per year. Prior approval (at least 3 days in advance) from the Department Chair is mandatory, except for seminars.</li>
+                                <li><strong>Sick Leave (SL):</strong> Employees receive five (5) paid sick leave credits annually. Absences extending beyond 2 consecutive days require a signed Medical Certificate verified by the school clinic.</li>
+                                <li><strong>Emergency Leave (EL):</strong> Five (5) emergency leave credits are provided for domestic emergencies, critical illness in the immediate family, or severe weather conditions.</li>
+                                <li><strong>Maternity & Paternity Leave:</strong> In full compliance with SSS Republic Act 11210, mothers receive 105 days paid leave. Fathers receive 7 days paid leave.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Policy Block 2: Benefits -->
+                        <div class="p-5 border border-slate-200/80 rounded-2xl bg-slate-50 space-y-2 shadow-xs">
+                            <h3 class="font-extrabold text-sm text-slate-900 flex items-center gap-1.5"><i class="fas fa-gift text-emerald-500"></i> 2. Statutory & Institutional Benefits</h3>
+                            <p>SAGA matches all national benefits and adds institutional support:</p>
+                            <ul class="list-disc pl-5 space-y-1.5 mt-1.5">
+                                <li><strong>13th Month Pay:</strong> Disbursed in full during the second week of December, computed in accordance with Presidential Decree No. 851.</li>
+                                <li><strong>Social Security, PhilHealth, and HDMF (Pag-IBIG):</strong> Regular monthly remittances are split between school share and employee deductions per standard guidelines.</li>
+                                <li><strong>PRC LET Seminars:</strong> The school provides full subsidy for mandatory Continuing Professional Development (CPD) points required for license renewal.</li>
+                                <li><strong>Tuition Discount:</strong> Legitimate children of regular faculty members receive a 75% tuition fee waiver at Gonzaga Academy.</li>
+                            </ul>
+                        </div>
+
+                        <!-- Policy Block 3: Attendance & Lates -->
+                        <div class="p-5 border border-slate-200/80 rounded-2xl bg-slate-50 space-y-2 shadow-xs">
+                            <h3 class="font-extrabold text-sm text-slate-900 flex items-center gap-1.5"><i class="fas fa-clock text-amber-500"></i> 3. Timekeeping & Tardiness Guidelines</h3>
+                            <p>To ensure standard lesson delivery, strict timekeeping compliance is monitored:</p>
+                            <ul class="list-disc pl-5 space-y-1.5 mt-1.5">
+                                <li><strong>Daily Shift:</strong> The standard academic shift is 7:30 AM to 4:30 PM. Clock-in logs captured after 7:30 AM are automatically flagged as tardy.</li>
+                                <li><strong>Late Penalties:</strong> Late clock-ins reduce the net pay, calculated using the formula: <code>Late Minutes * Minute Rate</code> based on base salary.</li>
+                                <li><strong>Written Warnings:</strong> Accumulating three (3) late clock-ins in a single payroll cycle triggers a formal warning memo. Continued tardiness leads to disciplinary conferences.</li>
+                            </ul>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -650,6 +777,25 @@
         </div>
     </div>
 
+    <!-- Printable Payslip Modal -->
+    <div id="essPayslipModal" class="modal-overlay">
+        <div class="modal max-w-xl">
+            <div class="modal-header bg-slate-900 text-white rounded-t-lg px-6 py-4 flex justify-between items-center print:hidden">
+                <h2 class="modal-title text-white text-lg font-bold flex items-center gap-2">
+                    <i class="fas fa-file-invoice-dollar text-emerald-400"></i> Official Faculty Pay Advice
+                </h2>
+                <button onclick="closeESSPayslipModal()" class="text-gray-400 hover:text-white text-2xl font-bold border-none bg-transparent cursor-pointer">&times;</button>
+            </div>
+            <div class="modal-body p-6 bg-white" id="essPayslipPrintArea">
+                <!-- Populated dynamically by JS -->
+            </div>
+            <div class="modal-footer bg-gray-50 p-4 rounded-b-lg border-t flex justify-end gap-3 print:hidden">
+                <button onclick="closeESSPayslipModal()" class="px-4 py-2 border rounded-xl text-xs font-bold bg-white text-slate-700 hover:bg-slate-100 transition-all cursor-pointer">Close</button>
+                <button onclick="printPayslipDoc()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-bold shadow-md transition-all flex items-center gap-1.5 cursor-pointer"><i class="fas fa-print"></i> Print Payslip</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-gray-900 text-gray-300 py-8">
         <div class="max-w-7xl mx-auto px-4 text-center">
@@ -760,6 +906,9 @@
             loadESSDocumentList();
             renderContractIntentSubTab();
             renderClearanceSubTab();
+            renderESSInbox();
+            loadESSPayslips();
+            renderESSCalendar();
 
             // Attach live template auto-update listeners to form fields
             ['leaveType', 'leaveDays', 'leaveFromDate', 'leaveToDate', 'leaveReason'].forEach(id => {
@@ -977,13 +1126,23 @@
                     ((new Date(times.out) - new Date(times.in)) / 3600000).toFixed(2) :
                     '--';
 
+                let rowStatus = '<span class="badge badge-active">Present</span>';
+                if (times.in) {
+                    const clockTime = new Date(times.in);
+                    const h = clockTime.getHours();
+                    const m = clockTime.getMinutes();
+                    if (h > 7 || (h === 7 && m > 30)) {
+                        rowStatus = '<span class="badge badge-warning" style="background-color:#FEF3C7; color:#92400E; border:1px solid #FCD34D;">Late</span>';
+                    }
+                }
+
                 return `
                     <tr>
                         <td>${date}</td>
                         <td><span class="text-green-600 font-semibold">${timeIn}</span></td>
                         <td><span class="text-red-600 font-semibold">${timeOut}</span></td>
                         <td>${hoursWorked}</td>
-                        <td><span class="badge badge-active">Present</span></td>
+                        <td>${rowStatus}</td>
                     </tr>
                 `;
             }).join('');
@@ -995,6 +1154,41 @@
             } else if (lastLog.type === 'out') {
                 document.getElementById('lastTimeOut').textContent = SAGA.formatTime(lastLog.timestamp);
             }
+
+            // Recalculate metrics dynamically
+            let daysWorkedThisMonth = 0;
+            let latesThisMonth = 0;
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const currentMonth = now.getMonth();
+
+            const fullLogs = SAGA.getAttendanceLogs(currentEmployee.id, 60);
+            const daysSet = new Set();
+            
+            fullLogs.forEach(log => {
+                const logDate = new Date(log.timestamp);
+                if (logDate.getFullYear() === currentYear && logDate.getMonth() === currentMonth) {
+                    daysSet.add(log.date);
+                    if (log.type === 'in') {
+                        const hours = logDate.getHours();
+                        const minutes = logDate.getMinutes();
+                        if (hours > 7 || (hours === 7 && minutes > 30)) {
+                            latesThisMonth++;
+                        }
+                    }
+                }
+            });
+            
+            daysWorkedThisMonth = daysSet.size;
+            const absencesThisMonth = currentEmployee.attendanceMetrics?.absencesCount || 0;
+
+            const daysWorkedEl = document.getElementById('essStats-daysWorked');
+            const latesEl = document.getElementById('essStats-lates');
+            const absencesEl = document.getElementById('essStats-absences');
+
+            if (daysWorkedEl) daysWorkedEl.textContent = daysWorkedThisMonth;
+            if (latesEl) latesEl.textContent = latesThisMonth;
+            if (absencesEl) absencesEl.textContent = absencesThisMonth;
         }
 
         function updateLeaveBalance() {
@@ -2020,6 +2214,368 @@ Generated: ${new Date().toLocaleString()}
                 border-bottom-color: #3B82F6;
             }
         `;
+        function renderESSInbox() {
+            const inbox = document.getElementById('essInboxList');
+            if (!inbox) return;
+
+            const memos = currentEmployee.memos || [];
+            if (memos.length === 0) {
+                inbox.innerHTML = `<p class="text-xs text-gray-400 italic">Your inbox is clear. No institutional notices or memos.</p>`;
+                return;
+            }
+
+            inbox.innerHTML = memos.map(memo => {
+                const badge = memo.acknowledged
+                    ? `<span class="px-2.5 py-0.5 text-[9px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-full uppercase"><i class="fas fa-check"></i> Acknowledged</span>`
+                    : `<span class="px-2.5 py-0.5 text-[9px] font-extrabold bg-rose-100 text-rose-800 border border-rose-300 rounded-full uppercase tracking-wider animate-pulse">Required Action</span>`;
+
+                return `
+                    <div class="p-4 border ${memo.acknowledged ? 'bg-slate-50/50 border-slate-200' : 'bg-rose-50/20 border-rose-200'} rounded-2xl space-y-3">
+                        <div class="flex justify-between items-start gap-4">
+                            <div>
+                                <h4 class="font-extrabold text-slate-900 text-sm">${memo.title}</h4>
+                                <p class="text-[10px] text-slate-400 font-semibold mt-0.5">Issued: ${SAGA.formatDate(memo.date)} • HR Administration Office</p>
+                            </div>
+                            ${badge}
+                        </div>
+                        <div class="text-xs text-slate-700 leading-relaxed font-medium bg-white p-3 border rounded-xl whitespace-pre-wrap">
+                            ${memo.content}
+                        </div>
+                        ${!memo.acknowledged ? `
+                            <div class="flex justify-end pt-1">
+                                <button onclick="acknowledgeMemoClick('${memo.id}')" class="px-4 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-xl text-[10px] font-bold shadow-sm transition border-none cursor-pointer">
+                                    <i class="fas fa-signature mr-1"></i> Acknowledge Receipt
+                                </button>
+                            </div>
+                        ` : `
+                            <p class="text-[10px] text-slate-400 font-semibold italic text-right">Acknowledged on ${SAGA.formatDate(memo.acknowledgedDate)}</p>
+                        `}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        window.acknowledgeMemoClick = function(memoId) {
+            if (confirm('Verify Acknowledgment: Clicking OK verifies that you have read and understood the warning memo issued by HR.')) {
+                const emp = SAGA.acknowledgeMemo(currentEmployee.id, memoId);
+                if (emp) {
+                    currentEmployee = emp;
+                    renderESSInbox();
+                    alert('Memo acknowledgment registered.');
+                }
+            }
+        }
+
+        function loadESSPayslips() {
+            const pay = SAGA.generatePayslip(currentEmployee.id);
+            const container = document.getElementById('essPayslipListContainer');
+            if (!container || !pay) return;
+
+            const grossEl = document.getElementById('essPayroll-gross');
+            const dedEl = document.getElementById('essPayroll-deductions');
+            const netEl = document.getElementById('essPayroll-net');
+
+            if (grossEl) grossEl.textContent = '₱' + (pay.grossSalary + pay.otPay).toLocaleString();
+            if (dedEl) dedEl.textContent = '₱' + pay.totalDeductions.toLocaleString();
+            if (netEl) netEl.textContent = '₱' + pay.netPay.toLocaleString();
+
+            container.innerHTML = `
+                <div class="bg-gray-50 p-4 rounded-xl flex justify-between items-center hover:shadow-md transition">
+                    <div>
+                        <p class="font-extrabold text-gray-900">Payroll Period: July 1-15, 2026 (J1)</p>
+                        <p class="text-xs text-gray-600">Net Pay: ₱${pay.netPay.toLocaleString()} • Status: Disbursed</p>
+                    </div>
+                    <div class="flex gap-2">
+                        <button onclick="previewESSPayslip()" class="btn btn-primary btn-small bg-blue-600 border-none font-bold text-white text-xs py-1.5 px-3 rounded-lg cursor-pointer">
+                            <i class="fas fa-file-invoice-dollar"></i> View & Print
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-gray-50 p-4 rounded-xl flex justify-between items-center opacity-70">
+                    <div>
+                        <p class="font-bold text-gray-700">Payroll Period: June 15-30, 2026 (J2)</p>
+                        <p class="text-xs text-gray-500">Net Pay: ₱${(pay.grossSalary - pay.totalDeductions + pay.deductions.lateDeduction).toLocaleString()} • Status: Paid</p>
+                    </div>
+                    <span class="text-xs font-bold text-slate-400 italic">Archived</span>
+                </div>
+            `;
+        }
+
+        window.previewESSPayslip = function() {
+            const pay = SAGA.generatePayslip(currentEmployee.id);
+            const printArea = document.getElementById('essPayslipPrintArea');
+            if (!pay || !printArea) return;
+
+            printArea.innerHTML = `
+                <div class="space-y-6 max-w-xl mx-auto p-4 border border-slate-300 rounded-2xl bg-white font-sans text-slate-800 text-xs">
+                    <div class="text-center border-b pb-4">
+                        <div class="w-12 h-12 rounded-xl bg-slate-900 border border-amber-400 flex items-center justify-center p-1 mx-auto mb-2">
+                            <img src="assets/school_logo.png" alt="SAGA Emblem" class="w-full h-full object-contain">
+                        </div>
+                        <h3 class="font-extrabold text-sm text-slate-900">St. Aloysius Gonzaga Academy, Inc.</h3>
+                        <p class="text-[9px] text-slate-500 uppercase tracking-widest">Institutional Disbursement and Ledger Office</p>
+                        <p class="text-[10px] text-amber-600 font-bold mt-1">Official Electronic Pay Advice</p>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4 border-b pb-3.5">
+                        <div>
+                            <p class="text-slate-400">Employee ID / Code:</p>
+                            <p class="font-bold text-slate-900">${currentEmployee.id}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400">Employee Name:</p>
+                            <p class="font-bold text-slate-900">${currentEmployee.name}</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400">Payment Period:</p>
+                            <p class="font-bold text-slate-900">July 1-15, 2026 (J1)</p>
+                        </div>
+                        <div>
+                            <p class="text-slate-400">Bank Disbursement Date:</p>
+                            <p class="font-bold text-slate-900">${SAGA.formatDate(pay.paymentDate)}</p>
+                        </div>
+                    </div>
+
+                    <div class="space-y-3">
+                        <div class="flex justify-between font-bold text-slate-900 text-sm pb-1.5 border-b">
+                            <span>Earning Elements</span>
+                            <span>Amount (PHP)</span>
+                        </div>
+                        <div class="flex justify-between font-semibold">
+                            <span class="text-slate-500">Base Salary Package</span>
+                            <span class="text-slate-900">₱${pay.grossSalary.toLocaleString()}.00</span>
+                        </div>
+                        <div class="flex justify-between font-semibold">
+                            <span class="text-slate-500">Overtime Loading Allowance (${pay.approvedOtHours || 0} hrs)</span>
+                            <span class="text-slate-900">₱${pay.otPay.toLocaleString()}.00</span>
+                        </div>
+                        <div class="flex justify-between font-bold bg-slate-50 p-2 rounded">
+                            <span>Gross Earnings Total</span>
+                            <span>₱${(pay.grossSalary + pay.otPay).toLocaleString()}.00</span>
+                        </div>
+                    </div>
+
+                    <div class="space-y-2 pt-2">
+                        <div class="flex justify-between font-bold text-slate-900 text-sm pb-1.5 border-b">
+                            <span>Deduction Elements</span>
+                            <span>Amount (PHP)</span>
+                        </div>
+                        <div class="flex justify-between font-semibold">
+                            <span class="text-slate-500">SSS Contribution (4.5%)</span>
+                            <span class="text-slate-900">- ₱${pay.deductions.sss.toLocaleString()}.00</span>
+                        </div>
+                        <div class="flex justify-between font-semibold">
+                            <span class="text-slate-500">PhilHealth Contribution (2.5%)</span>
+                            <span class="text-slate-900">- ₱${pay.deductions.philhealth.toLocaleString()}.00</span>
+                        </div>
+                        <div class="flex justify-between font-semibold">
+                            <span class="text-slate-500">HDMF Pag-IBIG Share</span>
+                            <span class="text-slate-900">- ₱${pay.deductions.pagibig.toLocaleString()}.00</span>
+                        </div>
+                        <div class="flex justify-between font-semibold">
+                            <span class="text-slate-500">Withholding Tax Allocation</span>
+                            <span class="text-slate-900">- ₱${pay.deductions.tax.toLocaleString()}.00</span>
+                        </div>
+                        <div class="flex justify-between font-semibold">
+                            <span class="text-slate-500">Attendance Late Penalties (${pay.deductions.lateMinutes} mins)</span>
+                            <span class="text-rose-600 font-bold">- ₱${pay.deductions.lateDeduction.toLocaleString()}.00</span>
+                        </div>
+                        <div class="flex justify-between font-semibold">
+                            <span class="text-slate-500">Unexcused Absences (${pay.deductions.absencesCount} days)</span>
+                            <span class="text-rose-650">- ₱${pay.deductions.absenceDeduction.toLocaleString()}.00</span>
+                        </div>
+                        <div class="flex justify-between font-bold bg-slate-50 p-2 rounded">
+                            <span>Deductions Allocation Total</span>
+                            <span>₱${pay.totalDeductions.toLocaleString()}.00</span>
+                        </div>
+                    </div>
+
+                    <div class="p-3 bg-emerald-50 border border-emerald-250/50 rounded-xl flex justify-between items-center text-sm">
+                        <span class="font-extrabold text-slate-800">NET DISBURSEMENT PAYOUT</span>
+                        <span class="font-extrabold text-emerald-700 text-lg">₱${pay.netPay.toLocaleString()}.00</span>
+                    </div>
+
+                    <div class="text-[9px] text-slate-400 text-center leading-relaxed">
+                        System authenticated payslip advice receipt. Verification ID: SEC-ESS-${currentEmployee.id}-advice.
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('essPayslipModal').classList.add('active');
+        }
+
+        window.closeESSPayslipModal = function() {
+            document.getElementById('essPayslipModal').classList.remove('active');
+        }
+
+        window.printPayslipDoc = function() {
+            window.print();
+        }
+
+        function renderESSCalendar() {
+            const grid = document.getElementById('essCalendarGrid');
+            if (!grid) return;
+
+            const now = new Date();
+            const year = 2026;
+            const month = 6; // July
+            
+            const firstDayIndex = 3; 
+            const daysInMonth = 31;
+
+            let html = '';
+            for (let i = 0; i < firstDayIndex; i++) {
+                html += `<div class="bg-slate-50 border border-slate-100 rounded-xl min-h-[75px] opacity-30"></div>`;
+            }
+
+            const data = SAGA.getData();
+            const logs = data.attendanceLogs[currentEmployee.id] || [];
+            const leaves = data.leaveRequests || [];
+            const approvedLeaves = leaves.filter(l => l.employeeId === currentEmployee.id && l.status === 'approved');
+
+            const todayDay = (now.getFullYear() === year && now.getMonth() === month) ? now.getDate() : 31;
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dateObj = new Date(year, month, d);
+                const dayOfWeek = dateObj.getDay();
+                const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+
+                let cellBg = 'bg-slate-50 border-slate-200 text-slate-800';
+                let badgeColor = 'bg-slate-200 text-slate-600';
+                let statusLabel = 'Absent / Unlogged';
+                let dayStatus = 'absent';
+                let timeIn = '';
+                let timeOut = '';
+
+                // Check approved leaves
+                const isOnLeave = approvedLeaves.some(l => {
+                    const from = new Date(l.fromDate);
+                    const to = new Date(l.toDate);
+                    return dateObj >= from && dateObj <= to;
+                });
+
+                if (isOnLeave) {
+                    dayStatus = 'leave';
+                } else if (d <= todayDay && !isWeekend) {
+                    const targetDateStr = dateObj.toLocaleDateString();
+                    const dailyLogs = logs.filter(l => l.date === targetDateStr || l.timestamp.startsWith(`7/${d}/2026`) || l.timestamp.startsWith(`07/${d}/2026`) || (l.timestamp.includes(`/07/2026`) && l.timestamp.split('/')[1] == d));
+                    const checkIn = dailyLogs.find(l => l.type === 'in' || l.direction === 'in');
+                    const checkOut = dailyLogs.find(l => l.type === 'out' || l.direction === 'out');
+
+                    if (checkIn) {
+                        timeIn = checkIn.timeOnly || (checkIn.timestamp.split(' ')[1] + ' ' + (checkIn.timestamp.split(' ')[2] || ''));
+                        if (checkIn.timestamp.includes('T')) {
+                            const dateParsed = new Date(checkIn.timestamp);
+                            timeIn = dateParsed.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                        }
+                        
+                        dayStatus = checkIn.status || 'present';
+                        if (!checkIn.status) {
+                            const dateParsed = new Date(checkIn.timestamp);
+                            const h = dateParsed.getHours();
+                            const m = dateParsed.getMinutes();
+                            if (h > 7 || (h === 7 && m > 30)) {
+                                dayStatus = 'late';
+                            } else {
+                                dayStatus = 'present';
+                            }
+                        }
+                    }
+                    if (checkOut) {
+                        timeOut = checkOut.timeOnly || (checkOut.timestamp.split(' ')[1] + ' ' + (checkOut.timestamp.split(' ')[2] || ''));
+                        if (checkOut.timestamp.includes('T')) {
+                            const dateParsed = new Date(checkOut.timestamp);
+                            timeOut = dateParsed.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                        }
+                    }
+                } else if (isWeekend) {
+                    dayStatus = 'weekend';
+                }
+
+                if (dayStatus === 'present') {
+                    cellBg = 'bg-emerald-50/75 border-emerald-250 text-emerald-900 hover:bg-emerald-100/80';
+                    badgeColor = 'bg-emerald-200 text-emerald-800';
+                    statusLabel = 'Present';
+                } else if (dayStatus === 'late') {
+                    cellBg = 'bg-yellow-50/75 border-yellow-250 text-yellow-900 hover:bg-yellow-100/80';
+                    badgeColor = 'bg-yellow-200 text-yellow-800';
+                    statusLabel = 'Late';
+                } else if (dayStatus === 'leave') {
+                    cellBg = 'bg-rose-50/70 border-rose-250 text-rose-900 hover:bg-rose-100/80';
+                    badgeColor = 'bg-rose-200 text-rose-800';
+                    statusLabel = 'Leave';
+                } else if (dayStatus === 'weekend') {
+                    cellBg = 'bg-slate-100/50 border-slate-200 text-slate-400 font-normal';
+                    badgeColor = 'bg-slate-200 text-slate-500';
+                    statusLabel = 'Weekend';
+                } else {
+                    cellBg = 'bg-rose-50/70 border-rose-250 text-rose-900 hover:bg-rose-100/80';
+                    badgeColor = 'bg-rose-200 text-rose-800';
+                    statusLabel = 'Absent';
+                }
+
+                html += `
+                    <div class="border rounded-xl p-2 min-h-[75px] text-left flex flex-col justify-between transition-all ${cellBg} shadow-xs hover:-translate-y-0.5">
+                        <div class="flex justify-between items-start w-full">
+                            <span class="font-extrabold text-xs">${d}</span>
+                            <span class="px-1.5 py-0.5 text-[8px] font-extrabold rounded-md uppercase tracking-wider ${badgeColor}">${statusLabel}</span>
+                        </div>
+                        <div class="text-[9px] font-medium space-y-0.5 mt-1.5">
+                            ${timeIn ? `<div class="text-slate-600"><i class="fas fa-sign-in-alt text-[7px] text-emerald-500 mr-0.5"></i> ${timeIn}</div>` : ''}
+                            ${timeOut ? `<div class="text-slate-600"><i class="fas fa-sign-out-alt text-[7px] text-rose-450 mr-0.5"></i> ${timeOut}</div>` : ''}
+                            ${!timeIn && !timeOut && dayStatus !== 'weekend' ? `<div class="text-slate-400 italic">${statusLabel}</div>` : ''}
+                        </div>
+                    </div>
+                `;
+            }
+
+            const remaining = 35 - (firstDayIndex + daysInMonth);
+            for (let i = 0; i < remaining; i++) {
+                html += `<div class="bg-slate-50 border border-slate-100 rounded-xl min-h-[75px] opacity-30"></div>`;
+            }
+
+            grid.innerHTML = html;
+        }
+
+        window.submitOTForm = function(event) {
+            event.preventDefault();
+            const date = document.getElementById('otDate').value;
+            const hours = document.getElementById('otHours').value;
+            const reason = document.getElementById('otReason').value;
+
+            if (!date || !hours || !reason) {
+                alert('Please fill out all OT fields.');
+                return;
+            }
+
+            const emp = SAGA.submitOTRequest(currentEmployee.id, { date, hours, reason });
+            if (emp) {
+                currentEmployee = emp;
+                document.getElementById('otApplicationForm').reset();
+                loadESSPayslips();
+                alert('✅ Overtime Application filed successfully! Routed to department head and payroll audit queue.');
+            }
+        }
+
+        window.submitAdjustmentForm = function(event) {
+            event.preventDefault();
+            const date = document.getElementById('adjDate').value;
+            const requestedTime = document.getElementById('adjTime').value;
+            const reason = document.getElementById('adjReason').value;
+
+            if (!date || !requestedTime || !reason) {
+                alert('Please fill out all adjustment fields.');
+                return;
+            }
+
+            const emp = SAGA.submitTimeAdjustment(currentEmployee.id, { date, requestedTime, reason });
+            if (emp) {
+                currentEmployee = emp;
+                document.getElementById('timeAdjustmentForm').reset();
+                alert('✅ Late Time Adjustment Request submitted! HR will review your transportation delay details.');
+            }
+        }
+
         // Close leave document modal on outside click
         document.getElementById('leaveDocModal').addEventListener('click', (e) => {
             if (e.target === document.getElementById('leaveDocModal')) {

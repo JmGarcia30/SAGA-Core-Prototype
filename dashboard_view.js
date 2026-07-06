@@ -143,6 +143,16 @@ function handleLogout() {
 // CORE NAVIGATION & THEMING
 // ============================================================================
 function switchNavTab(tabName) {
+    if (tabName === 'onboarding') {
+        tabName = 'employees';
+        setTimeout(() => switchEmployeeSubTab('onboarding'), 0);
+    } else if (tabName === 'applicants') {
+        tabName = 'recruitment';
+        setTimeout(() => switchRecruitmentSubTab('applicants'), 0);
+    } else if (tabName === 'memos') {
+        setTimeout(() => renderMemosTab(), 0);
+    }
+
     currentTab = tabName;
     window.location.hash = tabName;
 
@@ -165,14 +175,13 @@ function switchNavTab(tabName) {
     // Update breadcrumb
     const breadcrumbMap = {
         'overview': 'Workforce Overview',
-        'recruitment': 'Recruitment & Job Openings',
-        'applicants': 'Job Applicants (ATS)',
+        'recruitment': 'Recruitment / ATS',
         'employees': 'Employee Directory',
-        'onboarding': 'Onboarding Pipeline',
-        'attendance': 'RFID Attendance logs',
+        'attendance': 'RFID Attendance & Logs',
         'payroll': 'Payroll Hub',
-        'leave': 'Leaves approvals queue',
-        'exit': 'Exits & Separation',
+        'leave': 'Leaves & OT Queue',
+        'memos': 'Employee Warning Memos',
+        'exit': 'Contracts & Exit Clearances',
         'documents': 'Digital 201 Files',
         'analytics': 'Advanced Analytics',
         'reports': 'Report Generator',
@@ -266,27 +275,58 @@ function renderViewData(tabName) {
             initializeCharts();
             break;
         case 'recruitment':
-            renderRecruitmentJobs();
-            break;
-        case 'applicants':
-            renderApplicantsDropdowns();
-            renderApplicantsList();
+            if (document.getElementById('recruitmentSubTab-jobs').classList.contains('hidden') &&
+                document.getElementById('recruitmentSubTab-applicants').classList.contains('hidden')) {
+                switchRecruitmentSubTab('jobs');
+            } else {
+                if (!document.getElementById('recruitmentSubTab-jobs').classList.contains('hidden')) {
+                    renderRecruitmentJobs();
+                } else {
+                    renderApplicantsDropdowns();
+                    renderApplicantsList();
+                }
+            }
             break;
         case 'employees':
-            renderEmployeesFilters();
-            renderEmployeeDirectory();
-            break;
-        case 'onboarding':
-            renderOnboardingTab();
+            if (document.getElementById('employeeSubTab-roster').classList.contains('hidden') &&
+                document.getElementById('employeeSubTab-onboarding').classList.contains('hidden')) {
+                switchEmployeeSubTab('roster');
+            } else {
+                if (!document.getElementById('employeeSubTab-roster').classList.contains('hidden')) {
+                    renderEmployeesFilters();
+                    renderEmployeeDirectory();
+                } else {
+                    renderOnboardingTab();
+                }
+            }
             break;
         case 'attendance':
-            renderAttendanceTab();
+            if (document.getElementById('attendanceSubTab-logs').classList.contains('hidden') &&
+                document.getElementById('attendanceSubTab-scanner').classList.contains('hidden') &&
+                document.getElementById('attendanceSubTab-calendar').classList.contains('hidden')) {
+                switchAttendanceSubTab('logs');
+            } else {
+                if (!document.getElementById('attendanceSubTab-logs').classList.contains('hidden')) renderAttendanceTab();
+                else if (!document.getElementById('attendanceSubTab-scanner').classList.contains('hidden')) populateScannerEmployeeSelect();
+                else renderHRCalendar();
+            }
+            break;
+        case 'leave':
+            if (document.getElementById('leaveSubTab-leaves').classList.contains('hidden') &&
+                document.getElementById('leaveSubTab-ot').classList.contains('hidden') &&
+                document.getElementById('leaveSubTab-adjustments').classList.contains('hidden')) {
+                switchLeaveSubTab('leaves');
+            } else {
+                if (!document.getElementById('leaveSubTab-leaves').classList.contains('hidden')) renderLeavesQueue();
+                else if (!document.getElementById('leaveSubTab-ot').classList.contains('hidden')) renderOvertimeQueue();
+                else renderTimeAdjustmentsQueue();
+            }
+            break;
+        case 'memos':
+            renderMemosTab();
             break;
         case 'payroll':
             renderPayrollTab();
-            break;
-        case 'leave':
-            renderLeavesQueue();
             break;
         case 'exit':
             renderExitTab();
@@ -1767,6 +1807,13 @@ function renderOnboardingTab() {
             interviewer: "Search Panel"
         };
 
+        const getFileLabel = (key) => {
+            const file = (emp.documents && emp.documents.otherDocs) ? emp.documents.otherDocs.find(f => f.docType === key) : null;
+            return file 
+                ? `<span class="text-[9px] text-indigo-650 font-bold block mt-1 pl-6"><i class="fas fa-file-pdf text-red-500 mr-1"></i> File: ${file.fileName} (${new Date(file.uploadedAt).toLocaleDateString()})</span>` 
+                : `<span class="text-[9px] text-slate-400 font-medium block mt-1 pl-6 italic"><i class="fas fa-times-circle text-slate-350 mr-1"></i> Awaiting upload...</span>`;
+        };
+
         return `
             <div class="card p-6 border border-slate-200 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all space-y-4 mb-4">
                 <!-- Top Row: Profile Details -->
@@ -1790,14 +1837,14 @@ function renderOnboardingTab() {
                         </div>
                         <div class="flex items-center gap-2 w-full sm:w-auto justify-end">
                             ${!emp.rfidCardId ? `
-                                <button onclick="bindRFIDScanTarget('${emp.id}', '${emp.name}')" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all border-none"><i class="fas fa-id-card"></i> Link RFID</button>
+                                <button onclick="bindRFIDScanTarget('${emp.id}', '${emp.name}')" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all border-none cursor-pointer"><i class="fas fa-id-card"></i> Link RFID</button>
                             ` : `
                                 <div class="text-center shrink-0">
                                     <span class="px-2.5 py-1 text-[10px] bg-emerald-100 text-emerald-800 font-bold border border-emerald-200 rounded-lg flex items-center gap-1"><i class="fas fa-check-circle"></i> Card: ${emp.rfidCardId}</span>
-                                    <button onclick="bindRFIDScanTarget('${emp.id}', '${emp.name}')" class="text-[9px] text-indigo-500 font-bold hover:underline mt-1 block w-full text-center border-none bg-transparent p-0">Change Card</button>
+                                    <button onclick="bindRFIDScanTarget('${emp.id}', '${emp.name}')" class="text-[9px] text-indigo-500 font-bold hover:underline mt-1 block w-full text-center border-none bg-transparent p-0 cursor-pointer">Change Card</button>
                                 </div>
                             `}
-                            <button onclick="finalizeOnboarding('${emp.id}')" class="px-3.5 py-2 ${completedCount >= steps.length - 1 ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-none' : 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed'} text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all"><i class="fas fa-check-circle"></i> Complete Onboarding</button>
+                            <button onclick="finalizeOnboarding('${emp.id}')" class="px-3.5 py-2 ${completedCount >= steps.length - 1 ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-none cursor-pointer' : 'bg-slate-100 border border-slate-200 text-slate-400 cursor-not-allowed'} text-xs font-bold rounded-xl flex items-center gap-1.5 shadow-sm transition-all"><i class="fas fa-check-circle"></i> Complete Onboarding</button>
                         </div>
                     </div>
                 </div>
@@ -1826,51 +1873,75 @@ function renderOnboardingTab() {
                         <h5 class="font-extrabold text-xs text-slate-900 uppercase tracking-wider flex items-center gap-1.5"><i class="fas fa-folder-open text-blue-500"></i> HR Digital Document Audit & Verification</h5>
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
                             <!-- Resume toggle -->
-                            <div class="p-2.5 bg-slate-50 border border-slate-200/60 rounded-xl flex items-center justify-between font-semibold select-none">
-                                <span class="flex items-center gap-2"><i class="fas fa-file-pdf text-red-500"></i> 1. Letter & Resume CV</span>
-                                <input type="checkbox" checked disabled class="rounded border-slate-300 text-blue-600">
+                            <div class="p-2.5 bg-slate-50 border border-slate-200/60 rounded-xl flex flex-col justify-between font-semibold select-none gap-1">
+                                <div class="flex items-center justify-between w-full">
+                                    <span class="flex items-center gap-2"><i class="fas fa-file-pdf text-red-500"></i> 1. Letter & Resume CV</span>
+                                    <input type="checkbox" checked disabled class="rounded border-slate-300 text-blue-600">
+                                </div>
+                                <span class="text-[9px] text-indigo-600 font-bold block mt-1 pl-6"><i class="fas fa-file-pdf text-red-500 mr-1"></i> File: resume.pdf</span>
                             </div>
 
                             <!-- TOR -->
-                            <label class="p-2.5 ${docs.tor ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex items-center justify-between cursor-pointer font-semibold select-none transition-all">
-                                <span class="flex items-center gap-2"><i class="fas fa-graduation-cap ${docs.tor ? 'text-emerald-600' : 'text-slate-400'}"></i> 2. Academic TOR</span>
-                                <input type="checkbox" ${docs.tor ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'tor', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            <label class="p-2.5 ${docs.tor ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex flex-col justify-between cursor-pointer font-semibold select-none transition-all gap-1">
+                                <div class="flex items-center justify-between w-full">
+                                    <span class="flex items-center gap-2"><i class="fas fa-graduation-cap ${docs.tor ? 'text-emerald-600' : 'text-slate-400'}"></i> 2. Academic TOR</span>
+                                    <input type="checkbox" ${docs.tor ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'tor', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                </div>
+                                ${getFileLabel('tor')}
                             </label>
 
                             <!-- Diploma -->
-                            <label class="p-2.5 ${docs.diploma ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex items-center justify-between cursor-pointer font-semibold select-none transition-all">
-                                <span class="flex items-center gap-2"><i class="fas fa-certificate ${docs.diploma ? 'text-emerald-600' : 'text-slate-400'}"></i> 3. Photocopy of Diploma</span>
-                                <input type="checkbox" ${docs.diploma ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'diploma', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            <label class="p-2.5 ${docs.diploma ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex flex-col justify-between cursor-pointer font-semibold select-none transition-all gap-1">
+                                <div class="flex items-center justify-between w-full">
+                                    <span class="flex items-center gap-2"><i class="fas fa-certificate ${docs.diploma ? 'text-emerald-600' : 'text-slate-400'}"></i> 3. Photocopy of Diploma</span>
+                                    <input type="checkbox" ${docs.diploma ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'diploma', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                </div>
+                                ${getFileLabel('diploma')}
                             </label>
 
                             <!-- PRC License -->
-                            <label class="p-2.5 ${docs.prcLicense ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex items-center justify-between cursor-pointer font-semibold select-none transition-all">
-                                <span class="flex items-center gap-2"><i class="fas fa-id-badge ${docs.prcLicense ? 'text-emerald-600' : 'text-slate-400'}"></i> 4. PRC LET License</span>
-                                <input type="checkbox" ${docs.prcLicense ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'prcLicense', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            <label class="p-2.5 ${docs.prcLicense ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex flex-col justify-between cursor-pointer font-semibold select-none transition-all gap-1">
+                                <div class="flex items-center justify-between w-full">
+                                    <span class="flex items-center gap-2"><i class="fas fa-id-badge ${docs.prcLicense ? 'text-emerald-600' : 'text-slate-400'}"></i> 4. PRC LET License</span>
+                                    <input type="checkbox" ${docs.prcLicense ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'prcLicense', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                </div>
+                                ${getFileLabel('prcLicense')}
                             </label>
 
                             <!-- Previous Employment Cert -->
-                            <label class="p-2.5 ${docs.serviceRecord ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex items-center justify-between cursor-pointer font-semibold select-none transition-all">
-                                <span class="flex items-center gap-2"><i class="fas fa-briefcase ${docs.serviceRecord ? 'text-emerald-600' : 'text-slate-400'}"></i> 5. Previous Employment Cert</span>
-                                <input type="checkbox" ${docs.serviceRecord ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'serviceRecord', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            <label class="p-2.5 ${docs.serviceRecord ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex flex-col justify-between cursor-pointer font-semibold select-none transition-all gap-1">
+                                <div class="flex items-center justify-between w-full">
+                                    <span class="flex items-center gap-2"><i class="fas fa-briefcase ${docs.serviceRecord ? 'text-emerald-600' : 'text-slate-400'}"></i> 5. Previous Employment Cert</span>
+                                    <input type="checkbox" ${docs.serviceRecord ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'serviceRecord', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                </div>
+                                ${getFileLabel('serviceRecord')}
                             </label>
 
                             <!-- 3 Recommendation Letters -->
-                            <label class="p-2.5 ${docs.recommendations ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex items-center justify-between cursor-pointer font-semibold select-none transition-all">
-                                <span class="flex items-center gap-2"><i class="fas fa-envelope-open-text ${docs.recommendations ? 'text-emerald-600' : 'text-slate-400'}"></i> 6. 3 Recommendation Letters</span>
-                                <input type="checkbox" ${docs.recommendations ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'recommendations', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            <label class="p-2.5 ${docs.recommendations ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex flex-col justify-between cursor-pointer font-semibold select-none transition-all gap-1">
+                                <div class="flex items-center justify-between w-full">
+                                    <span class="flex items-center gap-2"><i class="fas fa-envelope-open-text ${docs.recommendations ? 'text-emerald-600' : 'text-slate-400'}"></i> 6. 3 Recommendation Letters</span>
+                                    <input type="checkbox" ${docs.recommendations ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'recommendations', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                </div>
+                                ${getFileLabel('recommendations')}
                             </label>
 
                             <!-- NBI Clearance -->
-                            <label class="p-2.5 ${docs.nbiClearance ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex items-center justify-between cursor-pointer font-semibold select-none transition-all">
-                                <span class="flex items-center gap-2"><i class="fas fa-gavel ${docs.nbiClearance ? 'text-emerald-600' : 'text-slate-400'}"></i> 7. NBI Clearance</span>
-                                <input type="checkbox" ${docs.nbiClearance ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'nbiClearance', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            <label class="p-2.5 ${docs.nbiClearance ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex flex-col justify-between cursor-pointer font-semibold select-none transition-all gap-1">
+                                <div class="flex items-center justify-between w-full">
+                                    <span class="flex items-center gap-2"><i class="fas fa-gavel ${docs.nbiClearance ? 'text-emerald-600' : 'text-slate-400'}"></i> 7. NBI Clearance</span>
+                                    <input type="checkbox" ${docs.nbiClearance ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'nbiClearance', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                </div>
+                                ${getFileLabel('nbiClearance')}
                             </label>
 
                             <!-- Marriage Contract -->
-                            <label class="p-2.5 ${docs.marriageContract ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex items-center justify-between cursor-pointer font-semibold select-none transition-all">
-                                <span class="flex items-center gap-2"><i class="fas fa-ring ${docs.marriageContract ? 'text-emerald-600' : 'text-slate-400'}"></i> 8. Marriage Contract</span>
-                                <input type="checkbox" ${docs.marriageContract ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'marriageContract', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                            <label class="p-2.5 ${docs.marriageContract ? 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100 text-emerald-900' : 'bg-slate-50 hover:bg-slate-100 text-slate-800'} border rounded-xl flex flex-col justify-between cursor-pointer font-semibold select-none transition-all gap-1">
+                                <div class="flex items-center justify-between w-full">
+                                    <span class="flex items-center gap-2"><i class="fas fa-ring ${docs.marriageContract ? 'text-emerald-600' : 'text-slate-400'}"></i> 8. Marriage Contract</span>
+                                    <input type="checkbox" ${docs.marriageContract ? 'checked' : ''} onchange="toggleEmployeeDocumentStatus('${emp.id}', 'marriageContract', this.checked)" class="rounded border-slate-300 text-indigo-600 focus:ring-indigo-500 cursor-pointer">
+                                </div>
+                                ${getFileLabel('marriageContract')}
                             </label>
                         </div>
                     </div>
@@ -2915,41 +2986,166 @@ function renderESSDashboard() {
 
 function renderESSAttendanceLogs() {
     const currentEmpId = activeUser.employeeId || 'EMP_1624896000000';
-    const logs = SAGA.getAttendanceLogs(currentEmpId, 30);
+    const data = SAGA.getData();
+    const logs = data.attendanceLogs[currentEmpId] || [];
     const tbody = document.getElementById('essAttendanceTableBody');
-
-    if (logs.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400 italic">No attendance logs logged this term.</td></tr>`;
-        return;
-    }
 
     // Group logs by date to compute worked hours
     const grouped = {};
     logs.forEach(l => {
         if (!grouped[l.date]) grouped[l.date] = { date: l.date, in: null, out: null };
-        if (l.type === 'in') grouped[l.date].in = l.timestamp;
-        else if (l.type === 'out') grouped[l.date].out = l.timestamp;
+        if (l.type === 'in' || l.direction === 'in') {
+            grouped[l.date].in = l.timestamp;
+        } else if (l.type === 'out' || l.direction === 'out') {
+            grouped[l.date].out = l.timestamp;
+        }
     });
 
-    tbody.innerHTML = Object.values(grouped).reverse().map(g => {
-        const inTime = g.in ? SAGA.formatTime(g.in) : '--:--';
-        const outTime = g.out ? SAGA.formatTime(g.out) : '--:--';
+    if (tbody) {
+        if (logs.length === 0) {
+            tbody.innerHTML = `<tr><td colspan="5" class="text-center py-8 text-slate-400 italic">No attendance logs logged this term.</td></tr>`;
+        } else {
+            tbody.innerHTML = Object.values(grouped).reverse().map(g => {
+                const inTime = g.in ? SAGA.formatTime(g.in) : '--:--';
+                const outTime = g.out ? SAGA.formatTime(g.out) : '--:--';
 
-        let hrs = 'N/A';
-        if (g.in && g.out) {
-            hrs = ((new Date(g.out) - new Date(g.in)) / (1000 * 60 * 60)).toFixed(1) + ' hrs';
+                let hrs = 'N/A';
+                if (g.in && g.out) {
+                    hrs = ((new Date(g.out) - new Date(g.in)) / (1000 * 60 * 60)).toFixed(1) + ' hrs';
+                }
+
+                return `
+                    <tr>
+                        <td class="font-bold text-slate-900">${g.date}</td>
+                        <td class="font-semibold text-slate-700">${inTime}</td>
+                        <td class="font-semibold text-slate-700">${outTime}</td>
+                        <td class="font-bold">${hrs}</td>
+                        <td class="text-emerald-600">Hardware Swipe Checked</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    }
+
+    // Now render the visual calendar grid
+    const grid = document.getElementById('essCalendarGrid');
+    if (grid) {
+        const daysInMonth = 31;
+        const startDayOfWeek = 3; // July 2026 starts on Wednesday
+        const totalCells = 35; 
+
+        let html = '';
+        
+        for (let i = 0; i < startDayOfWeek; i++) {
+            html += `<div class="bg-slate-50 border border-slate-100 rounded-xl min-h-[75px] opacity-40"></div>`;
         }
 
-        return `
-            <tr>
-                <td class="font-bold text-slate-900">${g.date}</td>
-                <td class="font-semibold text-slate-700">${inTime}</td>
-                <td class="font-semibold text-slate-700">${outTime}</td>
-                <td class="font-bold">${hrs}</td>
-                <td class="text-emerald-600">Hardware Swipe Checked</td>
-            </tr>
-        `;
-    }).join('');
+        const leaves = data.leaveRequests || [];
+        const approvedLeaves = leaves.filter(l => l.employeeId === currentEmpId && l.status === 'approved');
+
+        for (let day = 1; day <= daysInMonth; day++) {
+            const dateStr = `2026-07-${day < 10 ? '0' + day : day}`;
+            const dateObj = new Date(2026, 6, day);
+            const dayOfWeek = dateObj.getDay();
+            const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+
+            const dayLogs = logs.filter(l => l.timestamp.startsWith(`7/${day}/2026`) || l.timestamp.startsWith(`07/${day}/2026`) || (l.timestamp.includes(`/07/2026`) && l.timestamp.split('/')[1] == day));
+            
+            let dayStatus = 'absent'; 
+            let timeIn = '';
+            let timeOut = '';
+
+            if (dayLogs.length > 0) {
+                const checkIn = dayLogs.find(l => l.type === 'in' || l.direction === 'in');
+                const checkOut = dayLogs.find(l => l.type === 'out' || l.direction === 'out');
+
+                if (checkIn) {
+                    timeIn = checkIn.timeOnly || checkIn.timestamp.split(' ')[1] + ' ' + (checkIn.timestamp.split(' ')[2] || '');
+                    if (checkIn.timestamp.includes('T')) {
+                        const parsedDate = new Date(checkIn.timestamp);
+                        timeIn = parsedDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    }
+                    dayStatus = checkIn.status || 'present';
+                    if (!checkIn.status) {
+                        const parsedDate = new Date(checkIn.timestamp);
+                        const h = parsedDate.getHours();
+                        const m = parsedDate.getMinutes();
+                        if (h > 7 || (h === 7 && m > 30)) {
+                            dayStatus = 'late';
+                        } else {
+                            dayStatus = 'present';
+                        }
+                    }
+                }
+                if (checkOut) {
+                    timeOut = checkOut.timeOnly || checkOut.timestamp.split(' ')[1] + ' ' + (checkOut.timestamp.split(' ')[2] || '');
+                    if (checkOut.timestamp.includes('T')) {
+                        const parsedDate = new Date(checkOut.timestamp);
+                        timeOut = parsedDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+                    }
+                }
+            }
+
+            const isOnLeave = approvedLeaves.some(l => {
+                const from = new Date(l.fromDate);
+                const to = new Date(l.toDate);
+                return dateObj >= from && dateObj <= to;
+            });
+            if (isOnLeave) {
+                dayStatus = 'leave';
+            }
+
+            let cellBg = 'bg-slate-50 border-slate-200 text-slate-800';
+            let badgeColor = 'bg-slate-200 text-slate-650';
+            let statusLabel = 'Absent / Unlogged';
+
+            if (dayStatus === 'present') {
+                cellBg = 'bg-emerald-50/75 border-emerald-250 text-emerald-900';
+                badgeColor = 'bg-emerald-200 text-emerald-800';
+                statusLabel = 'Present';
+            } else if (dayStatus === 'late') {
+                cellBg = 'bg-yellow-50/75 border-yellow-250 text-yellow-900';
+                badgeColor = 'bg-yellow-200 text-yellow-800';
+                statusLabel = 'Late';
+            } else if (dayStatus === 'leave') {
+                cellBg = 'bg-rose-50/70 border-rose-250 text-rose-900';
+                badgeColor = 'bg-rose-200 text-rose-800';
+                statusLabel = 'Leave';
+            } else {
+                if (isWeekend) {
+                    cellBg = 'bg-slate-100/50 border-slate-200 text-slate-400 font-normal';
+                    badgeColor = 'bg-slate-200 text-slate-500';
+                    statusLabel = 'Weekend';
+                } else {
+                    cellBg = 'bg-rose-50/70 border-rose-250 text-rose-900';
+                    badgeColor = 'bg-rose-200 text-rose-800';
+                    statusLabel = 'Absent';
+                }
+            }
+
+            // Strictly read-only calendar on the employee side (no click handlers)
+            html += `
+                <div class="border rounded-xl p-2 min-h-[75px] text-left flex flex-col justify-between transition-all ${cellBg} shadow-xs">
+                    <div class="flex justify-between items-start w-full">
+                        <span class="font-bold text-xs">${day}</span>
+                        <span class="px-1.5 py-0.5 text-[8px] font-extrabold rounded-md uppercase tracking-wider ${badgeColor}">${statusLabel}</span>
+                    </div>
+                    <div class="text-[9px] font-medium space-y-0.5 mt-1.5">
+                        ${timeIn ? `<div class="text-slate-600"><i class="fas fa-sign-in-alt text-[7px] text-emerald-500 mr-0.5"></i> ${timeIn}</div>` : ''}
+                        ${timeOut ? `<div class="text-slate-600"><i class="fas fa-sign-out-alt text-[7px] text-rose-450 mr-0.5"></i> ${timeOut}</div>` : ''}
+                        ${!timeIn && !timeOut && dayStatus !== 'weekend' ? `<div class="text-slate-400 italic">${statusLabel}</div>` : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        const remaining = totalCells - (startDayOfWeek + daysInMonth);
+        for (let i = 0; i < remaining; i++) {
+            html += `<div class="bg-slate-50 border border-slate-100 rounded-xl min-h-[75px] opacity-40"></div>`;
+        }
+
+        grid.innerHTML = html;
+    }
 }
 
 function renderESSPayslips() {
@@ -4363,4 +4559,572 @@ function approveContractRenewal(empId) {
         SAGA.showCustomAlert(`Contract renewal for ${data.employees[empId].name} has been approved.`, "Renewal Approved");
         renderExitRenewals();
     }
+}
+
+// ============================================================================
+// SUB-TAB NAVIGATION
+// ============================================================================
+function switchEmployeeSubTab(subTabName) {
+    document.getElementById('employeeSubTab-roster').classList.add('hidden');
+    document.getElementById('employeeSubTab-onboarding').classList.add('hidden');
+    
+    document.getElementById('btnEmployeeSubTab-roster').className = "px-4 py-2.5 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 focus:outline-none text-gray-500 border-transparent hover:text-gray-700 cursor-pointer";
+    document.getElementById('btnEmployeeSubTab-onboarding').className = "px-4 py-2.5 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 focus:outline-none text-gray-500 border-transparent hover:text-gray-700 cursor-pointer";
+
+    document.getElementById(`employeeSubTab-${subTabName}`).classList.remove('hidden');
+    
+    const targetBtn = document.getElementById(`btnEmployeeSubTab-${subTabName}`);
+    targetBtn.className = "px-4 py-2.5 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 focus:outline-none text-blue-600 border-blue-600 cursor-pointer";
+
+    if (subTabName === 'roster') {
+        renderEmployeesFilters();
+        renderEmployeeDirectory();
+    } else if (subTabName === 'onboarding') {
+        renderOnboardingTab();
+    }
+}
+
+function switchRecruitmentSubTab(subTabName) {
+    document.getElementById('recruitmentSubTab-jobs').classList.add('hidden');
+    document.getElementById('recruitmentSubTab-applicants').classList.add('hidden');
+
+    document.getElementById('btnRecruitmentSubTab-jobs').className = "px-4 py-2.5 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 focus:outline-none text-gray-500 border-transparent hover:text-gray-700 cursor-pointer";
+    document.getElementById('btnRecruitmentSubTab-applicants').className = "px-4 py-2.5 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 focus:outline-none text-gray-500 border-transparent hover:text-gray-700 cursor-pointer";
+
+    document.getElementById(`recruitmentSubTab-${subTabName}`).classList.remove('hidden');
+
+    const targetBtn = document.getElementById(`btnRecruitmentSubTab-${subTabName}`);
+    targetBtn.className = "px-4 py-2.5 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 focus:outline-none text-blue-600 border-blue-600 cursor-pointer";
+
+    if (subTabName === 'jobs') {
+        renderRecruitmentJobs();
+    } else if (subTabName === 'applicants') {
+        renderApplicantsDropdowns();
+        renderApplicantsList();
+    }
+}
+
+function switchAttendanceSubTab(subTabName) {
+    document.getElementById('attendanceSubTab-logs').classList.add('hidden');
+    document.getElementById('attendanceSubTab-scanner').classList.add('hidden');
+    document.getElementById('attendanceSubTab-calendar').classList.add('hidden');
+
+    document.getElementById('btnAttendanceSubTab-logs').className = "px-4 py-2.5 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 focus:outline-none text-gray-500 border-transparent hover:text-gray-700 cursor-pointer";
+    document.getElementById('btnAttendanceSubTab-scanner').className = "px-4 py-2.5 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 focus:outline-none text-gray-500 border-transparent hover:text-gray-700 cursor-pointer";
+    document.getElementById('btnAttendanceSubTab-calendar').className = "px-4 py-2.5 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 focus:outline-none text-gray-500 border-transparent hover:text-gray-700 cursor-pointer";
+
+    document.getElementById(`attendanceSubTab-${subTabName}`).classList.remove('hidden');
+
+    const targetBtn = document.getElementById(`btnAttendanceSubTab-${subTabName}`);
+    targetBtn.className = "px-4 py-2.5 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 focus:outline-none text-blue-600 border-blue-600 cursor-pointer";
+
+    if (subTabName === 'logs') {
+        renderAttendanceTab();
+    } else if (subTabName === 'scanner') {
+        populateScannerEmployeeSelect();
+    } else if (subTabName === 'calendar') {
+        renderHRCalendarEmployeeSelect();
+    }
+}
+
+function switchLeaveSubTab(subTabName) {
+    document.getElementById('leaveSubTab-leaves').classList.add('hidden');
+    document.getElementById('leaveSubTab-ot').classList.add('hidden');
+    document.getElementById('leaveSubTab-adjustments').classList.add('hidden');
+
+    document.getElementById('btnLeaveSubTab-leaves').className = "px-4 py-2.5 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 focus:outline-none text-gray-500 border-transparent hover:text-gray-700 cursor-pointer";
+    document.getElementById('btnLeaveSubTab-ot').className = "px-4 py-2.5 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 focus:outline-none text-gray-500 border-transparent hover:text-gray-700 cursor-pointer";
+    document.getElementById('btnLeaveSubTab-adjustments').className = "px-4 py-2.5 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 focus:outline-none text-gray-500 border-transparent hover:text-gray-700 cursor-pointer";
+
+    document.getElementById(`leaveSubTab-${subTabName}`).classList.remove('hidden');
+
+    const targetBtn = document.getElementById(`btnLeaveSubTab-${subTabName}`);
+    targetBtn.className = "px-4 py-2.5 text-xs font-extrabold border-b-2 transition-all flex items-center gap-2 focus:outline-none text-blue-600 border-blue-600 cursor-pointer";
+
+    if (subTabName === 'leaves') {
+        renderLeavesQueue();
+    } else if (subTabName === 'ot') {
+        renderOvertimeQueue();
+    } else if (subTabName === 'adjustments') {
+        renderTimeAdjustmentsQueue();
+    }
+}
+
+// ============================================================================
+// WARNING MEMOS Compose & Notice Board
+// ============================================================================
+function renderMemosTab() {
+    const data = SAGA.getData();
+    const activeEmployees = Object.values(data.employees).filter(e => e.status === 'active');
+    
+    // Populate select dropdown
+    const select = document.getElementById('memoEmployeeSelect');
+    if (select) {
+        select.innerHTML = '<option value="">-- Choose Employee --</option>' + 
+            activeEmployees.map(emp => {
+                const logs = data.attendanceLogs[emp.id] || [];
+                const lates = logs.filter(l => l.status === 'late').length;
+                const lateText = lates > 0 ? ` (${lates} lates logged)` : '';
+                return `<option value="${emp.id}">${emp.name}${lateText}</option>`;
+            }).join('');
+    }
+
+    // Render memo history
+    const tableBody = document.getElementById('issuedMemosTableBody');
+    if (tableBody) {
+        let allMemos = [];
+        Object.values(data.employees).forEach(emp => {
+            if (emp.memos && emp.memos.length > 0) {
+                emp.memos.forEach(m => {
+                    allMemos.push({
+                        employeeName: emp.name,
+                        employeeId: emp.id,
+                        ...m
+                    });
+                });
+            }
+        });
+
+        allMemos.sort((a, b) => new Date(b.dateIssued) - new Date(a.dateIssued));
+
+        if (allMemos.length === 0) {
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="5" class="text-center text-slate-400 py-6 italic">No formal warning memos have been issued yet.</td>
+                </tr>`;
+        } else {
+            tableBody.innerHTML = allMemos.map(m => {
+                const statusBadge = m.acknowledged 
+                    ? `<span class="px-2.5 py-1 text-[9px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-200 rounded-lg flex items-center gap-1"><i class="fas fa-check-double text-[8px]"></i> Acknowledged</span>`
+                    : `<span class="px-2.5 py-1 text-[9px] font-extrabold bg-yellow-100 text-yellow-800 border border-yellow-200 rounded-lg flex items-center gap-1"><i class="fas fa-paper-plane text-[8px]"></i> Issued</span>`;
+                return `
+                    <tr class="hover:bg-slate-50 transition-colors">
+                        <td class="px-3 py-3 font-semibold text-slate-500">${new Date(m.dateIssued).toLocaleDateString()}</td>
+                        <td class="px-3 py-3 font-bold text-slate-800">${m.employeeName}</td>
+                        <td class="px-3 py-3 font-semibold text-slate-700">${m.title}</td>
+                        <td class="px-3 py-3 text-center">${statusBadge}</td>
+                        <td class="px-3 py-3 font-semibold text-slate-500">${m.dateAcknowledged ? new Date(m.dateAcknowledged).toLocaleDateString() : '—'}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+    }
+}
+
+function submitIssueMemo(event) {
+    event.preventDefault();
+    const empId = document.getElementById('memoEmployeeSelect').value;
+    const title = document.getElementById('memoTitle').value;
+    const content = document.getElementById('memoContent').value;
+
+    if (!empId || !title || !content) {
+        SAGA.showCustomAlert('Please fill out all required fields to issue a warning memo.', 'Validation Error');
+        return;
+    }
+
+    SAGA.issueWarningMemo(empId, title, content);
+    logSystemAuditTrail(`HR issued formal warning letter [${title}] to employee ID [${empId}].`);
+    
+    // Clear form
+    document.getElementById('memoTitle').value = '';
+    document.getElementById('memoContent').value = '';
+    
+    SAGA.showCustomAlert('The warning memo has been officially logged and sent to the employee\'s ESS portal inbox.', 'Memo Issued Successfully');
+    renderMemosTab();
+}
+
+// ============================================================================
+// OVERTIME MANAGEMENT
+// ============================================================================
+function renderOvertimeQueue() {
+    const data = SAGA.getData();
+    const tableBody = document.getElementById('otRequestsQueueTableBody');
+    if (!tableBody) return;
+
+    let pendingOTs = [];
+    Object.values(data.employees).forEach(emp => {
+        if (emp.otRequests && emp.otRequests.length > 0) {
+            emp.otRequests.forEach(ot => {
+                if (ot.status === 'pending') {
+                    pendingOTs.push({
+                        employeeName: emp.name,
+                        employeeId: emp.id,
+                        ...ot
+                    });
+                }
+            });
+        }
+    });
+
+    if (pendingOTs.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="6" class="text-center text-slate-400 py-6 italic">No pending overtime applications.</td>
+            </tr>`;
+        return;
+    }
+
+    tableBody.innerHTML = pendingOTs.map(ot => {
+        return `
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-3 py-3 font-semibold text-slate-500">${new Date(ot.dateFiled).toLocaleDateString()}</td>
+                <td class="px-3 py-3 font-bold text-slate-800">${ot.employeeName}</td>
+                <td class="px-3 py-3 font-semibold text-slate-700">${ot.date}</td>
+                <td class="px-3 py-3 font-bold text-slate-900">${ot.hoursRequested} hours</td>
+                <td class="px-3 py-3 font-semibold text-slate-600">${ot.reason}</td>
+                <td class="px-3 py-3 text-right">
+                    <div class="flex justify-end gap-1.5">
+                        <button onclick="approveOTRequestAction('${ot.employeeId}', '${ot.id}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-bold shadow-sm transition border-none cursor-pointer"><i class="fas fa-check"></i> Approve</button>
+                        <button onclick="rejectOTRequestAction('${ot.employeeId}', '${ot.id}')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[10px] font-bold shadow-sm transition border-none cursor-pointer"><i class="fas fa-times"></i> Reject</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function approveOTRequestAction(empId, otId) {
+    SAGA.approveOTRequest(empId, otId);
+    logSystemAuditTrail(`Approved Overtime request [${otId}] for employee ID [${empId}].`);
+    SAGA.showCustomAlert('Overtime request approved and factored into payroll logs.', 'Application Approved');
+    renderOvertimeQueue();
+}
+
+function rejectOTRequestAction(empId, otId) {
+    SAGA.rejectOTRequest(empId, otId);
+    logSystemAuditTrail(`Rejected Overtime request [${otId}] for employee ID [${empId}].`);
+    SAGA.showCustomAlert('Overtime request has been rejected.', 'Application Rejected');
+    renderOvertimeQueue();
+}
+
+// ============================================================================
+// TIME ADJUSTMENTS MANAGEMENT
+// ============================================================================
+function renderTimeAdjustmentsQueue() {
+    const data = SAGA.getData();
+    const tableBody = document.getElementById('timeAdjustmentsQueueTableBody');
+    if (!tableBody) return;
+
+    let pendingAdjustments = [];
+    Object.values(data.employees).forEach(emp => {
+        if (emp.timeAdjustmentRequests && emp.timeAdjustmentRequests.length > 0) {
+            emp.timeAdjustmentRequests.forEach(adj => {
+                if (adj.status === 'pending') {
+                    pendingAdjustments.push({
+                        employeeName: emp.name,
+                        employeeId: emp.id,
+                        ...adj
+                    });
+                }
+            });
+        }
+    });
+
+    if (pendingAdjustments.length === 0) {
+        tableBody.innerHTML = `
+            <tr>
+                <td colspan="7" class="text-center text-slate-400 py-6 italic">No pending late time adjustment requests.</td>
+            </tr>`;
+        return;
+    }
+
+    tableBody.innerHTML = pendingAdjustments.map(adj => {
+        return `
+            <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-3 py-3 font-semibold text-slate-500">${new Date(adj.dateFiled).toLocaleDateString()}</td>
+                <td class="px-3 py-3 font-bold text-slate-800">${adj.employeeName}</td>
+                <td class="px-3 py-3 font-semibold text-slate-700">${adj.lateDate}</td>
+                <td class="px-3 py-3 font-semibold text-slate-500 line-through">${adj.originalTimeIn || 'None'}</td>
+                <td class="px-3 py-3 font-bold text-emerald-600">${adj.requestedTimeIn}</td>
+                <td class="px-3 py-3 font-semibold text-slate-600">${adj.reason}</td>
+                <td class="px-3 py-3 text-right">
+                    <div class="flex justify-end gap-1.5">
+                        <button onclick="approveTimeAdjustmentAction('${adj.employeeId}', '${adj.id}')" class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[10px] font-bold shadow-sm transition border-none cursor-pointer"><i class="fas fa-check"></i> Approve</button>
+                        <button onclick="rejectTimeAdjustmentAction('${adj.employeeId}', '${adj.id}')" class="px-2.5 py-1 bg-rose-600 hover:bg-rose-700 text-white rounded-lg text-[10px] font-bold shadow-sm transition border-none cursor-pointer"><i class="fas fa-times"></i> Reject</button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function approveTimeAdjustmentAction(empId, adjId) {
+    SAGA.approveTimeAdjustment(empId, adjId);
+    logSystemAuditTrail(`Approved Late Time Adjustment [${adjId}] for employee ID [${empId}]. Attendance record updated to present.`);
+    SAGA.showCustomAlert('Time adjustment approved. Attendance record updated successfully.', 'Application Approved');
+    renderTimeAdjustmentsQueue();
+}
+
+// Global scope check-in wrapper
+window.approveTimeAdjustmentAction = approveTimeAdjustmentAction;
+
+function rejectTimeAdjustmentAction(empId, adjId) {
+    SAGA.rejectTimeAdjustment(empId, adjId);
+    logSystemAuditTrail(`Rejected Late Time Adjustment [${adjId}] for employee ID [${empId}].`);
+    SAGA.showCustomAlert('Time adjustment request has been rejected.', 'Application Rejected');
+    renderTimeAdjustmentsQueue();
+}
+
+// ============================================================================
+// IOT GATE SCANNER
+// ============================================================================
+let scannerSelectedDirection = 'in';
+
+function populateScannerEmployeeSelect() {
+    const data = SAGA.getData();
+    const activeEmployees = Object.values(data.employees).filter(e => e.status === 'active');
+    const select = document.getElementById('scannerEmployeeSelect');
+    if (select) {
+        select.innerHTML = activeEmployees.map(emp => {
+            return `<option value="${emp.id}" data-rfid="${emp.rfidCardId || ''}">${emp.name} (RFID: ${emp.rfidCardId || 'Not Bound'})</option>`;
+        }).join('');
+    }
+}
+
+function setScannerDirection(dir) {
+    scannerSelectedDirection = dir;
+    const btnIn = document.getElementById('btnScannerDirIn');
+    const btnOut = document.getElementById('btnScannerDirOut');
+    
+    if (dir === 'in') {
+        btnIn.className = "py-2.5 bg-blue-100 border border-blue-400 text-blue-900 rounded-xl flex items-center justify-center gap-1.5 font-bold cursor-pointer";
+        btnOut.className = "py-2.5 hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl flex items-center justify-center gap-1.5 font-bold cursor-pointer";
+    } else {
+        btnIn.className = "py-2.5 hover:bg-slate-100 border border-slate-200 text-slate-600 rounded-xl flex items-center justify-center gap-1.5 font-bold cursor-pointer";
+        btnOut.className = "py-2.5 bg-blue-100 border border-blue-400 text-blue-900 rounded-xl flex items-center justify-center gap-1.5 font-bold cursor-pointer";
+    }
+}
+
+function simulateScannerTap() {
+    const select = document.getElementById('scannerEmployeeSelect');
+    if (!select || !select.value) return;
+
+    const empId = select.value;
+    const option = select.options[select.selectedIndex];
+    const rfid = option.getAttribute('data-rfid');
+
+    if (!rfid) {
+        SAGA.showCustomAlert('This employee does not have a registered RFID card. Please link a card in Directory -> Onboarding Audit first.', 'Scan Denied');
+        return;
+    }
+
+    const data = SAGA.getData();
+    const employeeName = data.employees[empId].name;
+
+    const transitTime = new Date();
+    let timestampStr = transitTime.toLocaleDateString() + ' ';
+    const h = scannerSelectedDirection === 'in' ? 8 : 16;
+    const m = scannerSelectedDirection === 'in' ? 15 : 35;
+    if (scannerSelectedDirection === 'in') {
+        timestampStr += '08:15:00 AM';
+    } else {
+        timestampStr += '04:35:00 PM';
+    }
+
+    const logEntry = {
+        direction: scannerSelectedDirection, // SAGA logs use direction: 'in' or 'out'
+        timestamp: new Date(transitTime.getFullYear(), transitTime.getMonth(), transitTime.getDate(), h, m, 0).toISOString(),
+        date: transitTime.toLocaleDateString()
+    };
+
+    if (!data.attendanceLogs[empId]) {
+        data.attendanceLogs[empId] = [];
+    }
+    data.attendanceLogs[empId].push(logEntry);
+    SAGA.saveData(data);
+
+    logSystemAuditTrail(`Simulated physical RFID transit tap at gates: Card UID [${rfid}], Employee [${employeeName}], Direction [${scannerSelectedDirection.toUpperCase()}].`);
+    SAGA.showCustomAlert(`RFID scan detected at Main Security Gate:\n\nStaff: ${employeeName}\nCard: ${rfid}\nEvent: CLOCK ${scannerSelectedDirection.toUpperCase()}\nTime: ${timestampStr}`, "Gate Transit Simulation Success");
+    
+    if (!document.getElementById('attendanceSubTab-logs').classList.contains('hidden')) {
+        renderAttendanceTab();
+    }
+}
+
+// ============================================================================
+// EDITABLE HR CALENDAR OVERRIDES
+// ============================================================================
+let hrCalendarSelectedEmployeeId = '';
+let currentSelectedDayIndex = null;
+let currentSelectedDateStr = '';
+
+function renderHRCalendarEmployeeSelect() {
+    const data = SAGA.getData();
+    const activeEmployees = Object.values(data.employees).filter(e => e.status === 'active');
+    const select = document.getElementById('hrCalendarEmployeeSelect');
+    if (select) {
+        select.innerHTML = activeEmployees.map(emp => {
+            return `<option value="${emp.id}">${emp.name}</option>`;
+        }).join('');
+
+        if (!hrCalendarSelectedEmployeeId && activeEmployees.length > 0) {
+            hrCalendarSelectedEmployeeId = activeEmployees[0].id;
+        }
+        select.value = hrCalendarSelectedEmployeeId;
+    }
+    renderHRCalendar();
+}
+
+function renderHRCalendar() {
+    const select = document.getElementById('hrCalendarEmployeeSelect');
+    if (select) hrCalendarSelectedEmployeeId = select.value;
+    
+    const grid = document.getElementById('hrCalendarGrid');
+    if (!grid || !hrCalendarSelectedEmployeeId) return;
+
+    const data = SAGA.getData();
+    const emp = data.employees[hrCalendarSelectedEmployeeId];
+    if (!emp) return;
+
+    const daysInMonth = 31;
+    const startDayOfWeek = 3; 
+    const totalCells = 35; 
+
+    let html = '';
+    
+    for (let i = 0; i < startDayOfWeek; i++) {
+        html += `<div class="bg-slate-50 border border-slate-100 rounded-xl min-h-[75px] opacity-40"></div>`;
+    }
+
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `2026-07-${day < 10 ? '0' + day : day}`;
+        const displayDate = `July ${day}, 2026`;
+        
+        const logs = data.attendanceLogs[emp.id] || [];
+        const dayLogs = logs.filter(l => l.timestamp.startsWith(`7/${day}/2026`) || l.timestamp.startsWith(`07/${day}/2026`) || (l.timestamp.includes(`/07/2026`) && l.timestamp.split('/')[1] == day));
+        
+        let dayStatus = 'absent'; 
+        let timeIn = '';
+        let timeOut = '';
+
+        if (dayLogs.length > 0) {
+            const checkIn = dayLogs.find(l => l.direction === 'in');
+            const checkOut = dayLogs.find(l => l.direction === 'out');
+
+            if (checkIn) {
+                timeIn = checkIn.timeOnly || checkIn.timestamp.split(' ')[1] + ' ' + checkIn.timestamp.split(' ')[2];
+                dayStatus = checkIn.status || 'present';
+            }
+            if (checkOut) {
+                timeOut = checkOut.timeOnly || checkOut.timestamp.split(' ')[1] + ' ' + checkOut.timestamp.split(' ')[2];
+            }
+        }
+
+        const leaves = data.leaves || [];
+        const hasLeave = leaves.some(l => l.employeeId === emp.id && l.status === 'Approved' && new Date(l.startDate) <= new Date(dateStr) && new Date(l.endDate) >= new Date(dateStr));
+        if (hasLeave) {
+            dayStatus = 'leave';
+        }
+
+        let cellBg = 'bg-slate-50 border-slate-200 text-slate-800';
+        let badgeColor = 'bg-slate-200 text-slate-600';
+        let statusLabel = 'Absent / Unlogged';
+
+        if (dayStatus === 'present') {
+            cellBg = 'bg-emerald-50/75 border-emerald-200 text-emerald-900 hover:bg-emerald-100/80';
+            badgeColor = 'bg-emerald-200 text-emerald-800';
+            statusLabel = 'Present';
+        } else if (dayStatus === 'late') {
+            cellBg = 'bg-yellow-50/75 border-yellow-200 text-yellow-900 hover:bg-yellow-100/80';
+            badgeColor = 'bg-yellow-200 text-yellow-800';
+            statusLabel = 'Late';
+        } else if (dayStatus === 'leave') {
+            cellBg = 'bg-rose-50/70 border-rose-200 text-rose-900 hover:bg-rose-100/80';
+            badgeColor = 'bg-rose-200 text-rose-800';
+            statusLabel = 'Leave';
+        } else {
+            cellBg = 'bg-rose-50/70 border-rose-200 text-rose-900 hover:bg-rose-100/80';
+            badgeColor = 'bg-rose-200 text-rose-800';
+            statusLabel = 'Absent';
+        }
+
+        html += `
+            <div onclick="openHRCalendarOverrideModal(${day}, '${dateStr}')" 
+                class="border rounded-xl p-2 min-h-[75px] text-left flex flex-col justify-between cursor-pointer transition-all ${cellBg} shadow-xs hover:-translate-y-0.5">
+                <div class="flex justify-between items-start w-full">
+                    <span class="font-bold text-xs">${day}</span>
+                    <span class="px-1.5 py-0.5 text-[8px] font-extrabold rounded-md uppercase tracking-wider ${badgeColor}">${dayStatus}</span>
+                </div>
+                <div class="text-[9px] font-medium space-y-0.5 mt-1.5">
+                    ${timeIn ? `<div class="text-slate-600"><i class="fas fa-sign-in-alt text-[7px] text-emerald-500 mr-0.5"></i> ${timeIn}</div>` : ''}
+                    ${timeOut ? `<div class="text-slate-600"><i class="fas fa-sign-out-alt text-[7px] text-rose-400 mr-0.5"></i> ${timeOut}</div>` : ''}
+                    ${!timeIn && !timeOut ? `<div class="text-slate-400 italic">${statusLabel}</div>` : ''}
+                </div>
+            </div>
+        `;
+    }
+
+    const remaining = totalCells - (startDayOfWeek + daysInMonth);
+    for (let i = 0; i < remaining; i++) {
+        html += `<div class="bg-slate-50 border border-slate-100 rounded-xl min-h-[75px] opacity-40"></div>`;
+    }
+
+    grid.innerHTML = html;
+}
+
+function openHRCalendarOverrideModal(day, dateStr) {
+    currentSelectedDayIndex = day;
+    currentSelectedDateStr = dateStr;
+
+    const data = SAGA.getData();
+    const emp = data.employees[hrCalendarSelectedEmployeeId];
+    if (!emp) return;
+
+    document.getElementById('overrideModalDate').textContent = `July ${day}, 2026 (${emp.name})`;
+    
+    const logs = data.attendanceLogs[emp.id] || [];
+    const dayLogs = logs.filter(l => l.timestamp.startsWith(`7/${day}/2026`) || l.timestamp.startsWith(`07/${day}/2026`) || l.timestamp.split('/')[1] == day);
+    
+    let currentStatus = 'present';
+    let timeInVal = '07:15 AM';
+    let timeOutVal = '04:30 PM';
+
+    if (dayLogs.length > 0) {
+        const checkIn = dayLogs.find(l => l.direction === 'in');
+        const checkOut = dayLogs.find(l => l.direction === 'out');
+
+        if (checkIn) {
+            currentStatus = checkIn.status || 'present';
+            timeInVal = checkIn.timeOnly || (checkIn.timestamp.split(' ')[1] + ' ' + checkIn.timestamp.split(' ')[2]);
+        }
+        if (checkOut) {
+            timeOutVal = checkOut.timeOnly || (checkOut.timestamp.split(' ')[1] + ' ' + checkOut.timestamp.split(' ')[2]);
+        }
+    }
+
+    document.getElementById('overrideStatusSelect').value = currentStatus;
+    document.getElementById('overrideTimeIn').value = timeInVal;
+    document.getElementById('overrideTimeOut').value = timeOutVal;
+
+    onOverrideStatusChange();
+
+    document.getElementById('hrCalendarOverrideModal').classList.add('active');
+}
+
+function closeHRCalendarOverrideModal() {
+    document.getElementById('hrCalendarOverrideModal').classList.remove('active');
+}
+
+function onOverrideStatusChange() {
+    const status = document.getElementById('overrideStatusSelect').value;
+    const timeInputs = document.getElementById('overrideTimeInputs');
+    if (status === 'present' || status === 'late') {
+        timeInputs.style.display = 'grid';
+    } else {
+        timeInputs.style.display = 'none';
+    }
+}
+
+function saveHRCalendarOverride() {
+    const status = document.getElementById('overrideStatusSelect').value;
+    const timeIn = document.getElementById('overrideTimeIn').value;
+    const timeOut = document.getElementById('overrideTimeOut').value;
+
+    SAGA.saveAttendanceOverride(hrCalendarSelectedEmployeeId, currentSelectedDateStr, status, timeIn, timeOut);
+    logSystemAuditTrail(`HR edited attendance calendar for employee [${hrCalendarSelectedEmployeeId}] on date [July ${currentSelectedDayIndex}, 2026] to [${status.toUpperCase()}].`);
+    SAGA.showCustomAlert('Calendar status override written to database successfully.', 'Override Saved');
+    
+    closeHRCalendarOverrideModal();
+    renderHRCalendar();
+    renderAttendanceTab();
 }
