@@ -71,7 +71,7 @@ const SAGA = {
   // Initialize localStorage with mock data (only if not existing or if too many applicants)
   init() {
     const dataRaw = localStorage.getItem("saga_data");
-    const CURRENT_VERSION = 7;
+    const CURRENT_VERSION = 10;
     if (!dataRaw) {
       this.resetData();
     } else {
@@ -96,12 +96,9 @@ const SAGA = {
 
     const mockEmployeeId1 = "EMP_1624896000000";
     const mockEmployeeId2 = "EMP_1624896000001";
-    const mockEmployeeId3 = "EMP_1624896000002";
-    const mockEmployeeId4 = "EMP_1624896000003";
 
     const initialData = {
       applicants: [
-        // JOB POSITION 1: Elementary Grade School Teacher (2 applicants)
         {
           id: "APP_1719662400001",
           name: "Maria Teresa Santos, LPT",
@@ -117,36 +114,6 @@ const SAGA = {
           hireDateApproved: null
         },
         {
-          id: "APP_1719662400002",
-          name: "Teacher Juan Dela Cruz",
-          email: "juan.delacruz@school.edu.ph",
-          phone: "+63 918 789 0123",
-          resume: "Licensed Professional Teacher (LPT) specializing in Elementary Grade School education. 6 years experience in classroom management, child psychology, creative lesson planning.",
-          resumeFileName: "Juan_Dela_Cruz_Resume.pdf",
-          jobId: 1,
-          status: "hired",
-          compatibility_score: 90,
-          extracted_skills: [{ skill: "teaching", weight: 18 }, { skill: "lpt", weight: 18 }, { skill: "classroom management", weight: 16 }],
-          appliedDate: twoWeeksAgo.toISOString(),
-          hireDateApproved: oneWeekAgo.toISOString()
-        },
-        // JOB POSITION 2: Junior High School Science & Math Faculty (1 applicant)
-        {
-          id: "APP_1719662400004",
-          name: "Prof. Gabriel Mercado, LPT",
-          email: "gabriel.mercado@gmail.com",
-          phone: "+63 919 555 7777",
-          resume: "BSEd Major in Mathematics. LPT certified with 6 years teaching Algebra, Geometry, and Trigonometry for Junior High School. DepEd K-12 curriculum specialist.",
-          resumeFileName: "Gabriel_Mercado_Math_CV.pdf",
-          jobId: 2,
-          status: "scored",
-          compatibility_score: 92,
-          extracted_skills: [{ skill: "teaching", weight: 18 }, { skill: "lpt", weight: 18 }, { skill: "mathematics", weight: 14 }, { skill: "deped", weight: 14 }],
-          appliedDate: twoWeeksAgo.toISOString(),
-          hireDateApproved: null
-        },
-        // JOB POSITION 3: Senior High School STEM & Computer Instructor (2 applicants)
-        {
           id: "APP_1719662400007",
           name: "Engr. Mark Anthony Reyes, MS",
           email: "mark.reyes@school.edu.ph",
@@ -161,21 +128,6 @@ const SAGA = {
           hireDateApproved: null
         },
         {
-          id: "APP_1719662400000",
-          name: "Prof. Maria Clara Garcia",
-          email: "maria.garcia@school.edu.ph",
-          phone: "+63 917 234 5678",
-          resume: "Senior High School Educator with 7+ years teaching experience in STEM and Computer Science. Proficient in Python, Java, Lesson Planning, DepEd K-12 Curriculum, Pedagogy, and Capstone Research advisory. LPT licensed.",
-          resumeFileName: "Maria_Clara_Garcia_CV.pdf",
-          jobId: 3,
-          status: "scored",
-          compatibility_score: 94,
-          extracted_skills: [{ skill: "teaching", weight: 18 }, { skill: "lpt", weight: 18 }, { skill: "stem", weight: 15 }, { skill: "python", weight: 12 }],
-          appliedDate: twoWeeksAgo.toISOString(),
-          hireDateApproved: null
-        },
-        // JOB POSITION 4: Guidance Counselor & Student Wellness Officer (2 applicants)
-        {
           id: "APP_1719662400009",
           name: "Dr. Clarissa Loyola, RGC",
           email: "clarissa.loyola@school.edu.ph",
@@ -188,26 +140,12 @@ const SAGA = {
           extracted_skills: [{ skill: "guidance", weight: 14 }, { skill: "counseling", weight: 15 }, { skill: "child psychology", weight: 14 }, { skill: "communication", weight: 14 }],
           appliedDate: threeWeeksAgo.toISOString(),
           hireDateApproved: null
-        },
-        {
-          id: "APP_existing3",
-          name: "Dr. Elena Ramos, RGC",
-          email: "elena.ramos@school.edu.ph",
-          phone: "+63 915 888 9999",
-          resume: "Registered Guidance Counselor (RGC) with extensive experience in psychological assessment, academic guidance, and student wellness programs for secondary schools.",
-          resumeFileName: "Dr_Elena_Ramos_CV.pdf",
-          jobId: 4,
-          status: "hired",
-          compatibility_score: 91,
-          extracted_skills: [{ skill: "guidance", weight: 14 }, { skill: "counseling", weight: 15 }],
-          appliedDate: twoWeeksAgo.toISOString(),
-          hireDateApproved: oneWeekAgo.toISOString()
         }
       ],
       employees: {
         [mockEmployeeId1]: {
           id: mockEmployeeId1,
-          applicantId: "APP_1719662400001",
+          applicantId: "APP_1719662400002",
           name: "Teacher Juan Dela Cruz",
           email: "juan.delacruz@school.edu.ph",
           phone: "+63 918 789 0123",
@@ -216,6 +154,7 @@ const SAGA = {
           jobId: 1,
           status: "active",
           rfidCardId: "RFID-8849A",
+          rfidStatus: "active",
           rateStructure: "Full-Time Daily Rate",
           facultySchedule: "MWF 7:30 AM - 4:30 PM",
           departmentRole: "Elementary Class Adviser",
@@ -247,7 +186,7 @@ const SAGA = {
           performanceMetrics: {
             rating: 4.8,
             lastReviewDate: now.toISOString(),
-            projects: 4, // Class advisories
+            projects: 4,
             tasks_completed: 42
           },
           salaryInfo: {
@@ -267,6 +206,7 @@ const SAGA = {
           jobId: 2,
           status: "active",
           rfidCardId: "RFID-7712B",
+          rfidStatus: "active",
           rateStructure: "Full-Time Daily Rate",
           facultySchedule: "TTH 7:30 AM - 4:30 PM",
           departmentRole: "JHS Science Lead",
@@ -295,24 +235,6 @@ const SAGA = {
             sick: 5,
             emergency: 4
           },
-          contractIntent: {
-            academicYear: "2026-2027",
-            intent: "extend",
-            subjects: "Grade 10 Science, AP Science",
-            remarks: "I would like to focus more on lab activities.",
-            submittedDate: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-            status: "Pending Review"
-          },
-          conductLogs: [
-            {
-              id: "COND_PRESET1",
-              date: "2026-06-18",
-              offense: "Unexcused Tardiness / Attendance Issues",
-              sanction: "Written Warning",
-              details: "Accumulated three (3) unexcused tardiness violations in a single payroll period.",
-              loggedBy: "Principal's Office"
-            }
-          ],
           performanceMetrics: {
             rating: 4.6,
             lastReviewDate: new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000).toISOString(),
@@ -324,253 +246,42 @@ const SAGA = {
             lastPaymentDate: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
             currency: "PHP"
           }
-        },
-        [mockEmployeeId3]: {
-          id: mockEmployeeId3,
-          applicantId: "APP_existing2",
-          name: "Prof. Carlo Mendoza",
-          email: "carlo.mendoza@school.edu.ph",
-          phone: "+63 916 333 4444",
-          username: "carlo.mendoza",
-          password: "TestPass789",
-          jobId: 3,
-          status: "active",
-          rfidCardId: "RFID-9931C",
-          rateStructure: "Part-Time Hourly Metric",
-          facultySchedule: "MWF 8:00 AM - 12:00 PM",
-          departmentRole: "SHS STEM & ICT Instructor",
-          onboardedDate: new Date(now.getTime() - 180 * 24 * 60 * 60 * 1000).toISOString(),
-          orientationCompleted: true,
-          documents: {
-            resume: true,
-            tor: true,
-            diploma: true,
-            prcLicense: true,
-            serviceRecord: true,
-            recommendations: true,
-            nbiClearance: true,
-            marriageContract: true,
-            otherDocs: []
-          },
-          interview: {
-            status: "Passed Panel Interview",
-            score: 92,
-            date: "January 14, 2026",
-            comments: "Expert in Computer Science and STEM tracks.",
-            interviewer: "Dean of Academic Affairs"
-          },
-          leaveBalance: {
-            vacation: 10,
-            sick: 5,
-            emergency: 3
-          },
-          performanceMetrics: {
-            rating: 4.9,
-            lastReviewDate: new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000).toISOString(),
-            projects: 6,
-            tasks_completed: 65
-          },
-          salaryInfo: {
-            baseSalary: 44000,
-            lastPaymentDate: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-            currency: "PHP"
-          }
-        },
-        [mockEmployeeId4]: {
-          id: mockEmployeeId4,
-          applicantId: "APP_existing3",
-          name: "Dr. Elena Ramos, RGC",
-          email: "elena.ramos@school.edu.ph",
-          phone: "+63 915 888 9999",
-          username: "elena.ramos",
-          password: "GuidancePass123",
-          jobId: 4,
-          status: "active",
-          rfidCardId: "RFID-6620D",
-          rateStructure: "Full-Time Daily Rate",
-          facultySchedule: "Mon-Fri 8:00 AM - 5:00 PM",
-          departmentRole: "Registered Guidance Counselor",
-          onboardedDate: new Date(now.getTime() - 300 * 24 * 60 * 60 * 1000).toISOString(),
-          orientationCompleted: true,
-          documents: {
-            resume: true,
-            tor: true,
-            diploma: true,
-            prcLicense: true,
-            serviceRecord: true,
-            recommendations: true,
-            nbiClearance: true,
-            marriageContract: true,
-            otherDocs: []
-          },
-          interview: {
-            status: "Passed Panel Interview",
-            score: 95,
-            date: "September 8, 2025",
-            comments: "Highly qualified RGC with excellent counseling credentials.",
-            interviewer: "Board of Trustees Committee"
-          },
-          leaveBalance: {
-            vacation: 14,
-            sick: 5,
-            emergency: 5
-          },
-          performanceMetrics: {
-            rating: 4.7,
-            lastReviewDate: new Date(now.getTime() - 45 * 24 * 60 * 60 * 1000).toISOString(),
-            projects: 3,
-            tasks_completed: 39
-          },
-          salaryInfo: {
-            baseSalary: 40000,
-            lastPaymentDate: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000).toISOString(),
-            currency: "PHP"
-          }
         }
       },
-      archivedEmployees: [
-        {
-          id: "EMP_1624896000099",
-          applicantId: "APP_old1",
-          name: "Master Teacher Pedro Aquino",
-          email: "pedro.aquino@school.edu.ph",
-          phone: "+63 912 555 6666",
-          username: "pedro.aquino",
-          password: "OldPass123",
-          jobId: 2,
-          status: "separated",
-          onboardedDate: new Date(now.getTime() - 730 * 24 * 60 * 60 * 1000).toISOString(),
-          exitReason: "retirement",
-          clearanceApprovedDate: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString(),
-          archivedDate: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString(),
-          leaveBalance: {
-            vacation: 0,
-            sick: 0,
-            emergency: 0
-          },
-          performanceMetrics: {
-            rating: 4.9,
-            lastReviewDate: new Date(now.getTime() - 100 * 24 * 60 * 60 * 1000).toISOString(),
-            projects: 20,
-            tasks_completed: 210
-          },
-          salaryInfo: {
-            baseSalary: 48000,
-            lastPaymentDate: new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000).toISOString(),
-            currency: "PHP"
-          }
-        }
-      ],
-      leaveRequests: [
-        {
-          id: "LEAVE_1719662400000",
-          employeeId: mockEmployeeId1,
-          leaveType: "vacation",
-          fromDate: "2026-07-10",
-          toDate: "2026-07-12",
-          days: 3,
-          reason: "Attending Regional DepEd K-12 Pedagogy Seminar",
-          status: "pending",
-          submittedDate: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: "LEAVE_1719662400001",
-          employeeId: mockEmployeeId2,
-          leaveType: "sick",
-          fromDate: "2026-06-25",
-          toDate: "2026-06-26",
-          days: 2,
-          reason: "Flu and fever",
-          status: "approved",
-          submittedDate: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString()
-        },
-        {
-          id: "LEAVE_1719662400002",
-          employeeId: mockEmployeeId3,
-          leaveType: "emergency",
-          fromDate: "2026-07-01",
-          toDate: "2026-07-02",
-          days: 2,
-          reason: "Urgent family domestic emergency requiring physical presence",
-          status: "pending",
-          submittedDate: new Date(now.getTime() - 2 * 60 * 60 * 1000).toISOString()
-        }
-      ],
+      archivedEmployees: [],
+      leaveRequests: [],
       attendanceLogs: {
         [mockEmployeeId1]: [
           { type: "in", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 7, 15).toISOString(), date: new Date().toLocaleDateString() },
-          { type: "out", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 16, 30).toISOString(), date: new Date().toLocaleDateString() },
-          { type: "in", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 7, 55).toISOString(), date: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toLocaleDateString() },
-          { type: "out", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1, 16, 30).toISOString(), date: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toLocaleDateString() },
-          { type: "in", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2, 8, 10).toISOString(), date: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toLocaleDateString() },
-          { type: "out", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 2, 16, 30).toISOString(), date: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toLocaleDateString() },
-          { type: "in", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 3, 7, 45).toISOString(), date: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toLocaleDateString() },
-          { type: "out", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 3, 16, 30).toISOString(), date: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toLocaleDateString() }
+          { type: "out", timestamp: new Date(now.getFullYear(), now.getMonth(), now.getDate(), 16, 30).toISOString(), date: new Date().toLocaleDateString() }
         ],
         [mockEmployeeId2]: [
-          { type: "in", timestamp: new Date(now.getTime() - 3 * 60 * 60 * 1000).toISOString(), date: now.toLocaleDateString() },
-          { type: "in", timestamp: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000 - 8 * 60 * 60 * 1000).toISOString(), date: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toLocaleDateString() },
-          { type: "out", timestamp: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000 + 9 * 60 * 60 * 1000).toISOString(), date: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toLocaleDateString() }
+          { type: "in", timestamp: new Date(now.getTime() - 3 * 60 * 60 * 1000).toISOString(), date: now.toLocaleDateString() }
         ]
       },
       currentUser: {
         id: mockEmployeeId1,
         username: "juan.delacruz"
       },
-      dbVersion: 7
+      activities: [
+        {
+          id: "ACT_INIT",
+          user: "System Administrator",
+          action: "Initialized SAGA-Core database configurations",
+          time: now.toISOString(),
+          type: "system"
+        }
+      ],
+      activeSchoolYear: "SY 2026-2027 (First Semester)",
+      dbVersion: 10
     };
 
-    // Initialize empty arrays for new structures and warning memos
+    // Initialize empty arrays for warning memos and requests
     Object.values(initialData.employees).forEach(emp => {
       emp.memos = [];
       emp.otRequests = [];
       emp.timeAdjustmentRequests = [];
     });
-
-    // Seed mock warning memo for Juan Dela Cruz
-    initialData.employees[mockEmployeeId1].memos = [
-      {
-        id: "MEMO_1",
-        title: "Notice to Explain: Consecutive Late Clock-Ins",
-        date: new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        content: "Dear Teacher Juan,\n\nOur attendance records indicate that you have clocked in late 3 times during this payroll cycle. As per Section 4.2 of the Faculty Handbook, continuous tardiness affects class schedules and student contact hours.\n\nPlease provide a written explanation within 48 hours.\n\nSincerely,\nHR Department",
-        acknowledged: false
-      }
-    ];
-
-    // Seed mock overtime requests
-    initialData.employees[mockEmployeeId1].otRequests = [
-      {
-        id: "OT_SEED_1",
-        date: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 4).toISOString().split('T')[0],
-        hours: "2",
-        reason: "Grading final exams and exam clearance reviews",
-        submittedDate: new Date(now.getTime() - 4 * 24 * 60 * 60 * 1000).toISOString(),
-        status: "approved",
-        approvedBy: "Principal Clara"
-      },
-      {
-        id: "OT_SEED_2",
-        date: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1).toISOString().split('T')[0],
-        hours: "3.5",
-        reason: "Advising computer science capstone projects after class hours",
-        submittedDate: new Date(now.getTime() - 1 * 24 * 60 * 60 * 1000).toISOString(),
-        status: "pending"
-      }
-    ];
-
-    // Seed mock time adjustment requests
-    initialData.employees[mockEmployeeId1].timeAdjustmentRequests = [
-      {
-        id: "ADJ_SEED_1",
-        date: new Date(now.getFullYear(), now.getMonth(), now.getDate() - 3).toISOString().split('T')[0],
-        originalTime: "07:45 AM",
-        requestedTime: "07:25 AM",
-        reason: "LRT line malfunction and massive train delays (valid transportation advisory)",
-        submittedDate: new Date(now.getTime() - 3 * 24 * 60 * 60 * 1000).toISOString(),
-        status: "pending"
-      }
-    ];
 
     localStorage.setItem("saga_data", JSON.stringify(initialData));
   },
@@ -1060,6 +771,18 @@ const SAGA = {
   getArchivedEmployees() {
     const data = this.getData();
     return data.archivedEmployees;
+  },
+
+  getActiveSchoolYear() {
+    const data = this.getData();
+    return data.activeSchoolYear || "SY 2026-2027 (First Semester)";
+  },
+
+  updateActiveSchoolYear(newSy) {
+    const data = this.getData();
+    data.activeSchoolYear = newSy;
+    this.saveData(data);
+    return newSy;
   },
 
   // ============================================================================

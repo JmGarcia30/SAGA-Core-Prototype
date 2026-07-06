@@ -2457,8 +2457,10 @@ Generated: ${new Date().toLocaleString()}
                 if (isOnLeave) {
                     dayStatus = 'leave';
                 } else if (d <= todayDay && !isWeekend) {
-                    const targetDateStr = dateObj.toLocaleDateString();
-                    const dailyLogs = logs.filter(l => l.date === targetDateStr || l.timestamp.startsWith(`7/${d}/2026`) || l.timestamp.startsWith(`07/${d}/2026`) || (l.timestamp.includes(`/07/2026`) && l.timestamp.split('/')[1] == d));
+                    const dailyLogs = logs.filter(l => {
+                        const dl = new Date(l.timestamp);
+                        return dl.getFullYear() === 2026 && dl.getMonth() === 6 && dl.getDate() === d;
+                    });
                     const checkIn = dailyLogs.find(l => l.type === 'in' || l.direction === 'in');
                     const checkOut = dailyLogs.find(l => l.type === 'out' || l.direction === 'out');
 
@@ -2490,6 +2492,8 @@ Generated: ${new Date().toLocaleString()}
                     }
                 } else if (isWeekend) {
                     dayStatus = 'weekend';
+                } else if (d > todayDay) {
+                    dayStatus = 'upcoming';
                 }
 
                 if (dayStatus === 'present') {
@@ -2508,6 +2512,10 @@ Generated: ${new Date().toLocaleString()}
                     cellBg = 'bg-slate-100/50 border-slate-200 text-slate-400 font-normal';
                     badgeColor = 'bg-slate-200 text-slate-500';
                     statusLabel = 'Weekend';
+                } else if (dayStatus === 'upcoming') {
+                    cellBg = 'bg-slate-50 border-slate-200 text-slate-400 font-normal opacity-70';
+                    badgeColor = 'bg-slate-100 text-slate-400';
+                    statusLabel = 'Upcoming';
                 } else {
                     cellBg = 'bg-rose-50/70 border-rose-250 text-rose-900 hover:bg-rose-100/80';
                     badgeColor = 'bg-rose-200 text-rose-800';

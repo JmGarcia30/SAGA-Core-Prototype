@@ -222,7 +222,7 @@ function toggleTheme() {
     document.getElementById('themeToggleIcon').className = isDark ? 'fas fa-sun text-yellow-400' : 'fas fa-moon';
 
     // Redraw active charts
-    if (currentTab === 'overview' || currentTab === 'analytics') {
+    if (currentTab === 'overview') {
         initializeCharts();
     }
 }
@@ -334,9 +334,6 @@ function renderViewData(tabName) {
         case 'documents':
             renderDocumentsTab();
             break;
-        case 'analytics':
-            initializeAnalyticsCharts();
-            break;
         case 'reports':
             generateMockReportData();
             break;
@@ -360,6 +357,9 @@ function renderViewData(tabName) {
             break;
         case 'ess-exit':
             renderESSExit();
+            break;
+        case 'settings':
+            renderSettingsTab();
             break;
     }
 }
@@ -457,7 +457,7 @@ function renderRequestsSidebar() {
         count++;
         const job = SAGA.getJobById(app.jobId) || { title: 'Faculty Strand' };
         html += `
-            <div class="p-2.5 bg-indigo-50/50 border border-indigo-150 rounded-xl flex items-start gap-2.5 hover:bg-indigo-50 transition cursor-pointer" onclick="switchNavTab('applicants')">
+            <div class="p-2.5 bg-indigo-50/50 border border-indigo-200 rounded-xl flex items-start gap-2.5 hover:bg-indigo-50 transition cursor-pointer" onclick="switchNavTab('applicants')">
                 <div class="w-7 h-7 rounded-full bg-indigo-100 text-indigo-600 flex items-center justify-center text-xs shrink-0"><i class="fas fa-user-tie"></i></div>
                 <div class="min-w-0 flex-1">
                     <p class="font-bold text-slate-800 truncate">${app.name}</p>
@@ -667,13 +667,13 @@ function renderApplicantsDropdowns() {
     if (!container) return;
 
     let html = `
-        <button onclick="selectATSJobFilter('all')" id="btnJobFilter-all" class="px-3.5 py-1.5 rounded-xl transition text-[10px] font-bold select-none cursor-pointer ${selectedATSJobFilter === 'all' ? 'bg-indigo-650 text-white shadow-sm border-none' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}">
+        <button onclick="selectATSJobFilter('all')" id="btnJobFilter-all" class="px-3.5 py-1.5 rounded-xl transition text-[10px] font-bold select-none cursor-pointer ${selectedATSJobFilter === 'all' ? 'bg-indigo-600 text-white shadow-sm border-none' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}">
             All Listings
         </button>
     `;
 
     html += jobs.map(j => `
-        <button onclick="selectATSJobFilter('${j.id}')" id="btnJobFilter-${j.id}" class="px-3.5 py-1.5 rounded-xl transition text-[10px] font-bold select-none cursor-pointer ${selectedATSJobFilter == j.id ? 'bg-indigo-650 text-white shadow-sm border-none' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}">
+        <button onclick="selectATSJobFilter('${j.id}')" id="btnJobFilter-${j.id}" class="px-3.5 py-1.5 rounded-xl transition text-[10px] font-bold select-none cursor-pointer ${selectedATSJobFilter == j.id ? 'bg-indigo-600 text-white shadow-sm border-none' : 'bg-white border border-slate-200 text-slate-600 hover:bg-slate-50'}">
             ${j.title}
         </button>
     `).join('');
@@ -744,9 +744,9 @@ function renderApplicantsList() {
                     <span class="badge ${statusClass} text-[9px] uppercase font-bold tracking-wider">${app.status.replace('_', ' ')}</span>
                 </td>
                 <td class="text-right" onclick="event.stopPropagation()">
-                    <div class="flex justify-end gap-1.5">
-                        <button onclick="selectApplicantForAI('${app.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-750 text-[10px] rounded font-bold" title="Open AI evaluation"><i class="fas fa-brain"></i> View Details</button>
-                        ${(app.status === 'scored' || app.status === 'under_review' || app.status === 'applied') ? `<button onclick="initiateHiringProcess('${app.id}')" class="px-2.5 py-1 bg-indigo-650 hover:bg-indigo-700 text-white text-[10px] rounded font-bold shadow-sm" title="Recruit & Onboard"><i class="fas fa-user-plus"></i> Recruit</button>` : ''}
+                    <div class="flex justify-end gap-1.5 whitespace-nowrap">
+                        <button onclick="selectApplicantForAI('${app.id}')" class="px-2.5 py-1 bg-indigo-50 hover:bg-indigo-100 text-indigo-700 text-[10px] rounded font-bold whitespace-nowrap" title="Open AI evaluation"><i class="fas fa-brain"></i> View Details</button>
+                        ${(app.status === 'scored' || app.status === 'under_review' || app.status === 'applied') ? `<button onclick="initiateHiringProcess('${app.id}')" class="px-2.5 py-1 bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] rounded font-bold shadow-sm whitespace-nowrap" title="Recruit & Onboard"><i class="fas fa-user-plus"></i> Recruit</button>` : ''}
                     </div>
                 </td>
             </tr>
@@ -783,7 +783,7 @@ function renderApplicantsList() {
     if (app.compatibility_score === null || app.compatibility_score === undefined) {
         panel.innerHTML = `
             <div class="space-y-4 text-center py-8 font-sans">
-                <div class="w-16 h-16 bg-indigo-50 border border-indigo-150 text-indigo-650 rounded-full flex items-center justify-center text-xl mx-auto shadow-sm animate-pulse">
+                <div class="w-16 h-16 bg-indigo-50 border border-indigo-200 text-indigo-600 rounded-full flex items-center justify-center text-xl mx-auto shadow-sm animate-pulse">
                     <i class="fas fa-brain animate-bounce"></i>
                 </div>
                 <div class="space-y-1">
@@ -799,7 +799,7 @@ function renderApplicantsList() {
                     </div>
                 </div>
 
-                <button onclick="runAIScoringOnDemand('${app.id}')" id="btnRunAIScoring" class="w-full py-3 bg-indigo-650 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex justify-center items-center gap-1.5 border-none shadow-md cursor-pointer transition-all"><i class="fas fa-microchip"></i> Run SAGA AI CV Appraisal</button>
+                <button onclick="runAIScoringOnDemand('${app.id}')" id="btnRunAIScoring" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex justify-center items-center gap-1.5 border-none shadow-md cursor-pointer transition-all"><i class="fas fa-microchip"></i> Run SAGA AI CV Appraisal</button>
             </div>
         `;
         return;
@@ -921,87 +921,7 @@ function renderApplicantsList() {
                 </div>
             </div>
 
-            <!-- Document Received Checklist (HR checks off as applicant submits physically) -->
-            <div class="space-y-2 p-4 bg-blue-50/40 border border-blue-200/50 rounded-2xl text-left font-sans">
-                <div class="flex justify-between items-center pb-2 border-b border-blue-150">
-                    <h4 class="text-[10px] text-blue-900 font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="fas fa-folder-open text-blue-600"></i> Documents Received (Art. V)</h4>
-                    <span class="text-[9px] bg-blue-100 text-blue-900 font-extrabold px-1.5 py-0.5 rounded-full">${(() => {
-            const docs = app.documentsSubmitted || {};
-            const keys = ['resume', 'tor', 'diploma', 'prcLicense', 'recommendations', 'nbiClearance'];
-            const done = keys.filter(k => docs[k]).length;
-            return Math.round((done / keys.length) * 100);
-        })()}%</span>
-                </div>
-                <p class="text-[9px] text-slate-400 italic">Check off as the applicant physically submits each document to HR:</p>
-                <div class="space-y-1.5 pt-1 text-[10px] font-semibold text-slate-700">
-                    <label class="flex items-center gap-2.5 cursor-default">
-                        <input type="checkbox" checked disabled class="w-3.5 h-3.5 text-blue-500 border-slate-300 rounded pointer-events-none">
-                        <span class="line-through text-slate-450"><i class="fas fa-file-alt text-slate-400 mr-1"></i> Resume & Application Letter</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 cursor-pointer">
-                        <input type="checkbox" ${app.documentsSubmitted?.tor ? 'checked' : ''} onchange="toggleDocReceived('${app.id}', 'tor')" class="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
-                        <span class="${app.documentsSubmitted?.tor ? 'line-through text-slate-450 font-normal' : ''}"><i class="fas fa-graduation-cap text-indigo-500 mr-1"></i> Transcript of Records (TOR)</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 cursor-pointer">
-                        <input type="checkbox" ${app.documentsSubmitted?.diploma ? 'checked' : ''} onchange="toggleDocReceived('${app.id}', 'diploma')" class="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
-                        <span class="${app.documentsSubmitted?.diploma ? 'line-through text-slate-450 font-normal' : ''}"><i class="fas fa-award text-amber-500 mr-1"></i> Photocopy of Diploma</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 cursor-pointer">
-                        <input type="checkbox" ${app.documentsSubmitted?.prcLicense ? 'checked' : ''} onchange="toggleDocReceived('${app.id}', 'prcLicense')" class="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
-                        <span class="${app.documentsSubmitted?.prcLicense ? 'line-through text-slate-450 font-normal' : ''}"><i class="fas fa-id-card text-emerald-500 mr-1"></i> PRC LET License</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 cursor-pointer">
-                        <input type="checkbox" ${app.documentsSubmitted?.serviceRecord ? 'checked' : ''} onchange="toggleDocReceived('${app.id}', 'serviceRecord')" class="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
-                        <span class="${app.documentsSubmitted?.serviceRecord ? 'line-through text-slate-450 font-normal' : ''}"><i class="fas fa-briefcase text-slate-500 mr-1"></i> Previous Employment Cert</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 cursor-pointer">
-                        <input type="checkbox" ${app.documentsSubmitted?.recommendations ? 'checked' : ''} onchange="toggleDocReceived('${app.id}', 'recommendations')" class="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
-                        <span class="${app.documentsSubmitted?.recommendations ? 'line-through text-slate-450 font-normal' : ''}"><i class="fas fa-users text-blue-500 mr-1"></i> 3 Recommendation Letters</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 cursor-pointer">
-                        <input type="checkbox" ${app.documentsSubmitted?.nbiClearance ? 'checked' : ''} onchange="toggleDocReceived('${app.id}', 'nbiClearance')" class="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
-                        <span class="${app.documentsSubmitted?.nbiClearance ? 'line-through text-slate-450 font-normal' : ''}"><i class="fas fa-shield-alt text-rose-500 mr-1"></i> NBI Clearance</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 cursor-pointer">
-                        <input type="checkbox" ${app.documentsSubmitted?.marriageContract ? 'checked' : ''} onchange="toggleDocReceived('${app.id}', 'marriageContract')" class="w-3.5 h-3.5 text-blue-600 border-slate-300 rounded focus:ring-blue-500">
-                        <span class="${app.documentsSubmitted?.marriageContract ? 'line-through text-slate-450 font-normal' : ''}"><i class="fas fa-ring text-pink-500 mr-1"></i> Marriage Contract (if applicable)</span>
-                    </label>
-                </div>
-            </div>
 
-            <!-- Official School Hiring Process Milestones Compliance -->
-            <div class="space-y-2 p-4 bg-amber-50/40 border border-amber-250/50 rounded-2xl text-left font-sans">
-                <div class="flex justify-between items-center pb-2 border-b border-amber-105">
-                    <h4 class="text-[10px] text-amber-955 font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="fas fa-clipboard-list text-amber-600"></i> Hiring Process Tracker</h4>
-                    <span class="text-[9px] bg-amber-100 text-amber-900 font-extrabold px-1.5 py-0.5 rounded-full">${milestonesPct}%</span>
-                </div>
-                <div class="space-y-1.5 pt-1.5 text-[10px] font-semibold text-slate-700">
-                    <label class="flex items-center gap-2.5 cursor-pointer">
-                        <input type="checkbox" ${app.milestones.writtenExam ? 'checked' : ''} onchange="toggleHiringMilestone('${app.id}', 'writtenExam')" class="w-3.5 h-3.5 text-indigo-650 border-slate-300 rounded focus:ring-indigo-550">
-                        <span class="${app.milestones.writtenExam ? 'line-through text-slate-450 font-normal' : ''}">1. Undergo written examinations</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 cursor-pointer">
-                        <input type="checkbox" ${app.milestones.teachingDemo ? 'checked' : ''} onchange="toggleHiringMilestone('${app.id}', 'teachingDemo')" class="w-3.5 h-3.5 text-indigo-650 border-slate-300 rounded focus:ring-indigo-550">
-                        <span class="${app.milestones.teachingDemo ? 'line-through text-slate-450 font-normal' : ''}">2. Perform teaching demonstration</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 cursor-pointer">
-                        <input type="checkbox" ${app.milestones.deptHeadInterview ? 'checked' : ''} onchange="toggleHiringMilestone('${app.id}', 'deptHeadInterview')" class="w-3.5 h-3.5 text-indigo-650 border-slate-300 rounded focus:ring-indigo-550">
-                        <span class="${app.milestones.deptHeadInterview ? 'line-through text-slate-450 font-normal' : ''}">3. Department Head Interview</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 cursor-pointer">
-                        <input type="checkbox" ${app.milestones.presidentInterview ? 'checked' : ''} onchange="toggleHiringMilestone('${app.id}', 'presidentInterview')" class="w-3.5 h-3.5 text-indigo-650 border-slate-300 rounded focus:ring-indigo-550">
-                        <span class="${app.milestones.presidentInterview ? 'line-through text-slate-450 font-normal' : ''}">4. Endorsement & President Interview</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 cursor-pointer">
-                        <input type="checkbox" ${app.milestones.contractSigned ? 'checked' : ''} onchange="toggleHiringMilestone('${app.id}', 'contractSigned')" class="w-3.5 h-3.5 text-indigo-650 border-slate-300 rounded focus:ring-indigo-550">
-                        <span class="${app.milestones.contractSigned ? 'line-through text-slate-450 font-normal' : ''}">5. Sign the Employment Contract</span>
-                    </label>
-                    <label class="flex items-center gap-2.5 cursor-pointer">
-                        <input type="checkbox" ${app.milestones.policyOrientation ? 'checked' : ''} onchange="toggleHiringMilestone('${app.id}', 'policyOrientation')" class="w-3.5 h-3.5 text-indigo-650 border-slate-300 rounded focus:ring-indigo-550">
-                        <span class="${app.milestones.policyOrientation ? 'line-through text-slate-450 font-normal' : ''}">6. School Policy Orientation</span>
-                    </label>
-                </div>
-            </div>
 
             <!-- Strengths and Weaknesses -->
             <div class="grid grid-cols-2 gap-3 text-[10px] pt-2 border-t">
@@ -1019,6 +939,46 @@ function renderApplicantsList() {
                 </div>
             </div>
 
+            <!-- Interview Appointment Section -->
+            <div class="pt-2">
+                ${app.interviewAppointment ? `
+                    <div class="p-3.5 bg-indigo-50 border border-indigo-200 text-indigo-950 rounded-2xl text-xs space-y-1.5 font-semibold shadow-sm">
+                        <h5 class="font-extrabold text-[9px] text-indigo-700 uppercase tracking-wider flex items-center gap-1.5"><i class="fas fa-calendar-check"></i> Screening Interview Appointment</h5>
+                        <div class="text-[10px] space-y-0.5 mt-1 font-semibold text-slate-700">
+                            <p><strong class="text-slate-900">Date/Time:</strong> ${app.interviewAppointment.date} at ${app.interviewAppointment.time}</p>
+                            <p><strong class="text-slate-900">Interviewer:</strong> ${app.interviewAppointment.interviewer}</p>
+                            <p><strong class="text-slate-900">Venue/Link:</strong> ${app.interviewAppointment.venue}</p>
+                        </div>
+                    </div>
+                ` : `
+                    <div class="space-y-2">
+                        <button onclick="document.getElementById('interviewScheduleForm').classList.toggle('hidden')" class="w-full py-2.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl text-[10px] flex justify-center items-center gap-1.5 border-none cursor-pointer"><i class="fas fa-calendar-alt"></i> Set Interview Appointment</button>
+                        
+                        <div id="interviewScheduleForm" class="hidden p-3 bg-slate-50 border border-slate-200 rounded-2xl space-y-2 text-[10px] font-sans">
+                            <div class="grid grid-cols-2 gap-2">
+                                <div>
+                                    <label class="block text-[8px] font-bold text-slate-500 uppercase mb-0.5">Date</label>
+                                    <input type="date" id="schedDate" class="w-full p-2 border rounded-lg text-xs bg-white text-slate-700">
+                                </div>
+                                <div>
+                                    <label class="block text-[8px] font-bold text-slate-500 uppercase mb-0.5">Time</label>
+                                    <input type="time" id="schedTime" class="w-full p-2 border rounded-lg text-xs bg-white text-slate-700">
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-[8px] font-bold text-slate-500 uppercase mb-0.5">Interviewer Name</label>
+                                <input type="text" id="schedInterviewer" value="Principal Tan & Department Head" class="w-full p-2 border rounded-lg text-xs bg-white text-slate-700">
+                            </div>
+                            <div>
+                                <label class="block text-[8px] font-bold text-slate-500 uppercase mb-0.5">Venue / Meeting Room</label>
+                                <input type="text" id="schedVenue" value="Executive Boardroom, Main Building" class="w-full p-2 border rounded-lg text-xs bg-white text-slate-700">
+                            </div>
+                            <button onclick="saveInterviewAppointment('${app.id}')" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs border-none cursor-pointer shadow-sm">Confirm Appointment</button>
+                        </div>
+                    </div>
+                `}
+            </div>
+
             <!-- Email Status / Notify Button -->
             <div class="pt-2">
                 ${app.emailSent ? `
@@ -1026,13 +986,13 @@ function renderApplicantsList() {
                         <i class="fas fa-check-circle text-emerald-600"></i> Receipt Email Sent (Under Review)
                     </div>
                 ` : `
-                    <button onclick="sendReceiptEmail('${app.id}')" class="w-full py-2.5 bg-indigo-650 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all text-[10px] flex justify-center items-center gap-1.5 border-none shadow-sm cursor-pointer"><i class="fas fa-envelope"></i> Send Receipt & Under Review Email</button>
+                    <button onclick="sendReceiptEmail('${app.id}')" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all text-[10px] flex justify-center items-center gap-1.5 border-none shadow-sm cursor-pointer"><i class="fas fa-envelope"></i> Send Receipt & Under Review Email</button>
                 `}
             </div>
 
             <!-- Recruit Action bottom -->
             ${(app.status === 'scored' || app.status === 'under_review' || app.status === 'applied') ? `
-                <button onclick="initiateHiringProcessValidated('${app.id}')" class="w-full py-3 bg-indigo-650 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all text-xs flex justify-center items-center gap-1.5 border-none cursor-pointer"><i class="fas fa-user-plus"></i> Recruit & Initiate Onboarding</button>
+                <button onclick="initiateHiringProcessValidated('${app.id}')" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl shadow-lg shadow-indigo-500/20 transition-all text-xs flex justify-center items-center gap-1.5 border-none cursor-pointer"><i class="fas fa-user-plus"></i> Recruit & Initiate Onboarding</button>
             ` : ''}
         </div>
     `;
@@ -1090,30 +1050,6 @@ function toggleHiringMilestone(appId, milestoneKey) {
 }
 
 function initiateHiringProcessValidated(appId) {
-    const app = SAGA.getApplicantById(appId);
-    if (!app) return;
-
-    const milestones = app.milestones || { documentsSubmitted: true };
-    const required = ['documentsSubmitted', 'writtenExam', 'teachingDemo', 'deptHeadInterview', 'presidentInterview', 'contractSigned'];
-    const missing = required.filter(k => !milestones[k]);
-
-    if (missing.length > 0) {
-        const labels = {
-            writtenExam: "Undergo written examinations (Step 2)",
-            teachingDemo: "Perform teaching demonstration (Step 3)",
-            deptHeadInterview: "Undergo interview with the Head of the Department (Step 4)",
-            presidentInterview: "Endorsed to the President for final interview (Step 5)",
-            contractSigned: "Sign the Employment Contract (Step 6)"
-        };
-        const missingLabels = missing.map(m => `• ${labels[m] || m}`).join('\n');
-        SAGA.showCustomAlert(
-            `School Hiring Policy Compliance Alert:\n\nThis applicant cannot be finalized for hire yet. Under Article V rules, they must first complete the following process steps:\n\n${missingLabels}\n\nPlease check off these completed milestones in their profile checklist card first.`,
-            "Hiring Milestones Incomplete"
-        );
-        return;
-    }
-
-    // Call actual hiring
     initiateHiringProcess(appId);
 }
 
@@ -1202,7 +1138,7 @@ function openResumePreviewModal(appId) {
                             <p class="font-bold text-slate-800"><i class="fas fa-file-pdf text-red-500 mr-1.5"></i> ${app.resumeFileName || 'Resume.pdf'}</p>
                             <p class="text-[10px] text-slate-500">File Type: PDF Document • Securely Stored in SAGA-Core</p>
                         </div>
-                        <a href="#" onclick="event.preventDefault(); window.print();" class="px-3.5 py-1.5 bg-indigo-650 hover:bg-indigo-700 text-white rounded-xl font-bold no-underline flex items-center gap-1.5 text-[10px]"><i class="fas fa-print"></i> Print / Download</a>
+                        <a href="#" onclick="event.preventDefault(); window.print();" class="px-3.5 py-1.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold no-underline flex items-center gap-1.5 text-[10px]"><i class="fas fa-print"></i> Print / Download</a>
                     </div>
 
                     <div class="space-y-3 p-5 bg-slate-50 border rounded-2xl text-left">
@@ -1214,7 +1150,7 @@ function openResumePreviewModal(appId) {
                 <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
                     <button onclick="closeResumePreviewModal()" class="px-4 py-2 border rounded-xl font-bold text-xs text-slate-700 hover:bg-slate-100 cursor-pointer">Close Viewer</button>
                     ${!app.emailSent ? `
-                        <button onclick="closeResumePreviewModal(); sendReceiptEmail('${app.id}')" class="px-4 py-2 bg-indigo-650 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer border-none shadow-sm"><i class="fas fa-envelope"></i> Send Receipt Email</button>
+                        <button onclick="closeResumePreviewModal(); sendReceiptEmail('${app.id}')" class="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer border-none shadow-sm"><i class="fas fa-envelope"></i> Send Receipt Email</button>
                     ` : ''}
                 </div>
             </div>
@@ -1255,40 +1191,137 @@ function bulkScoreApplicants() {
 
 // ============================================================================
 // HIRE CONVERSION & CONFETTI ANIMATION
-// ============================================================================
+let currentHiringAppId = null;
+
 function initiateHiringProcess(appId) {
+    currentHiringAppId = appId;
     const app = SAGA.getApplicantById(appId);
     if (!app) return;
 
-    SAGA.showCustomConfirm(
-        `Are you sure you want to hire ${app.name} as an active Academy Faculty?\n\nThis will convert their application, generate credentials, and trigger the mandatory 201 Onboarding checklist.`,
-        "Approve Candidate Hiring"
-    ).then(confirm => {
-        if (confirm) {
-            const enteredScore = prompt("Enter final Board Panel Interview Score (70-100):", "90") || "90";
-            const enteredComments = prompt("Enter Board Panel Evaluator Comments:", "Excellent teaching demonstration, strong pedagogical foundations and class control.") || "Excellent teaching demonstration, strong pedagogical foundations and class control.";
+    const noticeEl = document.getElementById('hiringModalNotice');
+    const fieldsEl = document.getElementById('hiringModalInterviewFields');
+    const commentsEl = document.getElementById('hiringModalComments');
+    const btnSubmit = document.getElementById('btnConfirmHiringSubmit');
 
-            // Lock in interview scores on applicant record
-            SAGA.hireApplicant(appId, {
-                score: parseInt(enteredScore),
-                status: "Passed Board Panel",
-                comments: enteredComments,
-                interviewer: "Academy Search & Screening Board"
-            });
+    commentsEl.value = "Excellent teaching demonstration, strong pedagogical foundations and class control.";
 
-            // Run conversion
-            const username = app.name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10) + Math.floor(Math.random() * 100);
-            const employee = SAGA.createEmployee(app.id, username, "TempPass123!");
+    if (app.interviewAppointment) {
+        // If interview was scheduled, show the scheduled details and permit complete
+        noticeEl.innerHTML = `
+            <div class="flex items-start gap-2 text-indigo-700">
+                <i class="fas fa-check-circle text-sm mt-0.5"></i>
+                <div>
+                    <span class="font-bold text-[12px] block">Board Panel Interview Appointment Verified</span>
+                    <span class="text-[10px] text-slate-600 block mt-1">Scheduled for: <strong class="text-slate-800">${app.interviewAppointment.date}</strong> at <strong class="text-slate-800">${app.interviewAppointment.time}</strong></span>
+                    <span class="text-[10px] text-slate-600 block">Interviewer: <strong class="text-slate-800">${app.interviewAppointment.interviewer}</strong></span>
+                    <span class="text-[10px] text-slate-600 block">Venue: <strong class="text-slate-800">${app.interviewAppointment.venue}</strong></span>
+                </div>
+            </div>
+        `;
+        fieldsEl.innerHTML = '';
+        btnSubmit.disabled = false;
+        btnSubmit.className = "px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 border-none shadow-sm cursor-pointer";
+        btnSubmit.innerHTML = `<i class="fas fa-check"></i> Complete Recruitment`;
+    } else {
+        // If NO interview was scheduled, prompt that they need to schedule first to enable recruitment
+        noticeEl.innerHTML = `
+            <div class="flex items-start gap-2 text-amber-800">
+                <i class="fas fa-exclamation-triangle text-sm mt-0.5 text-amber-600"></i>
+                <div>
+                    <span class="font-bold text-[12px] block">Interview Appointment Required</span>
+                    <span class="text-[10px] text-slate-600 block mt-1">No screening interview is registered for <strong>${app.name}</strong>. Please schedule the Board Panel Interview below to enable recruitment.</span>
+                </div>
+            </div>
+        `;
+        fieldsEl.innerHTML = `
+            <div class="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-2 text-[10px]">
+                <div class="grid grid-cols-2 gap-2">
+                    <div>
+                        <label class="block text-[8px] font-bold text-slate-500 uppercase mb-0.5">Interview Date</label>
+                        <input type="date" id="hiringSchedDate" class="w-full p-2 border rounded-lg text-xs bg-white text-slate-700">
+                    </div>
+                    <div>
+                        <label class="block text-[8px] font-bold text-slate-500 uppercase mb-0.5">Interview Time</label>
+                        <input type="time" id="hiringSchedTime" class="w-full p-2 border rounded-lg text-xs bg-white text-slate-700">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-[8px] font-bold text-slate-500 uppercase mb-0.5">Interviewer Name / Committee</label>
+                    <input type="text" id="hiringSchedInterviewer" value="Principal Tan & Department Head" class="w-full p-2 border rounded-lg text-xs bg-white text-slate-700">
+                </div>
+                <div>
+                    <label class="block text-[8px] font-bold text-slate-500 uppercase mb-0.5">Venue / Meeting Link</label>
+                    <input type="text" id="hiringSchedVenue" value="Executive Boardroom, Main Building" class="w-full p-2 border rounded-lg text-xs bg-white text-slate-700">
+                </div>
+            </div>
+        `;
+        btnSubmit.disabled = false;
+        btnSubmit.className = "px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 border-none shadow-sm cursor-pointer";
+        btnSubmit.innerHTML = `<i class="fas fa-calendar-plus"></i> Schedule & Complete`;
+    }
 
-            if (!employee) return;
+    const modal = document.getElementById('hiringModal');
+    if (modal) modal.classList.add('active');
+}
 
-            // Trigger audit log
-            logSystemAuditTrail(`Approved hiring request for [${app.name}]. Panel Score: ${enteredScore}%. Provisioned ESS Account.`);
+function closeHiringModal() {
+    const modal = document.getElementById('hiringModal');
+    if (modal) modal.classList.remove('active');
+}
 
-            // Trigger success animation modal
-            showConversionModal(employee);
+function submitHiringProcessFromModal() {
+    if (!currentHiringAppId) return;
+
+    const app = SAGA.getApplicantById(currentHiringAppId);
+    if (!app) return;
+
+    let appt = app.interviewAppointment;
+
+    // If no appointment was pre-scheduled, read from the fields
+    if (!appt) {
+        const date = document.getElementById('hiringSchedDate').value;
+        const time = document.getElementById('hiringSchedTime').value;
+        const interviewer = document.getElementById('hiringSchedInterviewer').value.trim();
+        const venue = document.getElementById('hiringSchedVenue').value.trim();
+
+        if (!date || !time || !interviewer || !venue) {
+            alert('Please specify the interview appointment details first.');
+            return;
         }
+        appt = { date, time, interviewer, venue };
+        
+        // Save appointment to applicant
+        const db = SAGA.getData();
+        const targetApp = db.applicants.find(a => a.id === currentHiringAppId);
+        if (targetApp) {
+            targetApp.interviewAppointment = appt;
+            SAGA.saveData(db);
+        }
+    }
+
+    const comments = document.getElementById('hiringModalComments').value.trim() || "Passed Board Panel Interview.";
+
+    closeHiringModal();
+
+    // Lock in interview details on applicant record (setting a default score of 90, keeping original score structures intact but bypassing native prompt)
+    SAGA.hireApplicant(currentHiringAppId, {
+        score: 90,
+        status: "Passed Board Panel",
+        comments: comments,
+        interviewer: appt.interviewer
     });
+
+    // Run conversion
+    const username = app.name.toLowerCase().replace(/[^a-z0-9]/g, '').slice(0, 10) + Math.floor(Math.random() * 100);
+    const employee = SAGA.createEmployee(app.id, username, "TempPass123!");
+
+    if (!employee) return;
+
+    // Trigger audit log
+    logSystemAuditTrail(`Recruited candidate [${app.name}] following screening interview appointment. Provisioned ESS portal.`);
+
+    // Trigger success animation modal
+    showConversionModal(employee);
 }
 
 function showConversionModal(employee) {
@@ -1322,8 +1355,39 @@ function showConversionModal(employee) {
 function closeConversionModal() {
     document.getElementById('conversionModal').classList.remove('active');
 
-    // Redirect direct to onboarding list to complete RFID scans
-    switchNavTab('onboarding');
+    // Retrieve active candidate info for email simulation
+    const empId = currentRFIDTargetId;
+    const emp = SAGA.getEmployeeById(empId);
+    
+    if (emp) {
+        const mockEmail = emp.email || `${emp.username}@school.edu.ph`;
+        const emailSubject = `Job Offer & Pre-Employment Onboarding Invitation`;
+        const emailBody = `Dear ${emp.name},
+
+Congratulations! We are pleased to inform you that you have been recruited for a faculty position at St. Aloysius Gonzaga Academy.
+
+To begin your pre-employment onboarding, please access the SAGA-Core Faculty Onboarding Portal using the link below:
+Link: http://127.0.0.1:5500/onboarding.html?applicantId=${emp.applicantId}
+
+On the portal, select your name from the list, create your secure account credentials, and upload your required compliance documents.
+
+Best regards,
+Human Resources Department
+St. Aloysius Gonzaga Academy, Inc.`;
+
+        SAGA.showCustomConfirm(
+            `Simulating recruitment notification email delivery to ${mockEmail}:\n\n--------------------------------------------\nSubject: ${emailSubject}\n--------------------------------------------\n${emailBody}\n--------------------------------------------\n\nClick Confirm to dispatch this onboarding invite.`,
+            "Dispatch Onboarding Invitation"
+        ).then(confirm => {
+            if (confirm) {
+                logSystemAuditTrail(`Sent job offer and onboarding invitation email to: ${emp.name} (${mockEmail}).`);
+                SAGA.showCustomAlert(`Onboarding invitation email sent successfully to ${mockEmail}! They can now access onboarding.html directly.`, "Email Dispatched");
+            }
+            switchNavTab('onboarding');
+        });
+    } else {
+        switchNavTab('onboarding');
+    }
 }
 
 // ============================================================================
@@ -1810,7 +1874,7 @@ function renderOnboardingTab() {
         const getFileLabel = (key) => {
             const file = (emp.documents && emp.documents.otherDocs) ? emp.documents.otherDocs.find(f => f.docType === key) : null;
             return file 
-                ? `<span class="text-[9px] text-indigo-650 font-bold block mt-1 pl-6"><i class="fas fa-file-pdf text-red-500 mr-1"></i> File: ${file.fileName} (${new Date(file.uploadedAt).toLocaleDateString()})</span>` 
+                ? `<span class="text-[9px] text-indigo-600 font-bold block mt-1 pl-6"><i class="fas fa-file-pdf text-red-500 mr-1"></i> File: ${file.fileName} (${new Date(file.uploadedAt).toLocaleDateString()})</span>` 
                 : `<span class="text-[9px] text-slate-400 font-medium block mt-1 pl-6 italic"><i class="fas fa-times-circle text-slate-350 mr-1"></i> Awaiting upload...</span>`;
         };
 
@@ -1989,6 +2053,7 @@ function simulateRFIDCardTap() {
     const data = SAGA.getData();
     if (data.employees[currentRFIDTargetId]) {
         data.employees[currentRFIDTargetId].rfidCardId = mockHEX;
+        data.employees[currentRFIDTargetId].rfidStatus = 'active';
 
         // Log event
         const log = {
@@ -2503,14 +2568,43 @@ function renderExitTab() {
         }
 
         container.innerHTML = queue.map(emp => `
-            <div class="p-4 bg-slate-50 border rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4 text-xs">
-                <div class="space-y-1 font-semibold">
-                    <h4 class="font-extrabold text-sm text-slate-900">${emp.name}</h4>
-                    <p class="text-[10px] text-slate-400">Initiated: ${SAGA.formatDate(emp.exitInitiatedDate)} • Reason: <span class="font-bold text-slate-700">${emp.exitReason}</span></p>
-                </div>
+            <div class="p-4 bg-slate-50 border border-slate-200 rounded-2xl flex flex-col gap-3 text-xs font-sans">
+                <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="space-y-1 font-semibold">
+                        <h4 class="font-extrabold text-sm text-slate-900">${emp.name}</h4>
+                        <p class="text-[10px] text-slate-400">Initiated: ${SAGA.formatDate(emp.exitInitiatedDate)} • Reason: <span class="font-bold text-slate-700">${emp.exitReason}</span></p>
+                        ${emp.exitInterviewAppointment ? `
+                            <div class="mt-2 p-2.5 bg-indigo-50 border border-indigo-200 text-indigo-950 rounded-xl text-[10px] space-y-0.5 max-w-sm">
+                                <span class="font-bold uppercase tracking-wider text-indigo-700 text-[8px] flex items-center gap-1.5"><i class="fas fa-comments"></i> Exit Interview Scheduled</span>
+                                <div class="font-semibold"><strong>Date/Time:</strong> ${emp.exitInterviewAppointment.date} at ${emp.exitInterviewAppointment.time}</div>
+                                <div class="font-semibold"><strong>Interviewer:</strong> ${emp.exitInterviewAppointment.interviewer}</div>
+                            </div>
+                        ` : ''}
+                    </div>
 
-                <div class="flex items-center gap-2">
-                    <button onclick="approveExitClearanceFinal('${emp.id}')" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-sm text-[10px]"><i class="fas fa-door-open"></i> Sign Clearance & Archive</button>
+                    <div class="flex items-center gap-2">
+                        ${!emp.exitInterviewAppointment ? `<button onclick="document.getElementById('exitSchedForm-${emp.id}').classList.toggle('hidden')" class="px-3.5 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold rounded-xl shadow-sm text-[10px] cursor-pointer"><i class="fas fa-calendar-alt text-slate-500"></i> Schedule Exit Interview</button>` : ''}
+                        <button onclick="approveExitClearanceFinal('${emp.id}')" class="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-xl shadow-sm text-[10px] cursor-pointer"><i class="fas fa-door-open"></i> Sign Clearance & Archive</button>
+                    </div>
+                </div>
+                
+                <!-- Collapsible exit interview scheduler -->
+                <div id="exitSchedForm-${emp.id}" class="hidden p-3.5 bg-white border rounded-xl space-y-2 text-[10px] max-w-sm">
+                    <div class="grid grid-cols-2 gap-2">
+                        <div>
+                            <label class="block text-[8px] font-bold text-slate-500 uppercase mb-0.5">Interview Date</label>
+                            <input type="date" id="exitDate-${emp.id}" class="w-full p-2 border rounded-lg text-xs bg-white text-slate-700">
+                        </div>
+                        <div>
+                            <label class="block text-[8px] font-bold text-slate-500 uppercase mb-0.5">Interview Time</label>
+                            <input type="time" id="exitTime-${emp.id}" class="w-full p-2 border rounded-lg text-xs bg-white text-slate-700">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[8px] font-bold text-slate-500 uppercase mb-0.5">Interviewer Name / Panel</label>
+                        <input type="text" id="exitInterviewer-${emp.id}" value="HR Director & VP Academics" class="w-full p-2 border rounded-lg text-xs bg-white text-slate-700">
+                    </div>
+                    <button onclick="saveExitInterviewAppointment('${emp.id}')" class="w-full py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl text-xs border-none cursor-pointer shadow-sm">Confirm Appointment</button>
                 </div>
             </div>
         `).join('');
@@ -3049,7 +3143,10 @@ function renderESSAttendanceLogs() {
             const dayOfWeek = dateObj.getDay();
             const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
 
-            const dayLogs = logs.filter(l => l.timestamp.startsWith(`7/${day}/2026`) || l.timestamp.startsWith(`07/${day}/2026`) || (l.timestamp.includes(`/07/2026`) && l.timestamp.split('/')[1] == day));
+            const dayLogs = logs.filter(l => {
+                const dl = new Date(l.timestamp);
+                return dl.getFullYear() === 2026 && dl.getMonth() === 6 && dl.getDate() === day;
+            });
             
             let dayStatus = 'absent'; 
             let timeIn = '';
@@ -3095,6 +3192,8 @@ function renderESSAttendanceLogs() {
                 dayStatus = 'leave';
             }
 
+            const isFuture = day > new Date().getDate();
+
             let cellBg = 'bg-slate-50 border-slate-200 text-slate-800';
             let badgeColor = 'bg-slate-200 text-slate-650';
             let statusLabel = 'Absent / Unlogged';
@@ -3113,9 +3212,13 @@ function renderESSAttendanceLogs() {
                 statusLabel = 'Leave';
             } else {
                 if (isWeekend) {
-                    cellBg = 'bg-slate-100/50 border-slate-200 text-slate-400 font-normal';
+                    cellBg = 'bg-slate-100/50 border-slate-200 text-slate-400 font-normal opacity-60';
                     badgeColor = 'bg-slate-200 text-slate-500';
                     statusLabel = 'Weekend';
+                } else if (isFuture) {
+                    cellBg = 'bg-slate-50 border-slate-200 text-slate-400 font-normal opacity-70';
+                    badgeColor = 'bg-slate-100 text-slate-400';
+                    statusLabel = 'Upcoming';
                 } else {
                     cellBg = 'bg-rose-50/70 border-rose-250 text-rose-900';
                     badgeColor = 'bg-rose-200 text-rose-800';
@@ -4991,7 +5094,10 @@ function renderHRCalendar() {
         const displayDate = `July ${day}, 2026`;
         
         const logs = data.attendanceLogs[emp.id] || [];
-        const dayLogs = logs.filter(l => l.timestamp.startsWith(`7/${day}/2026`) || l.timestamp.startsWith(`07/${day}/2026`) || (l.timestamp.includes(`/07/2026`) && l.timestamp.split('/')[1] == day));
+        const dayLogs = logs.filter(l => {
+            const dl = new Date(l.timestamp);
+            return dl.getFullYear() === 2026 && dl.getMonth() === 6 && dl.getDate() === day;
+        });
         
         let dayStatus = 'absent'; 
         let timeIn = '';
@@ -5002,11 +5108,11 @@ function renderHRCalendar() {
             const checkOut = dayLogs.find(l => l.direction === 'out');
 
             if (checkIn) {
-                timeIn = checkIn.timeOnly || checkIn.timestamp.split(' ')[1] + ' ' + checkIn.timestamp.split(' ')[2];
+                timeIn = checkIn.timeOnly || new Date(checkIn.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
                 dayStatus = checkIn.status || 'present';
             }
             if (checkOut) {
-                timeOut = checkOut.timeOnly || checkOut.timestamp.split(' ')[1] + ' ' + checkOut.timestamp.split(' ')[2];
+                timeOut = checkOut.timeOnly || new Date(checkOut.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
             }
         }
 
@@ -5016,8 +5122,13 @@ function renderHRCalendar() {
             dayStatus = 'leave';
         }
 
+        const dateObj = new Date(2026, 6, day);
+        const dayOfWeek = dateObj.getDay();
+        const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+        const isFuture = day > new Date().getDate();
+
         let cellBg = 'bg-slate-50 border-slate-200 text-slate-800';
-        let badgeColor = 'bg-slate-200 text-slate-600';
+        let badgeColor = 'bg-slate-200 text-slate-650';
         let statusLabel = 'Absent / Unlogged';
 
         if (dayStatus === 'present') {
@@ -5033,9 +5144,22 @@ function renderHRCalendar() {
             badgeColor = 'bg-rose-200 text-rose-800';
             statusLabel = 'Leave';
         } else {
-            cellBg = 'bg-rose-50/70 border-rose-200 text-rose-900 hover:bg-rose-100/80';
-            badgeColor = 'bg-rose-200 text-rose-800';
-            statusLabel = 'Absent';
+            if (isWeekend) {
+                cellBg = 'bg-slate-100/50 border-slate-200 text-slate-400 font-normal opacity-60 hover:bg-slate-100/70';
+                badgeColor = 'bg-slate-200 text-slate-500';
+                statusLabel = 'Weekend';
+                dayStatus = 'weekend';
+            } else if (isFuture) {
+                cellBg = 'bg-slate-50 border-slate-200 text-slate-400 font-normal opacity-70 hover:bg-slate-100/50';
+                badgeColor = 'bg-slate-100 text-slate-400';
+                statusLabel = 'Upcoming';
+                dayStatus = 'upcoming';
+            } else {
+                cellBg = 'bg-rose-50/70 border-rose-200 text-rose-900 hover:bg-rose-100/80';
+                badgeColor = 'bg-rose-200 text-rose-800';
+                statusLabel = 'Absent';
+                dayStatus = 'absent';
+            }
         }
 
         html += `
@@ -5062,6 +5186,35 @@ function renderHRCalendar() {
     grid.innerHTML = html;
 }
 
+function convertTo24Hour(timeStr) {
+    if (!timeStr) return '';
+    // If already in HH:MM format, return it
+    if (!timeStr.toLowerCase().includes('am') && !timeStr.toLowerCase().includes('pm')) {
+        return timeStr.trim();
+    }
+    const parts = timeStr.trim().split(' ');
+    const time = parts[0];
+    const modifier = parts[1];
+    let [hours, minutes] = time.split(':');
+    if (hours === '12') {
+        hours = '00';
+    }
+    if (modifier && modifier.toLowerCase() === 'pm') {
+        hours = parseInt(hours, 10) + 12;
+    }
+    return `${String(hours).padStart(2, '0')}:${minutes}`;
+}
+
+function convertTo12Hour(time24) {
+    if (!time24) return '';
+    const [hoursStr, minutes] = time24.split(':');
+    let hours = parseInt(hoursStr, 10);
+    const modifier = hours >= 12 ? 'PM' : 'AM';
+    hours = hours % 12;
+    hours = hours ? hours : 12;
+    return `${String(hours).padStart(2, '0')}:${minutes} ${modifier}`;
+}
+
 function openHRCalendarOverrideModal(day, dateStr) {
     currentSelectedDayIndex = day;
     currentSelectedDateStr = dateStr;
@@ -5073,11 +5226,14 @@ function openHRCalendarOverrideModal(day, dateStr) {
     document.getElementById('overrideModalDate').textContent = `July ${day}, 2026 (${emp.name})`;
     
     const logs = data.attendanceLogs[emp.id] || [];
-    const dayLogs = logs.filter(l => l.timestamp.startsWith(`7/${day}/2026`) || l.timestamp.startsWith(`07/${day}/2026`) || l.timestamp.split('/')[1] == day);
+    const dayLogs = logs.filter(l => {
+        const dl = new Date(l.timestamp);
+        return dl.getFullYear() === 2026 && dl.getMonth() === 6 && dl.getDate() === day;
+    });
     
     let currentStatus = 'present';
-    let timeInVal = '07:15 AM';
-    let timeOutVal = '04:30 PM';
+    let timeInVal = '07:15';
+    let timeOutVal = '16:30';
 
     if (dayLogs.length > 0) {
         const checkIn = dayLogs.find(l => l.direction === 'in');
@@ -5085,10 +5241,12 @@ function openHRCalendarOverrideModal(day, dateStr) {
 
         if (checkIn) {
             currentStatus = checkIn.status || 'present';
-            timeInVal = checkIn.timeOnly || (checkIn.timestamp.split(' ')[1] + ' ' + checkIn.timestamp.split(' ')[2]);
+            const rawTime = checkIn.timeOnly || new Date(checkIn.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            timeInVal = convertTo24Hour(rawTime);
         }
         if (checkOut) {
-            timeOutVal = checkOut.timeOnly || (checkOut.timestamp.split(' ')[1] + ' ' + checkOut.timestamp.split(' ')[2]);
+            const rawTime = checkOut.timeOnly || new Date(checkOut.timestamp).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+            timeOutVal = convertTo24Hour(rawTime);
         }
     }
 
@@ -5117,14 +5275,143 @@ function onOverrideStatusChange() {
 
 function saveHRCalendarOverride() {
     const status = document.getElementById('overrideStatusSelect').value;
-    const timeIn = document.getElementById('overrideTimeIn').value;
-    const timeOut = document.getElementById('overrideTimeOut').value;
+    const timeIn24 = document.getElementById('overrideTimeIn').value;
+    const timeOut24 = document.getElementById('overrideTimeOut').value;
 
-    SAGA.saveAttendanceOverride(hrCalendarSelectedEmployeeId, currentSelectedDateStr, status, timeIn, timeOut);
+    const timeIn12 = convertTo12Hour(timeIn24) || '07:15 AM';
+    const timeOut12 = convertTo12Hour(timeOut24) || '04:30 PM';
+
+    SAGA.saveAttendanceOverride(hrCalendarSelectedEmployeeId, currentSelectedDateStr, status, timeIn12, timeOut12);
     logSystemAuditTrail(`HR edited attendance calendar for employee [${hrCalendarSelectedEmployeeId}] on date [July ${currentSelectedDayIndex}, 2026] to [${status.toUpperCase()}].`);
     SAGA.showCustomAlert('Calendar status override written to database successfully.', 'Override Saved');
     
     closeHRCalendarOverrideModal();
     renderHRCalendar();
     renderAttendanceTab();
+}
+
+// ============================================================================
+// 14. INSTITUTIONAL SYSTEM SETTINGS & ACADEMIC YEAR MANAGEMENT
+// ============================================================================
+function renderSettingsTab() {
+    const activeSy = SAGA.getActiveSchoolYear();
+    
+    // Set settings values
+    const settingsInput = document.getElementById('activeSySettingsInput');
+    const label = document.getElementById('activeSyLabel');
+    if (settingsInput) settingsInput.value = activeSy;
+    if (label) label.textContent = activeSy;
+
+    // Render RFID card registers
+    const data = SAGA.getData();
+    const tbody = document.getElementById('settingsRfidRegistryBody');
+    if (!tbody) return;
+
+    const employees = Object.values(data.employees);
+    if (employees.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center py-4 text-slate-400 italic">No employees found.</td></tr>`;
+        return;
+    }
+
+    tbody.innerHTML = employees.map(emp => {
+        let statusBadge = '';
+        if (!emp.rfidCardId) {
+            statusBadge = `<span class="text-amber-500 font-bold"><i class="fas fa-exclamation-triangle"></i> Pending Link</span>`;
+        } else if (emp.rfidStatus === 'inactive') {
+            statusBadge = `<span class="text-rose-600 font-extrabold"><i class="fas fa-ban animate-pulse"></i> Inactive / Disabled</span>`;
+        } else {
+            statusBadge = `<span class="text-emerald-600 font-bold"><i class="fas fa-check-circle"></i> Active</span>`;
+        }
+
+        return `
+            <tr class="border-b hover:bg-slate-50 transition-colors">
+                <td class="p-2.5 font-bold text-slate-700">${emp.id}</td>
+                <td class="p-2.5 font-extrabold text-slate-900">${emp.name}</td>
+                <td class="p-2.5 font-mono text-xs">
+                    ${emp.rfidCardId ? `<span class="bg-slate-100 border px-1.5 py-0.5 rounded text-slate-800 font-bold"><i class="fas fa-id-card text-indigo-500"></i> ${emp.rfidCardId}</span>` : `<span class="text-slate-400 italic font-semibold">Not Registered</span>`}
+                </td>
+                <td class="p-2.5 text-right font-bold">
+                    ${statusBadge}
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function triggerAcademicYearRollover() {
+    const newTerm = document.getElementById('newAcademicYearInput').value.trim();
+    if (!newTerm) {
+        alert('Please specify a valid name for the new academic term.');
+        return;
+    }
+
+    const currentSy = SAGA.getActiveSchoolYear();
+    SAGA.showCustomConfirm(
+        `Are you sure you want to trigger the academic roll-over?\n\nThis will:\n1. Transition school year from [${currentSy}] to [${newTerm}].\n2. De-authorize and mark all current RFID cards as INACTIVE/DISABLED.\n3. Require staff to link/reactivate their cards in the HR Settings tab.`,
+        "Confirm Academic Term Roll-over"
+    ).then(confirm => {
+        if (confirm) {
+            const data = SAGA.getData();
+            
+            // Mark all RFID cards as inactive
+            Object.values(data.employees).forEach(emp => {
+                if (emp.rfidCardId) {
+                    emp.rfidStatus = 'inactive';
+                }
+            });
+
+            // Set new active school year
+            data.activeSchoolYear = newTerm;
+            SAGA.saveData(data);
+
+            logSystemAuditTrail(`School year rolled over to [${newTerm}]. All active RFID gate access badges were marked as Inactive.`);
+            SAGA.showCustomAlert(`Successfully rolled over term to ${newTerm}!\nAll active RFID access tags are now Inactive & Disabled.`, "Term Roll-over Complete");
+
+            // Rerender Settings Tab
+            renderSettingsTab();
+        }
+    });
+}
+
+function saveInterviewAppointment(appId) {
+    const date = document.getElementById('schedDate').value;
+    const time = document.getElementById('schedTime').value;
+    const interviewer = document.getElementById('schedInterviewer').value.trim();
+    const venue = document.getElementById('schedVenue').value.trim();
+
+    if (!date || !time || !interviewer || !venue) {
+        alert('Please fill out all appointment details.');
+        return;
+    }
+
+    const db = SAGA.getData();
+    const app = db.applicants.find(a => a.id === appId);
+    if (app) {
+        app.interviewAppointment = { date, time, interviewer, venue };
+        SAGA.saveData(db);
+        logSystemAuditTrail(`Scheduled recruitment screening interview for: ${app.name} on ${date} at ${time}.`);
+        SAGA.showCustomAlert(`Interview scheduled successfully for ${app.name}.`, "Appointment Booked");
+        selectApplicantForAI(appId);
+    }
+}
+
+function saveExitInterviewAppointment(empId) {
+    const date = document.getElementById(`exitDate-${empId}`).value;
+    const time = document.getElementById(`exitTime-${empId}`).value;
+    const interviewer = document.getElementById(`exitInterviewer-${empId}`).value.trim();
+
+    if (!date || !time || !interviewer) {
+        alert('Please fill out all exit interview details.');
+        return;
+    }
+
+    const db = SAGA.getData();
+    const emp = db.employees[empId];
+    if (emp) {
+        emp.exitInterviewAppointment = { date, time, interviewer };
+        SAGA.saveData(db);
+        logSystemAuditTrail(`Scheduled exit offboarding interview for: ${emp.name} on ${date} at ${time}.`);
+        SAGA.showCustomAlert(`Exit offboarding interview scheduled for ${emp.name}.`, "Appointment Booked");
+        renderExitTab();
+    }
 }

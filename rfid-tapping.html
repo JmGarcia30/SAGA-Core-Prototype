@@ -282,10 +282,55 @@
             const employee = SAGA.getEmployeeById(employeeId);
             if (!employee) return;
 
+            // Check if card is inactive/disabled
+            if (employee.rfidStatus === 'inactive') {
+                playBeep('error');
+
+                const initials = employee.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
+                document.getElementById('employeeAvatar').textContent = initials;
+                document.getElementById('employeeAvatar').className = "w-16 h-16 rounded-2xl bg-rose-950 text-rose-400 flex items-center justify-center border border-rose-500/30 text-2xl shrink-0 font-bold animate-bounce";
+                
+                document.getElementById('employeeName').textContent = employee.name;
+                document.getElementById('employeeTitle').textContent = SAGA.getJobById(employee.jobId)?.title || 'Faculty Role';
+                document.getElementById('employeeIdText').textContent = `ID: ${employee.id} • Card UID: ${employee.rfidCardId}`;
+                
+                const badge = document.getElementById('logDirectionBadge');
+                badge.textContent = `ACCESS DENIED`;
+                badge.className = "px-2.5 py-0.5 text-[10px] font-extrabold rounded-full bg-rose-500/20 text-rose-400 border border-rose-500/30 uppercase tracking-wider";
+                
+                document.getElementById('greetingMessage').innerHTML = `ACCESS DENIED: Access badge has been disabled for the rolled over academic term. Please report to HR to link a new card. <i class="fas fa-exclamation-triangle text-rose-400 ml-1"></i>`;
+                document.getElementById('greetingMessage').className = "p-3.5 bg-rose-500/10 border border-rose-500/20 text-rose-400 rounded-xl text-center font-bold text-xs";
+                
+                document.getElementById('logTimestamp').textContent = new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+
+                document.getElementById('kioskStandby').classList.add('hidden');
+                document.getElementById('kioskFeedback').classList.remove('hidden');
+
+                // Append activity log
+                const trailMsg = `Access Denied: RFID scan received for [${employee.name}] at Gate Terminal. Card UID is inactive.`;
+                const data = SAGA.getData();
+                if (!data.activities) data.activities = [];
+                data.activities.unshift({
+                    id: "ACT_" + Date.now(),
+                    user: "IoT Gate Terminal",
+                    action: trailMsg,
+                    time: new Date().toISOString(),
+                    type: "transit"
+                });
+                SAGA.saveData(data);
+
+                if (feedbackTimer) clearTimeout(feedbackTimer);
+                feedbackTimer = setTimeout(() => {
+                    document.getElementById('kioskFeedback').classList.add('hidden');
+                    document.getElementById('kioskStandby').classList.remove('hidden');
+                    document.getElementById('employeeAvatar').className = "w-16 h-16 rounded-2xl bg-indigo-500/20 text-indigo-300 flex items-center justify-center border border-indigo-500/30 text-2xl shrink-0 font-bold";
+                }, 4000);
+                return;
+            }
+
             // Determine log direction
             let direction = 'in';
             if (overrideDirection === 'auto') {
-                // Fetch attendance logs for today
                 const todayStr = new Date().toLocaleDateString();
                 const logs = SAGA.getAttendanceLogs(employeeId, 1);
                 const logsToday = logs.filter(l => l.date === todayStr);
@@ -298,22 +343,17 @@
                 direction = overrideDirection;
             }
 
-            // Play synthesized success sound buzzer
             playBeep('success');
 
-            // Record entry in database
             const entry = SAGA.recordTimeEntry(employeeId, direction);
             
-            // Format initials
             const initials = employee.name.split(' ').map(n => n[0]).join('').slice(0, 2).toUpperCase();
             document.getElementById('employeeAvatar').textContent = initials;
             
-            // Populate card details
             document.getElementById('employeeName').textContent = employee.name;
             document.getElementById('employeeTitle').textContent = SAGA.getJobById(employee.jobId)?.title || 'Faculty Role';
             document.getElementById('employeeIdText').textContent = `ID: ${employee.id} • Card UID: ${employee.rfidCardId}`;
             
-            // Setup direction badge
             const badge = document.getElementById('logDirectionBadge');
             badge.textContent = `CLOCK ${direction.toUpperCase()}`;
             if (direction === 'in') {
@@ -328,24 +368,22 @@
 
             document.getElementById('logTimestamp').textContent = new Date(entry.timestamp).toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
 
-            // Display Feedback Card, Hide Standby
             document.getElementById('kioskStandby').classList.add('hidden');
             document.getElementById('kioskFeedback').classList.remove('hidden');
 
-            // Audit log trail entry
+            // Append activity log
             const trailMsg = `IoT RFID scan received at Gate Transit Terminal for [${employee.name}]: CLOCK ${direction.toUpperCase()} recorded.`;
-            
-            // Append log trail directly in shared data
             const data = SAGA.getData();
-            if (data.systemLogs) {
-                data.systemLogs.unshift({
-                    timestamp: new Date().toISOString(),
-                    message: trailMsg
-                });
-                SAGA.saveData(data);
-            }
+            if (!data.activities) data.activities = [];
+            data.activities.unshift({
+                id: "ACT_" + Date.now(),
+                user: "IoT Gate Terminal",
+                action: trailMsg,
+                time: new Date().toISOString(),
+                type: "transit"
+            });
+            SAGA.saveData(data);
 
-            // Set timeout to restore standby state after 4 seconds
             if (feedbackTimer) clearTimeout(feedbackTimer);
             feedbackTimer = setTimeout(() => {
                 document.getElementById('kioskFeedback').classList.add('hidden');
